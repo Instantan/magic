@@ -1,55 +1,20 @@
-package magic
+package patch
 
-import (
-	"errors"
+import "encoding/json"
 
-	"github.com/goccy/go-json"
-)
-
-type op byte
-
-var ErrUnreachable = errors.New("Unreachable")
-
-const (
-	add op = iota
-	del
-	rpl
-	swp
-)
-
-type patchable interface {
-	push(op op, path string, value any) patchable
-}
-
-type patch struct {
-	op    op
+type Patch struct {
+	op    Operation
 	path  string
 	value any
 }
 
-type patchesref struct {
-	path   string
-	parent patchable
+type Patches []Patch
+
+func (p *Patches) PushPatch(op Operation, path string, value any) {
+	*p = append(*p, Patch{op: op, path: path, value: value})
 }
 
-type patches []patch
-
-// func (p *patches) push(op op, path string, value any) *patches {
-// 	*p = append(*p, patch{op: op, path: path, value: value})
-// 	return p
-// }
-
-func (p *patchesref) push(op op, path string, value any) *patchesref {
-	p.parent.push(op, p.path+path, value)
-	return p
-}
-
-func (p *patches) clear() *patches {
-	*p = []patch{}
-	return p
-}
-
-func (p patches) MarshalJSON() ([]byte, error) {
+func (p Patches) MarshalJSON() ([]byte, error) {
 	if len(p) == 0 {
 		return []byte("[]"), nil
 	}
@@ -67,19 +32,19 @@ func (p patches) MarshalJSON() ([]byte, error) {
 	return data, nil
 }
 
-func (p *patch) MarshalJSON() ([]byte, error) {
+func (p *Patch) MarshalJSON() ([]byte, error) {
 	d, err := json.Marshal(p.value)
 	if err != nil {
 		return nil, err
 	}
 	switch p.op {
-	case add:
+	case Add:
 		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[0,\""+p.path+"\","), d), nil
-	case del:
+	case Del:
 		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[1,\""+p.path+"\","), d), nil
-	case rpl:
+	case Rpl:
 		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[2,\""+p.path+"\","), d), nil
-	case swp:
+	case Swp:
 		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[3,\""+p.path+"\","), d), nil
 	default:
 		return nil, ErrUnreachable

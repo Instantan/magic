@@ -1,10 +1,15 @@
 package magic
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/Instantan/magic/patch"
+)
 
 type List[T any] struct {
-	data    []T
-	patches patchesref
+	data   []T
+	path   string
+	parent patch.Patchable
 }
 
 // Value returns a pointer to the inner value (a slice)
@@ -37,14 +42,14 @@ func (l *List[T]) Len() int {
 // Append adds a element to the end of the list
 func (l *List[T]) Append(v T) *List[T] {
 	l.data = append(l.data, v)
-	l.patches.push(add, "/[]", v)
+	l.PushPatch(patch.Add, "/[]", v)
 	return l
 }
 
 // Prepend adds a element to the beginning of the list
 func (l *List[T]) Prepend(v T) *List[T] {
 	l.data = append([]T{v}, l.data...)
-	l.patches.push(add, "/[0]", v)
+	l.PushPatch(patch.Add, "/[0]", v)
 	return l
 }
 
@@ -52,7 +57,7 @@ func (l *List[T]) Prepend(v T) *List[T] {
 func (l *List[T]) Shift() *List[T] {
 	if len(l.data) > 0 {
 		l.data = l.data[1:]
-		l.patches.push(del, "/[0]", nil)
+		l.PushPatch(patch.Del, "/[0]", nil)
 	}
 	return l
 }
@@ -61,7 +66,7 @@ func (l *List[T]) Shift() *List[T] {
 func (l *List[T]) Pop() *List[T] {
 	if len(l.data) > 0 {
 		l.data = l.data[:len(l.data)-1]
-		l.patches.push(del, "/[]", nil)
+		l.PushPatch(patch.Del, "/[]", nil)
 	}
 	return l
 }
@@ -70,7 +75,7 @@ func (l *List[T]) Pop() *List[T] {
 func (l *List[T]) Remove(i int) *List[T] {
 	if len(l.data) > i {
 		l.data = append(l.data[:i], l.data[i+1:]...)
-		l.patches.push(del, "/["+strconv.Itoa(i)+"]", nil)
+		l.PushPatch(patch.Del, "/["+strconv.Itoa(i)+"]", nil)
 	}
 	return l
 }
@@ -78,27 +83,39 @@ func (l *List[T]) Remove(i int) *List[T] {
 // Swap switches the value at the position i with the value at the position y
 func (l *List[T]) Swap(i, y int) *List[T] {
 	l.data[i], l.data[y] = l.data[y], l.data[i]
-	l.patches.push(swp, "/["+strconv.Itoa(i)+"]", "/["+strconv.Itoa(i)+"]")
+	l.PushPatch(patch.Swp, "/["+strconv.Itoa(i)+"]", "/["+strconv.Itoa(i)+"]")
 	return l
 }
 
 // Set sets the value at the given position
 func (l *List[T]) Set(i int, value T) *List[T] {
 	l.data[i] = value
-	l.patches.push(rpl, "/["+strconv.Itoa(i)+"]", value)
+	l.PushPatch(patch.Rpl, "/["+strconv.Itoa(i)+"]", value)
 	return l
 }
 
 // Nil sets the slice to nil
 func (l *List[T]) Nil() *List[T] {
 	l.data = nil
-	l.patches.push(rpl, "/", nil)
+	l.PushPatch(patch.Rpl, "/", nil)
 	return l
 }
 
 // SetSlice completly changes the underlying slice
 func (l *List[T]) SetSlice(slc []T) *List[T] {
 	l.data = slc
-	l.patches.push(rpl, "/", slc)
+	l.PushPatch(patch.Rpl, "/", slc)
 	return l
+}
+
+// This implements the patch.Patcher interface
+func (l *List[T]) PushPatch(op patch.Operation, path string, value any) {
+	if l.parent != nil {
+		l.parent.PushPatch(op, l.path+path, value)
+	}
+}
+
+func (l *List[T]) RegisterParent(path string, p patch.Patchable) {
+	l.path = path
+	l.parent = p
 }
