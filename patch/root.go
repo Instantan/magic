@@ -2,9 +2,6 @@ package patch
 
 import (
 	"reflect"
-	"unsafe"
-
-	"github.com/viant/xunsafe"
 )
 
 type Root struct {
@@ -13,7 +10,7 @@ type Root struct {
 
 func NewRoot(data any) Root {
 	r := Root{}
-	r.register(data, reflect.TypeOf(data))
+	r.register(data, reflect.ValueOf(data))
 	return r
 }
 
@@ -28,7 +25,7 @@ func (r *Root) PushPatch(op Operation, path string, value any) {
 func (r *Root) RegisterParent(path string, _ Patchable) {
 }
 
-func (r *Root) register(data any, typ reflect.Type) {
+func (r *Root) register(data any, typ reflect.Value) {
 	switch typ.Kind() {
 	// case reflect.Pointer
 	case reflect.Struct:
@@ -36,15 +33,19 @@ func (r *Root) register(data any, typ reflect.Type) {
 	}
 }
 
-func (r *Root) registerStruct(data any, typ reflect.Type) {
-	xstruct := xunsafe.NewStruct(typ)
-	for i := range xstruct.Fields {
-		inf := xstruct.Fields[i].Interface(unsafe.Pointer(&data))
-		if patchable, ok := inf.(Patchable); ok {
-			name := xstruct.Fields[i].Name
-			patchable.RegisterParent("/"+name, r)
-		} else {
-			r.register(data, typ)
+func (r *Root) registerStruct(data any, v reflect.Value) {
+	n := v.NumField()
+	t := v.Type()
+	for i := 0; i < n; i++ {
+		f := v.Field(i)
+		if t.Field(i).IsExported() {
+			inf := f.Interface()
+			if patchable, ok := inf.(Patchable); ok {
+				name := t.Field(i).Name
+				patchable.RegisterParent("/"+name, r)
+			} else {
+				r.register(data, f)
+			}
 		}
 	}
 }

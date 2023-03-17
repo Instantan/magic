@@ -11,7 +11,6 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/viant/xunsafe v0.8.3 // indirect
 	github.com/wI2L/jsondiff v0.3.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 )

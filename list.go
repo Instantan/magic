@@ -7,9 +7,12 @@ import (
 )
 
 type List[T any] struct {
-	data   []T
-	path   string
-	parent patch.Patchable
+	data    []T
+	patcher patch.Patcher
+}
+
+func List() {
+
 }
 
 // Value returns a pointer to the inner value (a slice)
@@ -109,13 +112,10 @@ func (l *List[T]) SetSlice(slc []T) *List[T] {
 }
 
 // This implements the patch.Patcher interface
-func (l *List[T]) PushPatch(op patch.Operation, path string, value any) {
-	if l.parent != nil {
-		l.parent.PushPatch(op, l.path+path, value)
-	}
+func (l List[T]) PushPatch(op patch.Operation, path string, value any) {
+	l.patcher.PushPatch(op, path, value)
 }
 
-func (l *List[T]) RegisterParent(path string, p patch.Patchable) {
-	l.path = path
-	l.parent = p
+func (l List[T]) RegisterParent(path string, p patch.Patchable) {
+	l.patcher.RegisterParent(path, p)
 }

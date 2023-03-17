@@ -7,15 +7,18 @@ import (
 )
 
 type testStruct1 struct {
-	l1 *List[int]
+	L1 List[int]
 }
 
 func TestRegisterStruct(t *testing.T) {
 	t1 := testStruct1{
-		l1: &List[int]{},
+		L1: List[int]{},
 	}
 
 	root := patch.NewRoot(t1)
 
-	t.Log(root)
+	t1.L1.Append(1)
+
+	t.Log(t1)
+	t.Log(root.Patches())
 }
