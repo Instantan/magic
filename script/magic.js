@@ -10,7 +10,7 @@ function renderTemplate(template = "") {
     let tl = t.length;
     let rendered = "";
     while (i < tl) {
-        if (isTemplate(t[i])) {
+        if (isTag(t[i])) {
             rendered += magic.data.get(t[i].slice(2, -2))
         } else {
             rendered += t[i]
@@ -26,7 +26,7 @@ function compileTemplate(template = "") {
         let t = magic.templates.get(template)
         let i = t.length
         while (i--) {
-            if (isTemplate(t[i])) {
+            if (isTag(t[i])) {
                 templateValues.push(t[i].slice(2, -2))
             }
         }
@@ -56,29 +56,8 @@ function compileTemplate(template = "") {
     return templateValues
 }
 
-function isTemplate(template = "") {
+function isTag(template = "") {
     return template.length > 4 && template.includes("{{") && template.includes("}}")
-}
-
-function replaceTemplatesInInnerHTMLWithMagicValue(innerHTML) {
-    let innerHTMLLength = innerHTML.length;
-    let cold = false
-    let newInnerHTML = "";
-    for (let i = 0; i < innerHTMLLength; i++) {
-        let c = innerHTML[i]
-        if (!cold && c == "{" && i + 1 < innerHTMLLength && innerHTML[i + 1] === "{") {
-            cold = true
-            i++
-            newInnerHTML += "<m-v>"
-        } else if (cold && c == "}" && i + 1 < innerHTMLLength && innerHTML[i + 1] === "}") {
-            cold = false
-            i++
-            newInnerHTML += "</m-v>"
-        } else {
-            newInnerHTML += c
-        }
-    }
-    return newInnerHTML
 }
 
 function registerAttributeTemplatesForCollection(collection) {
@@ -94,7 +73,7 @@ function registerAttributeTemplatesForItem(item) {
     let i = item.attributes.length
     while (i--) {
         let attribute = item.attributes[i]
-        if (isTemplate(attribute.value)) {
+        if (isTag(attribute.value)) {
             let av = attribute.value
             const templateNames = compileTemplate(av)
             let itnl = templateNames.length
