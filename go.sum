@@ -17,6 +17,8 @@ github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6Kllzaw
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
+github.com/viant/xunsafe v0.8.3 h1:6xvkMn2nvcUiO6jnQIFwIU6PGMMibclf5Tyx0AUzduw=
+github.com/viant/xunsafe v0.8.3/go.mod h1:niyYv07oGkqPJirAda2yz+yqt5G+eM275y179yVaS3s=
 github.com/wI2L/jsondiff v0.3.0 h1:iTzQ9u/d86GE9RsBzVHX88f2EA1vQUboHwLhSQFc1s4=
 github.com/wI2L/jsondiff v0.3.0/go.mod h1:y1IMzNNjlSsk3IUoJdRJO7VRBtzMvRgyo4Vu0LdHpTc=
 golang.org/x/net v0.8.0 h1:Zrh2ngAOFYneWTAIAPethzeaQLuHwhuBkuV6ZiRnUaQ=
