@@ -22,7 +22,7 @@ func (r *Root) PushPatch(op Operation, path string, value any) {
 	r.patches.PushPatch(op, path, value)
 }
 
-func (r *Root) RegisterParent(path string, _ Patchable) {
+func (r *Root) RegisterParent(path string, _ Tracked) {
 }
 
 func (r *Root) register(data any, typ reflect.Value) {
@@ -40,12 +40,16 @@ func (r *Root) registerStruct(data any, v reflect.Value) {
 		f := v.Field(i)
 		if t.Field(i).IsExported() {
 			inf := f.Interface()
-			if patchable, ok := inf.(Patchable); ok {
+			if patchable, ok := inf.(Tracked); ok {
 				name := t.Field(i).Name
-				patchable.RegisterParent("/"+name, r)
 			} else {
 				r.register(data, f)
 			}
 		}
 	}
+}
+
+// Register registers the path of a
+func Register(parent uintptr, path string, value any) {
+	"name/"
 }
