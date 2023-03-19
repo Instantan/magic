@@ -1,11 +1,26 @@
-package patch
+package magic
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
+
+type Operation byte
+
+const (
+	Add Operation = iota
+	Del
+	Rpl
+	Swp
+)
 
 type Patch struct {
 	op    Operation
 	path  string
 	value any
+}
+
+type ChangeTracker interface {
+	PushPatch(root uintptr, op Operation, path string, value any)
 }
 
 type Patches []Patch
@@ -49,6 +64,14 @@ func (p *Patch) MarshalJSON() ([]byte, error) {
 	default:
 		return nil, ErrUnreachable
 	}
+}
+
+func (p Patches) String() string {
+	b, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
 
 func joinBytesSlicesAndSetLastToCloseBrace(s1, s2 []byte) []byte {
