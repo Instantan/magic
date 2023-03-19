@@ -6,6 +6,11 @@ import (
 
 type Operation byte
 
+type PatchRedirecter struct {
+	Patchable Patchable
+	Path      string
+}
+
 const (
 	Add Operation = iota
 	Del
@@ -82,4 +87,9 @@ func joinBytesSlicesAndSetLastToCloseBrace(s1, s2 []byte) []byte {
 	i += copy(b[i:], s2)
 	b[n] = 93
 	return b
+}
+
+func (p *PatchRedirecter) Patch(patch Patch) {
+	patch.path = p.Path + patch.path
+	p.Patchable.Patch(patch)
 }

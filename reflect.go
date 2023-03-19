@@ -2,37 +2,56 @@ package magic
 
 import (
 	"reflect"
+	"strconv"
+	"strings"
 )
 
-func Traverse(obj any, callback func(value any, pointer uintptr)) {
-	traverseRecursive(reflect.ValueOf(obj), callback)
+func Traverse(obj any, callback func(value any, path string)) {
+	traverseRecursive(reflect.ValueOf(obj), "", callback)
 }
 
-func traverseRecursive(value reflect.Value, callback func(value any, pointer uintptr)) {
+func traverseRecursive(value reflect.Value, path string, callback func(value any, path string)) {
 	switch value.Kind() {
 	case reflect.Ptr:
 		originalValue := value.Elem()
 		if !originalValue.IsValid() {
 			return
 		}
-		traverseRecursive(originalValue, callback)
+		traverseRecursive(originalValue, path, callback)
 	case reflect.Interface:
-		traverseRecursive(value.Elem(), callback)
+		traverseRecursive(value.Elem(), path, callback)
 	case reflect.Struct:
 		for _, f := range reflect.VisibleFields(value.Type()) {
 			if f.IsExported() {
-				traverseRecursive(value.FieldByIndex(f.Index), callback)
+				name := f.Name
+				if v := f.Tag.Get("json"); len(v) > 0 {
+					parts := strings.Split(v, ",")
+					name = parts[0]
+				}
+				p := path + "." + name
+				if p[0] == '.' {
+					p = p[1:]
+				}
+				traverseRecursive(value.FieldByIndex(f.Index), p, callback)
 			}
 		}
 	case reflect.Slice:
 		for i := 0; i < value.Len(); i += 1 {
-			traverseRecursive(value.Index(i), callback)
+			p := path + ".[" + strconv.Itoa(i) + "]"
+			if p[0] == '.' {
+				p = p[1:]
+			}
+			traverseRecursive(value.Index(i), p, callback)
 		}
 	case reflect.Map:
 		for _, key := range value.MapKeys() {
-			traverseRecursive(value.MapIndex(key), callback)
+			p := path + "." + key.String()
+			if p[0] == '.' {
+				p = p[1:]
+			}
+			traverseRecursive(value.MapIndex(key), p, callback)
 		}
 	default:
-		callback(value.Interface(), uintptr(value.Addr().UnsafePointer()))
+		callback(value.Interface(), path)
 	}
 }

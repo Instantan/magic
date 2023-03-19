@@ -1,15 +1,80 @@
 package magic
 
-type Get[T any] func() T
+import "encoding/json"
+
+type Reactive interface {
+	Subscribe(patchable Patchable)
+	Unsubscribe(Patchable)
+}
+
+type Patchable interface {
+	Patch(Patch)
+}
+
+type Get[T any] func(su ...suAction) T
 type Set[T any] func(v T)
+
+type suAction struct {
+	Patchable Patchable
+	subscribe bool
+}
+
+type signalSubscriptions struct {
+	subscribed map[Patchable]struct{}
+}
 
 func CreateSignal[T any](init T) (Get[T], Set[T]) {
 	value := init
-	getter := func() T {
+	ssub := signalSubscriptions{
+		subscribed: map[Patchable]struct{}{},
+	}
+	getter := Get[T](func(su ...suAction) T {
+		if len(su) > 0 {
+			ssub.apply(su)
+		}
 		return value
-	}
-	setter := func(v T) {
+	})
+	setter := Set[T](func(v T) {
+		ssub.patch(Patch{
+			op:    Rpl,
+			path:  "",
+			value: v,
+		})
 		value = v
-	}
+	})
 	return getter, setter
+}
+
+func (g Get[T]) Subscribe(patchable Patchable) {
+	g(suAction{
+		Patchable: patchable,
+		subscribe: true,
+	})
+}
+
+func (g Get[T]) Unsubscribe(patchable Patchable) {
+	g(suAction{
+		Patchable: patchable,
+		subscribe: false,
+	})
+}
+
+func (g Get[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(g())
+}
+
+func (s *signalSubscriptions) apply(su []suAction) {
+	for _, action := range su {
+		if action.subscribe {
+			s.subscribed[action.Patchable] = struct{}{}
+		} else {
+			delete(s.subscribed, action.Patchable)
+		}
+	}
+}
+
+func (s *signalSubscriptions) patch(p Patch) {
+	for patchable := range s.subscribed {
+		patchable.Patch(p)
+	}
 }
