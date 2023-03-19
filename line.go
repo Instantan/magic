@@ -11,27 +11,12 @@ import (
 
 type Line struct {
 	state any
-	patch *patcher
 	conn  net.Conn
 }
 
 type event struct {
 	Event string          `json:"e"`
 	Data  json.RawMessage `json:"d"`
-}
-
-// The call to sync, computes a patch between the state of the client and the new state
-// ands sends the patch to the client
-func (l *Line) Sync() {
-	diff, err := l.patch.diff(l.state)
-	if err != nil {
-		// todo: handle that
-		panic(err)
-	}
-	l.sendEvent(event{
-		Event: "p",
-		Data:  diff,
-	})
 }
 
 // The dispatch event function can be used to send arbitray data to the client
@@ -58,4 +43,33 @@ func (l *Line) sendEvent(ev event) {
 		// todo: handle that
 		panic(err)
 	}
+}
+
+func (ev event) MarshalJSON() ([]byte, error) {
+	d, err := json.Marshal(ev.Data)
+	if err != nil {
+		return nil, err
+	}
+	return []byte("[" + ev.Event + "," + string(d) + "]"), nil
+}
+
+func Append[T any](s *int, slc []T, values ...T) []T {
+
+	return append(slc, values...)
+}
+
+type Ref[T any] struct {
+	ref *T
+}
+
+func RefOf[T any](v *T) Ref[T] {
+	return Ref[T]{
+		ref: v,
+	}
+}
+
+func Set[T any](s *int, v T) T {
+
+	Append(s, []int{}, 1)
+	return v
 }

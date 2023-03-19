@@ -17,11 +17,11 @@ type Socket[T any] struct {
 	pstate []byte // the state the client holds, gets updated after every patch
 }
 
-type LiveHandler[T any] interface {
-	Mount(socket *Socket[T])
-	EventListener(event string, value EventValue, socket *Socket[T])
-	Unmount(socket *Socket[T])
-}
+// type LiveHandler[T any] interface {
+// 	Mount(socket *Socket[T])
+// 	EventListener(event string, value EventValue, socket *Socket[T])
+// 	Unmount(socket *Socket[T])
+// }
 
 // Live turns the template into a live template (copies the underlying template)
 func (template *Template) Live(handler LiveTemplate) *LiveTemplate {
