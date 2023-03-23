@@ -15,7 +15,9 @@ import (
 
 type Template struct {
 	filename string
-	data     []byte
+
+	live   []byte
+	static []byte
 }
 
 type Templates []*Template
@@ -41,8 +43,9 @@ func ParseFile(filename string) (*Template, error) {
 	}
 	template := &Template{
 		filename: filename,
-		data:     b,
+		static:   b,
 	}
+	template.prepareLiveFromStatic()
 	return template, nil
 }
 
@@ -77,7 +80,7 @@ func ParseFileFS(fsys fs.FS, filename string) (*Template, error) {
 		return nil, err
 	}
 	template := &Template{
-		data: buffer.Bytes(),
+		static: buffer.Bytes(),
 	}
 	return template, nil
 }
@@ -89,25 +92,28 @@ func ParseFileFS(fsys fs.FS, filename string) (*Template, error) {
 // Clone copies the template and returns a reference to the new template
 func (template *Template) Clone() *Template {
 	return &Template{
-		data: bytes.Clone(template.data),
+		filename: template.filename,
+		static:   bytes.Clone(template.static),
+		live:     bytes.Clone(template.live),
 	}
 }
 
 // Apply updates the template with all the given placeholders replaced
 func (template *Template) Apply(data any) {
 	m := dataToMapAny(data)
-	template.data = []byte(fasttemplate.ExecuteFuncString(string(template.data), "{{", "}}", func(w io.Writer, tag string) (int, error) {
+	template.static = []byte(fasttemplate.ExecuteFuncString(string(template.static), "{{", "}}", func(w io.Writer, tag string) (int, error) {
 		if v := jsonGetPath(m, tag); v != nil {
 			return w.Write([]byte(fmt.Sprint(v)))
 		}
 		return w.Write([]byte("{{" + tag + "}}"))
 	}))
+	template.prepareLiveFromStatic()
 }
 
 // Execute writes template with all the given placeholders replaced to the given writer
 func (template *Template) ExecuteStatic(w io.Writer, data any) {
 	m := dataToMapAny(data)
-	fasttemplate.ExecuteFunc(string(template.data), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
+	fasttemplate.ExecuteFunc(string(template.static), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
 		if v := jsonGetPath(m, tag); v != nil {
 			return w.Write([]byte(fmt.Sprint(v)))
 		}
@@ -115,10 +121,15 @@ func (template *Template) ExecuteStatic(w io.Writer, data any) {
 	})
 }
 
+// This should get called after every change to the static data. it turns the template into a live template
+func (template *Template) prepareLiveFromStatic() {
+	template.live = []byte(internal.ReplaceTemplateBracesInHTMLInnerTextWithComponent(string(template.static)))
+}
+
 // Execute writes template with all the given placeholders replaced to the given writer
 func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
 	b := dataToJSONBytes(data)
-	injected := internal.InjectDataIntoHTML(template.data, func() []byte {
+	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
 		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
 		dataConnID := "data-connid=\"" + connId + "\""
 		return []byte(" " + dataSRR + " " + dataConnID)
@@ -131,7 +142,7 @@ func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
 // Execute writes template with all the given placeholders replaced to the given writer
 func (template *Template) executeLiveWebsocket(w io.Writer, connId string, data any) {
 	b := dataToJSONBytes(data)
-	injected := internal.InjectDataIntoHTML(template.data, func() []byte {
+	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
 		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
 		dataConnID := "data-connid=\"" + connId + "\""
 		return []byte(" " + dataSRR + " " + dataConnID)
@@ -143,5 +154,5 @@ func (template *Template) executeLiveWebsocket(w io.Writer, connId string, data 
 
 // Writes the data to the given writer
 func (template *Template) Write(w io.Writer) {
-	w.Write(template.data)
+	w.Write(template.static)
 }
