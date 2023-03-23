@@ -19,19 +19,15 @@ const (
 )
 
 type Patch struct {
-	op    Operation
-	path  string
-	value any
-}
-
-type ChangeTracker interface {
-	PushPatch(root uintptr, op Operation, path string, value any)
+	Op    Operation
+	Path  string
+	Value any
 }
 
 type Patches []Patch
 
 func (p *Patches) PushPatch(op Operation, path string, value any) {
-	*p = append(*p, Patch{op: op, path: path, value: value})
+	*p = append(*p, Patch{Op: op, Path: path, Value: value})
 }
 
 func (p Patches) MarshalJSON() ([]byte, error) {
@@ -53,19 +49,19 @@ func (p Patches) MarshalJSON() ([]byte, error) {
 }
 
 func (p *Patch) MarshalJSON() ([]byte, error) {
-	d, err := json.Marshal(p.value)
+	d, err := json.Marshal(p.Value)
 	if err != nil {
 		return nil, err
 	}
-	switch p.op {
+	switch p.Op {
 	case Add:
-		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[0,\""+p.path+"\","), d), nil
+		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[0,\""+p.Path+"\","), d), nil
 	case Del:
-		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[1,\""+p.path+"\","), d), nil
+		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[1,\""+p.Path+"\","), d), nil
 	case Rpl:
-		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[2,\""+p.path+"\","), d), nil
+		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[2,\""+p.Path+"\","), d), nil
 	case Swp:
-		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[3,\""+p.path+"\","), d), nil
+		return joinBytesSlicesAndSetLastToCloseBrace([]byte("[3,\""+p.Path+"\","), d), nil
 	default:
 		return nil, ErrUnreachable
 	}
@@ -73,6 +69,14 @@ func (p *Patch) MarshalJSON() ([]byte, error) {
 
 func (p Patches) String() string {
 	b, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
+}
+
+func (p Patch) String() string {
+	b, err := p.MarshalJSON()
 	if err != nil {
 		panic(err)
 	}
@@ -89,7 +93,6 @@ func joinBytesSlicesAndSetLastToCloseBrace(s1, s2 []byte) []byte {
 	return b
 }
 
-func (p *PatchRedirecter) Patch(patch Patch) {
-	patch.path = p.Path + patch.path
-	p.Patchable.Patch(patch)
+func (p *PatchRedirecter) Patch(op Operation, path string, value any) {
+	p.Patchable.Patch(op, p.Path+path, value)
 }

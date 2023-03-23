@@ -1,4 +1,4 @@
-package magic
+package internal
 
 import (
 	"reflect"

@@ -8,7 +8,7 @@ type Reactive interface {
 }
 
 type Patchable interface {
-	Patch(Patch)
+	Patch(op Operation, path string, data any)
 }
 
 type Get[T any] func(su ...suAction) T
@@ -35,11 +35,7 @@ func CreateSignal[T any](init T) (Get[T], Set[T]) {
 		return value
 	})
 	setter := Set[T](func(v T) {
-		ssub.patch(Patch{
-			op:    Rpl,
-			path:  "",
-			value: v,
-		})
+		ssub.patch(Rpl, "", v)
 		value = v
 	})
 	return getter, setter
@@ -73,8 +69,8 @@ func (s *signalSubscriptions) apply(su []suAction) {
 	}
 }
 
-func (s *signalSubscriptions) patch(p Patch) {
+func (s *signalSubscriptions) patch(op Operation, path string, data any) {
 	for patchable := range s.subscribed {
-		patchable.Patch(p)
+		patchable.Patch(op, path, data)
 	}
 }

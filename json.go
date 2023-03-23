@@ -6,16 +6,21 @@ import (
 )
 
 func dataToMapAny(data any) map[string]any {
-	b, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
+	b := dataToJSONBytes(data)
 	m := map[string]any{}
-	err = json.Unmarshal(b, &m)
+	err := json.Unmarshal(b, &m)
 	if err != nil {
 		panic(err)
 	}
 	return m
+}
+
+func dataToJSONBytes(data any) []byte {
+	b, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
 
 func jsonGetPath(data map[string]any, path string) any {

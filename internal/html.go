@@ -1,8 +1,12 @@
-package magic
+package internal
 
-import "strings"
+import (
+	"strings"
+)
 
-func injectDataIntoHTML(data []byte, injectHTMLAttributes func() []byte, injectHeaderChilds func() []byte) []byte {
+type ByteInjector func() []byte
+
+func InjectDataIntoHTML(data []byte, injectHTMLAttributes, injectHeaderChilds ByteInjector) []byte {
 	saw := []byte{}
 	injectHTMLAttributesAt := 0
 	sawHTML := false
@@ -14,7 +18,7 @@ func injectDataIntoHTML(data []byte, injectHTMLAttributes func() []byte, injectH
 			sawHTML = true
 			injectHTMLAttributesAt = i + 1
 		}
-		if !sawHeader && sawHeaderTag(saw) {
+		if !sawHeader && sawHeadTag(saw) {
 			sawHeader = true
 			injectHeaderChildsAt = i + 1
 		}
@@ -34,7 +38,46 @@ func sawHTMLOpenTag(saw []byte) bool {
 	return len(saw) >= len(needsToSee) && strings.HasSuffix(strings.ToLower(string(saw)), needsToSee)
 }
 
-func sawHeaderTag(saw []byte) bool {
+func sawHeadTag(saw []byte) bool {
 	needsToSee := "<head>"
 	return len(saw) >= len(needsToSee) && strings.HasSuffix(strings.ToLower(string(saw)), needsToSee)
+}
+
+func ReplaceTemplateBracesInHTMLInnerTextWithComponent(data string) string {
+	isInInnerText := false
+	escaped := false
+
+	b := strings.Builder{}
+	b.Grow(len(data))
+
+	for i := 0; i < len(data); i++ {
+		if escaped {
+			escaped = false
+			b.WriteByte(data[i])
+			continue
+		}
+		switch data[i] {
+		case '<':
+			isInInnerText = false
+		case '>':
+			isInInnerText = true
+		case '\\':
+			escaped = true
+		case '{':
+			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '{' {
+				b.WriteString("<m-v>")
+				i++
+				continue
+			}
+		case '}':
+			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '}' {
+				b.WriteString("</m-v>")
+				i++
+				continue
+			}
+		}
+		b.WriteByte(data[i])
+	}
+
+	return b.String()
 }

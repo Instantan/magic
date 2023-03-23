@@ -2,12 +2,14 @@ package magic
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
 
+	"github.com/Instantan/magic/internal"
 	"github.com/valyala/fasttemplate"
 )
 
@@ -114,12 +116,27 @@ func (template *Template) ExecuteStatic(w io.Writer, data any) {
 }
 
 // Execute writes template with all the given placeholders replaced to the given writer
-func (template *Template) ExecuteLive(w io.Writer, data any) {
-	m := dataToMapAny(data)
-	fasttemplate.ExecuteFunc(string(template.data), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
-		if v := jsonGetPath(m, tag); v != nil {
-			return w.Write([]byte(fmt.Sprint(v)))
-		}
+func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
+	b := dataToJSONBytes(data)
+	injected := internal.InjectDataIntoHTML(template.data, func() []byte {
+		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
+		dataConnID := "data-connid=\"" + connId + "\""
+		return []byte(" " + dataSRR + " " + dataConnID)
+	}, injectSSEScript)
+	fasttemplate.ExecuteFunc(string(injected), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
+		return w.Write([]byte("{{" + tag + "}}"))
+	})
+}
+
+// Execute writes template with all the given placeholders replaced to the given writer
+func (template *Template) executeLiveWebsocket(w io.Writer, connId string, data any) {
+	b := dataToJSONBytes(data)
+	injected := internal.InjectDataIntoHTML(template.data, func() []byte {
+		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
+		dataConnID := "data-connid=\"" + connId + "\""
+		return []byte(" " + dataSRR + " " + dataConnID)
+	}, injectWebsocketScript)
+	fasttemplate.ExecuteFunc(string(injected), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
 		return w.Write([]byte("{{" + tag + "}}"))
 	})
 }
