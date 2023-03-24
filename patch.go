@@ -6,10 +6,16 @@ import (
 
 type Operation byte
 
+type Patchable interface {
+	Patch(op Operation, path string, data any)
+}
+
 type PatchRedirecter struct {
 	Patchable Patchable
 	Path      string
 }
+
+type PatchReceiver func(op Operation, path string, data any)
 
 const (
 	Add Operation = iota
@@ -95,4 +101,8 @@ func joinBytesSlicesAndSetLastToCloseBrace(s1, s2 []byte) []byte {
 
 func (p *PatchRedirecter) Patch(op Operation, path string, value any) {
 	p.Patchable.Patch(op, p.Path+path, value)
+}
+
+func (p *PatchReceiver) Patch(op Operation, path string, value any) {
+	(*p)(op, path, value)
 }

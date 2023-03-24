@@ -12,8 +12,8 @@ func main() {
 
 	mux.Handle("/index.html", magic.CreatePage(magic.MustParseFile("index.html"), IndexPage))
 
-	log.Print("Listening to http://localhost:8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	log.Print("Listening to http://localhost:8070")
+	if err := http.ListenAndServe(":8070", mux); err != nil {
 		log.Fatal(err)
 	}
 }

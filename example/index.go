@@ -7,15 +7,16 @@ import (
 )
 
 type IndexPageData struct {
-	Name   magic.Get[string] `json:"name"`
-	Nested struct {
-		Count magic.Get[int] `json:"count"`
-	} `json:"nested"`
+	Name    magic.Get[string] `json:"name"`
+	Counter struct {
+		Count magic.Get[int]  `json:"count"`
+		Even  magic.Get[bool] `json:"even"`
+	} `json:"counter"`
 }
 
 func IndexPage(ctx magic.PageContext) any {
-	getName, _ := magic.CreateSignal("Felix")
-	getCount, setCount := magic.CreateSignal(1)
+	getName, _ := magic.Signal("Felix")
+	getCount, setCount := magic.Signal(1)
 
 	go func() {
 		for {
@@ -24,12 +25,26 @@ func IndexPage(ctx magic.PageContext) any {
 		}
 	}()
 
+	even := magic.Computed(func() bool {
+		return getCount()%2 == 0
+	}, getCount)
+
+	magic.Effect(func() {
+		if even() {
+			println("is even")
+		} else {
+			println("is odd")
+		}
+	}, even)
+
 	return IndexPageData{
 		Name: getName,
-		Nested: struct {
-			Count magic.Get[int] `json:"count"`
+		Counter: struct {
+			Count magic.Get[int]  `json:"count"`
+			Even  magic.Get[bool] `json:"even"`
 		}{
 			Count: getCount,
+			Even:  even,
 		},
 	}
 }
