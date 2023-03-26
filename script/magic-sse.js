@@ -50,6 +50,12 @@ function readSSRData() {
 }
 
 function handlePatch(op, path, data) {
+    // The notify is technically not correct when patching a deep object
+    // for example when running 
+    // RPL "data.deep" { "user": { "name": { "prename": "Paul", "surename": "Blob" } } }
+    // then a effect that is listening to "data.deep" gets notified but not 
+    // a effect that is listening to "data.deep.user.name.prename"
+    // the listening system needs to be more granular
     switch (op) {
         case MAGIC_OP_ADD:
             set(magic.data, path, data);
@@ -137,7 +143,7 @@ function registerNodeAndChilds(node) {
     let n = document.getElementById("")
     let al = node.attributes.length
     while (al--) {
-        n.attributes.item.
+
     }
 }
 
