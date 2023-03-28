@@ -130,7 +130,7 @@ func (template *Template) prepareLiveFromStatic() {
 func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
 	b := dataToJSONBytes(data)
 	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
-		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
+		dataSRR := "data-ss=\"" + base64.StdEncoding.EncodeToString(b) + "\""
 		dataConnID := "data-connid=\"" + connId + "\""
 		return []byte(" " + dataSRR + " " + dataConnID)
 	}, injectSSEScript)
@@ -143,7 +143,7 @@ func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
 func (template *Template) executeLiveWebsocket(w io.Writer, connId string, data any) {
 	b := dataToJSONBytes(data)
 	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
-		dataSRR := "data-ssr=\"" + base64.StdEncoding.EncodeToString(b) + "\""
+		dataSRR := "data-ss=\"" + base64.StdEncoding.EncodeToString(b) + "\""
 		dataConnID := "data-connid=\"" + connId + "\""
 		return []byte(" " + dataSRR + " " + dataConnID)
 	}, injectWebsocketScript)

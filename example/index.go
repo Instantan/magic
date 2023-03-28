@@ -7,8 +7,9 @@ import (
 )
 
 type IndexPageData struct {
-	Name    magic.Get[string] `json:"name"`
-	Counter struct {
+	Name       magic.Get[string]   `json:"name"`
+	HelloWorld magic.Get[[]string] `json:"helloWorld"`
+	Counter    struct {
 		Count magic.Get[int]  `json:"count"`
 		Even  magic.Get[bool] `json:"even"`
 	} `json:"counter"`
@@ -17,10 +18,11 @@ type IndexPageData struct {
 func IndexPage(ctx magic.PageContext) any {
 	getName, _ := magic.Signal("Felix")
 	getCount, setCount := magic.Signal(1)
+	getHelloWorld, _ := magic.Signal([]string{"H", "e", "l", "l", "o"})
 
 	go func() {
 		for {
-			time.Sleep(time.Second)
+			time.Sleep(time.Second * 1)
 			setCount(getCount() + 1)
 		}
 	}()
@@ -38,7 +40,8 @@ func IndexPage(ctx magic.PageContext) any {
 	}, even)
 
 	return IndexPageData{
-		Name: getName,
+		Name:       getName,
+		HelloWorld: getHelloWorld,
 		Counter: struct {
 			Count magic.Get[int]  `json:"count"`
 			Even  magic.Get[bool] `json:"even"`
