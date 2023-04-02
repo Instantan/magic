@@ -96,7 +96,7 @@ class MagicValue extends HTMLElement {
 
     recomputePath = () => {
         this.setAttribute("tag", this.attributes.tag === undefined ? this.innerHTML : this.attributes.tag.value)
-        this.absolutePath = absolutePath(this, this.attributes.tag.value);
+        this.absolutePath = MagicUtil.absolutePath(this, this.attributes.tag.value);
     }
 
     connectedCallback() {
@@ -150,7 +150,7 @@ class MagicRange extends HTMLElement {
         this.rerender()
     }
     recomputePath = () => {
-        this.absolutePath = absolutePath(this, MagicTemplate.unpackTemplate(this.attributes.of.value));
+        this.absolutePath = MagicUtil.absolutePath(this, MagicTemplate.unpackTemplate(this.attributes.of.value));
     }
     sub = () => {
         if (this.subscribed) {
@@ -171,7 +171,7 @@ class MagicRange extends HTMLElement {
         if (!MagicTemplate.isTemplate(path)) {
             return
         }
-        path = absolutePath(this, this.absolutePath)
+        path = MagicUtil.absolutePath(this, this.absolutePath)
         const data = MagicUtil.get(magic.data, path, [])
         if (!Array.isArray(data)) {
             return
@@ -199,7 +199,7 @@ class MagicShow extends HTMLElement {
         super();
     }
     recomputePath = () => {
-        this.absolutePath = absolutePath(this, MagicTemplate.unpackTemplate(this.attributes.when.value));
+        this.absolutePath = MagicUtil.absolutePath(this, MagicTemplate.unpackTemplate(this.attributes.when.value));
     }
     connectedCallback() {
         this.recomputePath()
@@ -311,6 +311,50 @@ class MagicUtil {
         const ssrdata = attr.getNamedItem("data-ss");
         attr.removeNamedItem("data-ss");
         return JSON.parse(atob(ssrdata.value));
+    }
+
+
+    static getScope(node) {
+        let n = node
+        let scope = ""
+        while (true) {
+            n = n.parentElement
+            if (!n) {
+                return scope
+            }
+            const scp = MagicUtil.scopeFromNode(n)
+            if (scp === "") {
+                continue
+            }
+            scope = scp + scope
+            if (!MagicUtil.isRelativePath(scp)) {
+                return scope
+            }
+        }
+        return scope
+    }
+
+    static isRelativePath(path) {
+        return path[0] === "."
+    }
+
+    static scopeFromNode(node) {
+        const scopeattr = node.attributes["m-scope"]
+        if (!scopeattr) {
+            return ""
+        }
+        return scopeattr.value
+    }
+
+    static absolutePath(node, path) {
+        if (path[0] === ".") {
+            const scope = MagicUtil.getScope(node)
+            if (path === ".") {
+                return scope
+            }
+            return scope + path
+        }
+        return path
     }
 }
 
@@ -451,12 +495,6 @@ const magic = {
 };
 
 function handlePatch(op, path, data) {
-    // The notify is technically not correct when patching a deep object
-    // for example when running 
-    // RPL "data.deep" { "user": { "name": { "prename": "Paul", "surename": "Blob" } } }
-    // then a effect that is listening to "data.deep" gets notified but not 
-    // a effect that is listening to "data.deep.user.name.prename"
-    // the listening system needs to be more granular
     switch (op) {
         case MAGIC_OP_ADD:
             MagicUtil.set(magic.data, path, data);
@@ -483,7 +521,7 @@ function handleEvent(name, data) {
 
 function registerNodeAndChilds(node) {
     if (!node.tagName.startsWith("M-")) {
-        const scope = scopeFromNode(node)
+        const scope = MagicUtil.scopeFromNode(node)
         const dataGetter = (path) => {
             return MagicUtil.get(magic.data, path, "")
         }
@@ -511,49 +549,6 @@ function registerChilds(node) {
     while (cl--) {
         registerNodeAndChilds(node.children[cl])
     }
-}
-
-function getScope(node) {
-    let n = node
-    let scope = ""
-    while (true) {
-        n = n.parentElement
-        if (!n) {
-            return scope
-        }
-        const scp = scopeFromNode(n)
-        if (scp === "") {
-            continue
-        }
-        scope = scp + scope
-        if (!isRelativePath(scp)) {
-            return scope
-        }
-    }
-    return scope
-}
-
-function isRelativePath(path) {
-    return path[0] === "."
-}
-
-function scopeFromNode(node) {
-    const scopeattr = node.attributes["m-scope"]
-    if (!scopeattr) {
-        return ""
-    }
-    return scopeattr.value
-}
-
-function absolutePath(node, path) {
-    if (path[0] === ".") {
-        const scope = getScope(node)
-        if (path === ".") {
-            return scope
-        }
-        return scope + path
-    }
-    return path
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {
