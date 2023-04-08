@@ -18,25 +18,10 @@
 
 <body class="body {{counter.even}}">
 
-    {{name}} {{counter.even}} {{counter.count}}
+    <v magic-value="{{counter.count}}"></v>
+    <br /> {{name}} {{counter.even}} {{counter.count}}
 
-    <m-show when="{{counter.even}}">
-        {{counter.count}}
-    </m-show>
-
-    <m-range of="{{helloWorld}}">
-        <m-show when="{{counter.even}}">
-            {{.}}
-        </m-show>
-    </m-range>
-
-    <div m-scope="bla">
-        <div>
-            <div m-scope=".bla">
-                <h1 id="test"></h1>
-            </div>
-        </div>
-    </div>
+    <m magic-value="{{show counter.even}}{{counter.count}}{{end}}"></m>
 
 </body>
 

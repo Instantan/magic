@@ -2,21 +2,13 @@ package magic
 
 import _ "embed"
 
-//go:embed script/magic-sse.js
-var SSEScript []byte
-
-//go:embed script/magic-websocket.js
-var WebsocketScript []byte
+//go:embed script/magic-reactivity.js
+var ReactivityScript []byte
 
 func init() {
-	SSEScript = append(append([]byte("<script>"), SSEScript...), []byte("</script>")...)
-	WebsocketScript = append(append([]byte("<script>"), WebsocketScript...), []byte("</script>")...)
+	ReactivityScript = append(append([]byte("<script>"), ReactivityScript...), []byte("</script>")...)
 }
 
-func injectSSEScript() []byte {
-	return SSEScript
-}
-
-func injectWebsocketScript() []byte {
-	return WebsocketScript
+func injectReactivityScript() []byte {
+	return ReactivityScript
 }

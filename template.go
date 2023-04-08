@@ -127,26 +127,13 @@ func (template *Template) prepareLiveFromStatic() {
 }
 
 // Execute writes template with all the given placeholders replaced to the given writer
-func (template *Template) executeLiveSSE(w io.Writer, connId string, data any) {
+func (template *Template) executeLiveTemplate(w io.Writer, connId string, data any) {
 	b := dataToJSONBytes(data)
 	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
 		dataSRR := "data-ss=\"" + base64.StdEncoding.EncodeToString(b) + "\""
 		dataConnID := "data-connid=\"" + connId + "\""
 		return []byte(" " + dataSRR + " " + dataConnID)
-	}, injectSSEScript)
-	fasttemplate.ExecuteFunc(string(injected), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
-		return w.Write([]byte("{{" + tag + "}}"))
-	})
-}
-
-// Execute writes template with all the given placeholders replaced to the given writer
-func (template *Template) executeLiveWebsocket(w io.Writer, connId string, data any) {
-	b := dataToJSONBytes(data)
-	injected := internal.InjectDataIntoHTML(template.live, func() []byte {
-		dataSRR := "data-ss=\"" + base64.StdEncoding.EncodeToString(b) + "\""
-		dataConnID := "data-connid=\"" + connId + "\""
-		return []byte(" " + dataSRR + " " + dataConnID)
-	}, injectWebsocketScript)
+	}, injectReactivityScript)
 	fasttemplate.ExecuteFunc(string(injected), "{{", "}}", w, func(w io.Writer, tag string) (int, error) {
 		return w.Write([]byte("{{" + tag + "}}"))
 	})

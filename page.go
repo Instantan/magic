@@ -3,7 +3,6 @@ package magic
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"log"
 	"net/http"
 
 	"github.com/Instantan/magic/internal"
@@ -32,12 +31,7 @@ func CreatePage(template *Template, renderer PageRenderer) *Page {
 }
 
 func (p *Page) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	sse, websocket := p.requestingConnection(r)
-	if sse {
-		p.serveHTTPSSE(w, r)
-		return
-	}
-	if websocket {
+	if r.Header.Get("Upgrade") == "websocket" {
 		p.serveHTTPWebsockets(w, r)
 		return
 	}
@@ -61,39 +55,22 @@ func (p *Page) serveHTTPInitial(w http.ResponseWriter, r *http.Request) {
 	if isLive {
 		connID := randomConnectionString()
 		p.connections.Store(connID, ctx)
-		p.template.executeLiveSSE(w, connID, data)
+		p.template.executeLiveTemplate(w, connID, data)
 		return
 	}
 
 	p.template.ExecuteStatic(w, data)
 }
 
-func (p *Page) requestingConnection(r *http.Request) (sse, websocket bool) {
-	sse = r.Header.Get("Accept") == "text/event-stream"
-	if sse {
-		return sse, websocket
-	}
-	websocket = r.Header.Get("Upgrade") == "websocket"
-	return sse, websocket
-}
-
 func (p *Page) serveHTTPWebsockets(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func (p *Page) serveHTTPSSE(w http.ResponseWriter, r *http.Request) {
-	connID := r.URL.Query().Get("sse")
+	connID := r.URL.Query().Get("ws")
 	ctx, ok := p.connections.Load(connID)
 	if !ok {
 		http.Error(w, "Requested connection not available", http.StatusNotFound)
 		return
 	}
-	s := establishSSEConnection(w)
-	ctx.epb.setWriter(s)
-	log.Println("Started SSE")
-	<-r.Context().Done()
-	ctx.epb.setWriter(nil)
-	log.Println("Ended SSE")
+	s := establishWSConnection(w, r)
+	go s.Read(ctx)
 }
 
 func randomConnectionString() string {

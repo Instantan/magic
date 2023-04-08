@@ -65,13 +65,13 @@ func ReplaceTemplateBracesInHTMLInnerTextWithComponent(data string) string {
 			escaped = true
 		case '{':
 			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '{' {
-				b.WriteString("<m-v>")
+				b.WriteString("<m>")
 				i++
 				continue
 			}
 		case '}':
 			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '}' {
-				b.WriteString("</m-v>")
+				b.WriteString("</m>")
 				i++
 				continue
 			}
