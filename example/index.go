@@ -19,6 +19,17 @@ func IndexPage(ctx magic.PageContext) any {
 	getName, _ := magic.Signal("Felix")
 	getCount, setCount := magic.Signal(1)
 	getHelloWorld, _ := magic.Signal([]string{"H", "e", "l", "l", "o"})
+
+	ctx.Connected(func() {
+
+	})
+
+	magic.Value()
+
+	ctx.Cleanup(func() {
+
+	})
+
 	go func() {
 		for {
 			time.Sleep(time.Second * 1)
@@ -49,4 +60,5 @@ func IndexPage(ctx magic.PageContext) any {
 			Even:  even,
 		},
 	}
+
 }
