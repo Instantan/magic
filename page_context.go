@@ -7,7 +7,7 @@ import (
 type PageContext interface {
 	Page() *Page
 	Request() *http.Request
-	OnCleanup(func())
+	Cleanup(func())
 }
 
 type pageContext struct {
@@ -37,11 +37,11 @@ func (pctx *pageContext) Patch(op Operation, path string, value any) {
 	pctx.epb.PushPatch(op, path, value)
 }
 
-func (pctx *pageContext) OnCleanup(fn func()) {
+func (pctx *pageContext) Cleanup(fn func()) {
 	pctx.cleanupFuncs = append(pctx.cleanupFuncs, fn)
 }
 
-func (pctx *pageContext) Cleanup() {
+func (pctx *pageContext) cleanup() {
 	for i := range pctx.cleanupFuncs {
 		pctx.cleanupFuncs[i]()
 	}

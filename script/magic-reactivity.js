@@ -22,10 +22,10 @@ function connect() {
         .attributes.getNamedItem("data-connid").value);
     magic.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
     magic.socket.onopen = function() {
-        // subscribe to some channels
-        magic.socket.send(JSON.stringify({
-            //.... some message the I must send when I connect ....
-        }));
+        // // subscribe to some channels
+        // magic.socket.send(JSON.stringify({
+        //     //.... some message the I must send when I connect ....
+        // }));
     };
 
     magic.socket.onmessage = function(e) {
@@ -88,14 +88,14 @@ class MagicTemplate {
             [0, ""]
         ]
         while (i < template.length) {
-            if (template[i] === "{" && template[i + 1] === "{") {
-                i += 1
+            if (template[i] === "{" && template[i + 1] === "§") {
+                i += 2
                 tokens.push([1, ""])
-                while (template[i] !== "}" && template[i + 1] !== "}") {
-                    i += 1
+                while (template[i] !== "§" && template[i + 1] !== "}") {
                     tokens[tokens.length - 1][1] += template[i]
+                    i += 1
                 }
-                i += 3
+                i += 2
                 tokens.push([0, ""])
                 continue
             }
@@ -142,7 +142,7 @@ class MagicTemplate {
         let res = ""
         if (token[1] === "range") {
             res += MagicTemplate.execLogicRange(token, scope, applicator)
-        } else if (token[1] === "show") {
+        } else if (token[1] === "if") {
             res += MagicTemplate.execLogicShow(token, scope, applicator)
         } else {
             res += applicator(MagicTemplate.buildPath(scope, token[1]))

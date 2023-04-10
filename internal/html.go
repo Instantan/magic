@@ -46,9 +46,12 @@ func sawHeadTag(saw []byte) bool {
 func ReplaceTemplateBracesInHTMLInnerTextWithComponent(data string) string {
 	isInInnerText := false
 	escaped := false
+	sawTag := false
 
 	b := strings.Builder{}
 	b.Grow(len(data))
+
+	tagContent := ""
 
 	for i := 0; i < len(data); i++ {
 		if escaped {
@@ -65,18 +68,28 @@ func ReplaceTemplateBracesInHTMLInnerTextWithComponent(data string) string {
 			escaped = true
 		case '{':
 			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '{' {
-				b.WriteString("<m>")
+				sawTag = true
+				tagContent = ""
 				i++
 				continue
 			}
 		case '}':
-			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '}' {
-				b.WriteString("</m>")
+			if isInInnerText && sawTag && len(data)-1 > i+1 && data[i+1] == '}' {
+				sawTag = false
+				b.WriteString("<m magic-value=\"")
+				b.WriteString(tagContent)
+				b.WriteString("\">{{")
+				b.WriteString(tagContent)
+				b.WriteString("}}</m>")
 				i++
 				continue
 			}
 		}
-		b.WriteByte(data[i])
+		if isInInnerText && sawTag {
+			tagContent += string(data[i])
+		} else {
+			b.WriteByte(data[i])
+		}
 	}
 
 	return b.String()

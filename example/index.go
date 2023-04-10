@@ -20,12 +20,6 @@ func IndexPage(ctx magic.PageContext) any {
 	getCount, setCount := magic.Signal(1)
 	getHelloWorld, _ := magic.Signal([]string{"H", "e", "l", "l", "o"})
 
-	ctx.Connected(func() {
-
-	})
-
-	magic.Value()
-
 	ctx.Cleanup(func() {
 
 	})
