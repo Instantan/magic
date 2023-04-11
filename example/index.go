@@ -1,57 +1,31 @@
 package main
 
 import (
-	"time"
-
 	"github.com/Instantan/magic"
 )
 
 type IndexPageData struct {
-	Name       magic.Get[string]   `json:"name"`
-	HelloWorld magic.Get[[]string] `json:"helloWorld"`
+	Name       magic.ReactiveValue[string]   `json:"name"`
+	HelloWorld magic.ReactiveValue[[]string] `json:"helloWorld"`
 	Counter    struct {
-		Count magic.Get[int]  `json:"count"`
-		Even  magic.Get[bool] `json:"even"`
+		Count magic.ReactiveValue[int]  `json:"count"`
+		Even  magic.ReactiveValue[bool] `json:"even"`
 	} `json:"counter"`
 }
 
 func IndexPage(ctx magic.PageContext) any {
-	getName, _ := magic.Signal("Felix")
-	getCount, setCount := magic.Signal(1)
-	getHelloWorld, _ := magic.Signal([]string{"H", "e", "l", "l", "o"})
-
-	ctx.Cleanup(func() {
-
-	})
-
-	go func() {
-		for {
-			time.Sleep(time.Second * 1)
-			setCount(getCount() + 1)
-		}
-	}()
-
-	even := magic.Computed(func() bool {
-		return getCount()%2 == 0
-	}, getCount)
-
-	magic.Effect(func() {
-		if even() {
-			println("is even")
-		} else {
-			println("is odd")
-		}
-	}, even)
+	name := magic.Value("Felix")
+	count := magic.Value(1)
+	helloWorld := magic.Value([]string{"H", "e", "l", "l", "o"})
 
 	return IndexPageData{
-		Name:       getName,
-		HelloWorld: getHelloWorld,
+		Name:       name,
+		HelloWorld: helloWorld,
 		Counter: struct {
-			Count magic.Get[int]  `json:"count"`
-			Even  magic.Get[bool] `json:"even"`
+			Count magic.ReactiveValue[int]  `json:"count"`
+			Even  magic.ReactiveValue[bool] `json:"even"`
 		}{
-			Count: getCount,
-			Even:  even,
+			Count: count,
 		},
 	}
 

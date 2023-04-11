@@ -2,6 +2,8 @@ package internal
 
 import (
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
 type ByteInjector func() []byte
@@ -43,54 +45,50 @@ func sawHeadTag(saw []byte) bool {
 	return len(saw) >= len(needsToSee) && strings.HasSuffix(strings.ToLower(string(saw)), needsToSee)
 }
 
-func ReplaceTemplateBracesInHTMLInnerTextWithComponent(data string) string {
-	isInInnerText := false
-	escaped := false
-	sawTag := false
+func BuildLiveTemplateFromRawTemplate(template string) string {
+	tkn := html.NewTokenizer(strings.NewReader(template))
+	result := strings.Builder{}
 
-	b := strings.Builder{}
-	b.Grow(len(data))
-
-	tagContent := ""
-
-	for i := 0; i < len(data); i++ {
-		if escaped {
-			escaped = false
-			b.WriteByte(data[i])
-			continue
-		}
-		switch data[i] {
-		case '<':
-			isInInnerText = false
-		case '>':
-			isInInnerText = true
-		case '\\':
-			escaped = true
-		case '{':
-			if isInInnerText && len(data)-1 > i+1 && data[i+1] == '{' {
-				sawTag = true
-				tagContent = ""
-				i++
+	for {
+		tt := tkn.Next()
+		switch tt {
+		case html.ErrorToken:
+			return result.String()
+		case html.StartTagToken:
+			t := tkn.Token()
+			magicAttrs := []html.Attribute{}
+			for i := range t.Attr {
+				attr := t.Attr[i]
+				if strings.HasPrefix(attr.Key, "magic-") || !strings.Contains(attr.Val, "{{") {
+					continue
+				}
+				magicAttrs = append(magicAttrs, html.Attribute{
+					Namespace: attr.Namespace,
+					Key:       "magic-" + attr.Key,
+					Val:       convTemplateIntoMagicTemplate(attr.Val),
+				})
+			}
+			t.Attr = append(t.Attr, magicAttrs...)
+			result.WriteString(t.String())
+		case html.TextToken:
+			t := tkn.Token()
+			if strings.Contains(t.Data, "{{") {
+				result.WriteString(convTextTokenIntoMagicValue(t))
 				continue
 			}
-		case '}':
-			if isInInnerText && sawTag && len(data)-1 > i+1 && data[i+1] == '}' {
-				sawTag = false
-				b.WriteString("<m magic-value=\"")
-				b.WriteString(tagContent)
-				b.WriteString("\">{{")
-				b.WriteString(tagContent)
-				b.WriteString("}}</m>")
-				i++
-				continue
-			}
-		}
-		if isInInnerText && sawTag {
-			tagContent += string(data[i])
-		} else {
-			b.WriteByte(data[i])
+			result.WriteString(t.String())
+		default:
+			t := tkn.Token()
+			result.WriteString(t.String())
 		}
 	}
+}
 
-	return b.String()
+func convTextTokenIntoMagicValue(t html.Token) string {
+	data := strings.TrimSpace(t.String())
+	return "<m magic-value=\"" + convTemplateIntoMagicTemplate(data) + "\">" + data + "</m>"
+}
+
+func convTemplateIntoMagicTemplate(template string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(template, "{{", "{§"), "}}", "§}")
 }

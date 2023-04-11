@@ -7,14 +7,18 @@ import (
 type PageContext interface {
 	Page() *Page
 	Request() *http.Request
-	Cleanup(func())
+
+	Mount(func())
+	Unmount(func())
 }
 
 type pageContext struct {
-	page         *Page
-	request      *http.Request
-	epb          *epBuffer
-	cleanupFuncs []func()
+	page    *Page
+	request *http.Request
+	epb     *epBuffer
+	// lifetime
+	mount   func()
+	unmount func()
 }
 
 func newPageContext(p *Page, r *http.Request) *pageContext {
@@ -37,12 +41,22 @@ func (pctx *pageContext) Patch(op Operation, path string, value any) {
 	pctx.epb.PushPatch(op, path, value)
 }
 
-func (pctx *pageContext) Cleanup(fn func()) {
-	pctx.cleanupFuncs = append(pctx.cleanupFuncs, fn)
+func (pctx *pageContext) Mount(fn func()) {
+	pctx.mount = fn
 }
 
-func (pctx *pageContext) cleanup() {
-	for i := range pctx.cleanupFuncs {
-		pctx.cleanupFuncs[i]()
+func (pctx *pageContext) Unmount(fn func()) {
+	pctx.unmount = fn
+}
+
+func (pctx *pageContext) runMount() {
+	if pctx.mount != nil {
+		pctx.mount()
+	}
+}
+
+func (pctx *pageContext) runUnmount() {
+	if pctx.unmount != nil {
+		pctx.unmount()
 	}
 }

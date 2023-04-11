@@ -32,6 +32,6 @@ func TestReplaceTemplateBracesInHTMLInnerTextWithComponent(t *testing.T) {
 		<kjlmndjeklfm
 	`
 
-	nhtml := ReplaceTemplateBracesInHTMLInnerTextWithComponent(html)
+	nhtml := BuildLiveTemplateFromRawTemplate(html)
 	t.Log(nhtml)
 }

@@ -52,6 +52,9 @@ func traverseRecursive(value reflect.Value, path string, callback func(value any
 			traverseRecursive(value.MapIndex(key), p, callback)
 		}
 	default:
-		callback(value.Interface(), path)
+		zero := reflect.Value{}
+		if value != zero {
+			callback(value.Interface(), path)
+		}
 	}
 }

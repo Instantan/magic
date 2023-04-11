@@ -31,10 +31,13 @@ func (w *wss) Write(p []byte) (int, error) {
 func (w *wss) Read(ctx *pageContext) {
 	log.Println("Started WS")
 	ctx.epb.setWriter(w)
+	ctx.runMount()
+
 	defer func() {
 		w.conn.Close()
 		ctx.epb.setWriter(nil)
 		log.Println("Ended WS")
+		ctx.runUnmount()
 	}()
 
 	for {
