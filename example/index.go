@@ -28,5 +28,4 @@ func IndexPage(ctx magic.PageContext) any {
 			Count: count,
 		},
 	}
-
 }
