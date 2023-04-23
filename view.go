@@ -32,13 +32,14 @@ func init() {
 type ViewFn[Props any] func(props Props) Node
 
 func View[Props any](template string) ViewFn[Props] {
-	node := parseTemplate(minifyTemplate(template))
+	node := parseView(prepareDynamicValues(minifyView(template)))
+	makeViewDynamic(&node)
 	return func(props Props) Node {
 		return node
 	}
 }
 
-func minifyTemplate(template string) string {
+func minifyView(template string) string {
 	template, err := minifier.String("text/html", template)
 	if err != nil {
 		panic(err)
@@ -46,12 +47,31 @@ func minifyTemplate(template string) string {
 	return template
 }
 
-func parseTemplate(template string) Node {
+func prepareDynamicValues(template string) string {
+	re := regexp.MustCompile(`(?m)<.*=.*{{.*}}.*.*>`)
+	template = re.ReplaceAllStringFunc(template, func(s string) string {
+		print(s)
+		s = strings.ReplaceAll(s, "{{", "{%")
+		s = strings.ReplaceAll(s, "}}", "%}")
+		return s
+	})
+	re = regexp.MustCompile(`(?m){{\s*end\s*}}`)
+	template = re.ReplaceAllString(template, "</m>")
+	re = regexp.MustCompile(`((?m){{\s*(range|if)\s.*}})`)
+	template = re.ReplaceAllStringFunc(template, func(s string) string {
+		s = strings.ReplaceAll(s, "{{", "<m expr=\"")
+		s = strings.ReplaceAll(s, "}}", "\">")
+		return s
+	})
+	re = regexp.MustCompile(`((?m){{\s*)`)
+	template = re.ReplaceAllString(template, "<m expr=\"")
+	re = regexp.MustCompile(`((?m)\s*}})`)
+	template = re.ReplaceAllString(template, "\"/>")
+	return template
+}
+
+func parseView(template string) Node {
 	tkn := html.NewTokenizer(strings.NewReader(template))
-	tt := tkn.Next()
-	if tt == html.ErrorToken {
-		return Node{}
-	}
 	nodes := parseNodes(tkn)
 	if len(nodes) == 0 {
 		return Node{}
@@ -67,41 +87,130 @@ func parseTemplate(template string) Node {
 
 func parseNodes(tkn *html.Tokenizer) []Node {
 	nodes := []Node{}
-	node := Node{}
 	for {
 		tt := tkn.Next()
-		switch {
-		case tt == html.ErrorToken:
+		if tt == html.ErrorToken || tt == html.EndTagToken {
 			break
-		case tt == html.StartTagToken:
-			if node.Tag != "" {
-				nodes = append(nodes, node)
-				node = Node{}
-			}
-			token := tkn.Token()
-			node.Tag = token.Data
-			for i := range token.Attr {
-				node.Attributes = append(node.Attributes, Attribute{
-					Name:  token.Attr[i].Key,
-					Value: token.Attr[i].Val,
-				})
-			}
-		case tt == html.EndTagToken:
-			if node.Tag != "" {
-				nodes = append(nodes, node)
-				node = Node{}
-			}
-		case tt == html.TextToken:
-			if node.Tag != "" {
-				nodes = append(nodes, node)
-				node = Node{}
-			}
-			t := tkn.Token()
 		}
-	}
-	if node.Tag != "" {
-		nodes = append(nodes, node)
-		node = Node{}
+		if tt != html.StartTagToken && tt != html.SelfClosingTagToken && tt != html.TextToken {
+			continue
+		}
+		nodes = append(nodes, parseNode(tkn))
 	}
 	return nodes
+}
+
+func parseNode(tkn *html.Tokenizer) Node {
+	n := Node{}
+	token := tkn.Token()
+	if token.Type == html.StartTagToken || token.Type == html.SelfClosingTagToken {
+		n.Tag = token.Data
+		for i := range token.Attr {
+			n.Attributes = append(n.Attributes, Attribute{
+				Name:  token.Attr[i].Key,
+				Value: parseTemplate(token.Attr[i].Val),
+			})
+		}
+		if token.Type == html.SelfClosingTagToken {
+			return n
+		}
+	} else if token.Type == html.ErrorToken || token.Type == html.EndTagToken {
+		return n
+	} else if token.Type == html.TextToken {
+		n.Data = token.Data
+		return n
+	} else {
+		tkn.Next()
+		return parseNode(tkn)
+	}
+	n.Children = parseNodes(tkn)
+	return n
+}
+
+func makeViewDynamic(node *Node) {
+	for i := range node.Attributes {
+		makeAttributeDynamic(&node.Attributes[i])
+	}
+	expr := strings.TrimSpace(getNodeExpr(*node))
+	if expr == "" {
+		for i := range node.Children {
+			makeViewDynamic(&node.Children[i])
+		}
+		return
+	}
+	exprParts := removeEmptyExprParts(strings.Split(expr, " "))
+	node.Attributes = []Attribute{}
+	node.Data = buildFnFromExprPartsAndChildren(exprParts, node.Children)
+}
+
+func makeAttributeDynamic(attr *Attribute) {
+	template := attr.Value.(string)
+	if !strings.Contains(template, "{%") || !strings.Contains(template, "%}") {
+		return
+	}
+	attr.Value = parseTemplate(template)
+}
+
+func getNodeExpr(node Node) string {
+	if node.Tag == "m" && node.Data != nil {
+		expr := node.Data.(string)
+		for i := range node.Attributes {
+			if node.Attributes[i].Name == "expr" {
+				expr = node.Attributes[i].Value.(string)
+				break
+			}
+		}
+		return expr
+	}
+	return ""
+}
+
+func parseTemplate(data string) RxValue {
+	return data
+}
+
+func removeEmptyExprParts(exprParts []string) []string {
+	newParts := []string{}
+	for i := range exprParts {
+		if strings.TrimSpace(exprParts[i]) == "" {
+			continue
+		}
+		newParts = append(newParts, exprParts[i])
+	}
+	return newParts
+}
+
+func buildFnFromExprPartsAndChildren(parts []string, children []Node) RxValue {
+	if len(parts) == 0 {
+		return ""
+	}
+	if len(parts) == 2 {
+		switch parts[0] {
+		case "range":
+			return buildRangeFnFromChildren(parts[1], children)
+		case "if":
+			return buildIfFnFromChildren(parts[1], children)
+		}
+	} else if len(parts) == 1 {
+		return buildValueFn(parts[0])
+	}
+	return ""
+}
+
+func buildRangeFnFromChildren(selector string, children []Node) RxValue {
+	return func() []Node {
+		return []Node{}
+	}
+}
+
+func buildIfFnFromChildren(selector string, children []Node) RxValue {
+	return func() []Node {
+		return []Node{}
+	}
+}
+
+func buildValueFn(selector string) RxValue {
+	return func(data any) string {
+		return "BLA"
+	}
 }
