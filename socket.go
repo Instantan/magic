@@ -2,8 +2,11 @@ package magic
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"unsafe"
+
+	"github.com/gobwas/ws/wsutil"
 )
 
 type Socket interface {
@@ -17,7 +20,9 @@ type Socket interface {
 }
 
 type socket struct {
-	conn net.Conn
+	conn           net.Conn
+	knownTemplates Set[int]
+	patches        *patches
 }
 
 type socketref struct {
@@ -87,21 +92,36 @@ func (s *socket) assign(key string, value any) {
 
 func (s *socketref) assign(key string, value any) {
 	prev := s.state[key]
-	// the socket has the same state
-	// we dont have to push anything
 	if prev == value {
 		return
 	}
 	s.state[key] = value
 	if s.Live() {
-		// here we need to produce a patch
+		p := getPatch()
+		p.socketid = socketid(s.id())
+		p.data = map[string]any{}
+		s.root.patches.append(p)
 	}
-	// switch v := value.(type) {
-	// case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, uintptr, float32, float64, bool:
-	// 	return
-	// case AppliedView:
-	// 	return
-	// default:
-	// }
-	// based on the
+}
+
+func (s *socket) templateIsKnown(tmpl *Template) bool {
+	return s.knownTemplates.Has(tmpl.ID())
+}
+
+func (s *socket) markTemplateAsKnown(tmpl *Template) {
+	s.knownTemplates.Set(tmpl.ID())
+}
+
+func (s *socket) send(data []byte) {
+	wsutil.WriteServerText(s.conn, data)
+}
+
+func (s *socket) onSendTemplatePatch(ps []*patch) {
+	data := s.patchesToJson(ps)
+	s.send(data)
+}
+
+func socketid(id1, id2 uintptr) json.RawMessage {
+	v, _ := json.Marshal(fmt.Sprintf("%v:%v", id1, id2))
+	return v
 }

@@ -26,12 +26,12 @@ func View(templ string) ViewFn {
 	}
 }
 
-func (r AppliedView) HTML(w io.Writer) (n int, err error) {
-	r.template.Execute(w, func(w io.Writer, tag string) (int, error) {
+func (av AppliedView) HTML(w io.Writer) (n int, err error) {
+	av.template.Execute(w, func(w io.Writer, tag string) (int, error) {
 		if tag == "magic:live" {
 			return w.Write(magicMinScript)
 		}
-		rv, ok := r.socketref.state[tag]
+		rv, ok := av.socketref.state[tag]
 		if !ok {
 			return 0, nil
 		}
@@ -55,3 +55,34 @@ func (r AppliedView) HTML(w io.Writer) (n int, err error) {
 	})
 	return n, err
 }
+
+// TODO: This is unclean af
+// reimplement
+func (av AppliedView) Patch(templates *[]*Template, knownSocketRefs *map[uintptr]struct{}) []*patch {
+	ps := []*patch{}
+	p := getPatch()
+	rootid, refid := av.socketref.id()
+	p.socketid = socketid(rootid, refid)
+	p.data = av.socketref.state
+	ps = append(ps, p)
+	(*knownSocketRefs)[refid] = struct{}{}
+	for _, d := range p.data {
+		switch v := d.(type) {
+		case AppliedView:
+			_, irefid := v.socketref.id()
+			if _, ok := (*knownSocketRefs)[irefid]; !ok {
+				ps = append(ps, v.Patch(knownSocketRefs)...)
+			}
+		}
+	}
+	return ps
+}
+
+// func (av AppliedView)
+
+// func (av AppliedView) Mount() {
+// 	if av.socketref.eventHandler == nil {
+// 		return
+// 	}
+// 	av.socketref.eventHandler(MountEvent, nil)
+// }

@@ -1,5 +1,5 @@
-github.com/Instantan/template v0.0.0-20230423181128-d5cf89c22d0f h1:GTFmVPHquyYs5GYV/McGr3P5zPLcmXUbhdZbHZssStY=
-github.com/Instantan/template v0.0.0-20230423181128-d5cf89c22d0f/go.mod h1:EfVMmm+rt26UXwDwOhGuL2UEjq5bylLIo1vGXJl/Z4k=
+github.com/Instantan/template v0.0.0-20230424123402-94f83a3418b3 h1:YwgLwlyru33PczhVao3PsPxZHoraUwlWxzTF0V6IXP4=
+github.com/Instantan/template v0.0.0-20230424123402-94f83a3418b3/go.mod h1:EfVMmm+rt26UXwDwOhGuL2UEjq5bylLIo1vGXJl/Z4k=
 github.com/gobwas/httphead v0.1.0 h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU=
 github.com/gobwas/httphead v0.1.0/go.mod h1:O/RXo79gxV8G+RqlR/otEwx4Q36zl9rqC5u12GKvMCM=
 github.com/gobwas/pool v0.2.1 h1:xfeeEhW7pwmX8nuLVlqbzVc7udMDrwetjEv+TZIz1og=
@@ -16,4 +16,5 @@ github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6Kllzaw
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
+golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
