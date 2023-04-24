@@ -1,0 +1,19 @@
+{
+    "name": "@instantan/magic",
+    "version": "1.0.0",
+    "description": "",
+    "main": "magic.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "esbuild magic.js --bundle --minify --target=chrome58,firefox57,safari11,edge16 --outfile=magic.min.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "nanomorph": "^5.4.3"
+    },
+    "devDependencies": {
+        "esbuild": "^0.17.18"
+    }
+}

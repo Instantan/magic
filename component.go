@@ -1,11 +1,11 @@
 package magic
 
-type ComponentFn[Props any] func(ctx Context, props Props) Node
+type ComponentFn func(s Socket) AppliedView
 
-func Component[Props any](compfn ComponentFn[Props]) ComponentFn[Props] {
-	return func(ctx Context, props Props) Node {
-		subContext := ctx.clone()
-		node := compfn(subContext, props)
-		return node
+func Component(compfn ComponentFn) ComponentFn {
+	return func(s Socket) AppliedView {
+		sref := s.clone()
+		res := compfn(sref)
+		return res
 	}
 }

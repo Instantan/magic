@@ -3,7 +3,7 @@ package magic
 import "testing"
 
 func TestParseTemplate(t *testing.T) {
-	n := View[any](`
+	n := View(`
 		<h1>1</h1>
 		<h2 class="{{bla}}">
 			<p>bla</p>
@@ -14,5 +14,5 @@ func TestParseTemplate(t *testing.T) {
 			{{ end }}
 		</h2>
 	`)(nil)
-	t.Log(n.HTML())
+	t.Log(n)
 }
