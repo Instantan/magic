@@ -1,6 +1,7 @@
 package magic
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -56,33 +57,46 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 	return n, err
 }
 
-// TODO: This is unclean af
-// reimplement
-func (av AppliedView) Patch(templates *[]*Template, knownSocketRefs *map[uintptr]struct{}) []*patch {
-	ps := []*patch{}
-	p := getPatch()
-	rootid, refid := av.socketref.id()
-	p.socketid = socketid(rootid, refid)
-	p.data = av.socketref.state
-	ps = append(ps, p)
-	(*knownSocketRefs)[refid] = struct{}{}
-	for _, d := range p.data {
-		switch v := d.(type) {
-		case AppliedView:
-			_, irefid := v.socketref.id()
-			if _, ok := (*knownSocketRefs)[irefid]; !ok {
-				ps = append(ps, v.Patch(knownSocketRefs)...)
-			}
-		}
+func (av AppliedView) Patch() []*patch {
+	psBySocketRef := map[uintptr]*patch{}
+	av.patch(&psBySocketRef)
+	ps := make([]*patch, len(psBySocketRef)+1)
+	ps[0] = getPatch()
+	ps[0].socketid = socketid(av.socketref.root.id())
+	i := 1
+	for k := range psBySocketRef {
+		ps[i] = psBySocketRef[k]
+		i++
+	}
+	ps[0].data = map[string]any{
+		"#": AppliedView{
+			socketref: av.socketref,
+			template:  av.template,
+		},
 	}
 	return ps
 }
 
-// func (av AppliedView)
+func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
+	rootid, refid := av.socketref.id()
+	if _, ok := (*patchesBySocketRef)[refid]; ok {
+		return
+	}
+	p := getPatch()
+	p.data = av.socketref.state
+	p.socketid = socketid(rootid, refid)
+	(*patchesBySocketRef)[refid] = p
+	for _, d := range p.data {
+		switch v := d.(type) {
+		case AppliedView:
+			v.patch(patchesBySocketRef)
+		}
+	}
+}
 
-// func (av AppliedView) Mount() {
-// 	if av.socketref.eventHandler == nil {
-// 		return
-// 	}
-// 	av.socketref.eventHandler(MountEvent, nil)
-// }
+func (av AppliedView) MarshalJSON() ([]byte, error) {
+	d := make([]json.RawMessage, 2)
+	d[0] = socketid(av.socketref.id())
+	d[1], _ = json.Marshal(av.template.ID())
+	return json.Marshal(d)
+}

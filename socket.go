@@ -3,6 +3,7 @@ package magic
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"unsafe"
 
@@ -25,26 +26,12 @@ type socket struct {
 	patches        *patches
 }
 
-type socketref struct {
-	root         *socket
-	eventHandler EventHandler
-	state        map[string]any
-}
-
 func (s *socket) Live() bool {
-	return s.conn != nil
-}
-
-func (s *socketref) Live() bool {
-	return s.root.Live()
+	return s.patches != nil
 }
 
 func (s *socket) HandleEvent(evh EventHandler) {
 	// we need to dispatch the event to the right ref
-}
-
-func (s *socketref) HandleEvent(evh EventHandler) {
-	s.eventHandler = evh
 }
 
 func (s *socket) Send(ev string, data any) error {
@@ -56,28 +43,9 @@ func (s *socket) Send(ev string, data any) error {
 	return nil
 }
 
-func (s *socketref) Send(ev string, data any) error {
-	return s.root.Send(ev, data)
-}
-
 func (s *socket) id() (root uintptr, self uintptr) {
 	self = uintptr(unsafe.Pointer(s))
 	return self, 0
-}
-
-func (s *socketref) id() (root uintptr, self uintptr) {
-	self = uintptr(unsafe.Pointer(s))
-	if s.root == nil {
-		return 0, self
-	}
-	return uintptr(unsafe.Pointer(s.root)), self
-}
-
-func (s *socketref) clone() Socket {
-	return &socketref{
-		root:  s.root,
-		state: map[string]any{},
-	}
 }
 
 func (s *socket) clone() Socket {
@@ -88,20 +56,6 @@ func (s *socket) clone() Socket {
 }
 
 func (s *socket) assign(key string, value any) {
-}
-
-func (s *socketref) assign(key string, value any) {
-	prev := s.state[key]
-	if prev == value {
-		return
-	}
-	s.state[key] = value
-	if s.Live() {
-		p := getPatch()
-		p.socketid = socketid(s.id())
-		p.data = map[string]any{}
-		s.root.patches.append(p)
-	}
 }
 
 func (s *socket) templateIsKnown(tmpl *Template) bool {
@@ -121,7 +75,40 @@ func (s *socket) onSendTemplatePatch(ps []*patch) {
 	s.send(data)
 }
 
+func (s *socket) patchesToJson(ps []*patch) []byte {
+	templatesToSend := []json.RawMessage{}
+	dataToSend := []json.RawMessage{}
+	for i := range ps {
+		for _, v := range ps[i].data {
+			switch av := v.(type) {
+			case AppliedView:
+				if !s.templateIsKnown(av.template) {
+					m := make([]json.RawMessage, 2)
+					m[0], _ = json.Marshal(av.template.ID())
+					m[1], _ = json.Marshal(av.template.String())
+					t, _ := json.Marshal(m)
+					templatesToSend = append(templatesToSend, t)
+					s.markTemplateAsKnown(av.template)
+				}
+			}
+		}
+
+		d := make([]json.RawMessage, 2)
+		d[0] = ps[i].socketid
+		d[1], _ = json.Marshal(ps[i].data)
+		data, _ := json.Marshal(d)
+		dataToSend = append(dataToSend, data)
+		ps[i].free()
+	}
+	templatesToSend = append(templatesToSend, dataToSend...)
+	data, err := json.Marshal(templatesToSend)
+	if err != nil {
+		log.Printf("Failed sending patch: %v", err)
+	}
+	return data
+}
+
 func socketid(id1, id2 uintptr) json.RawMessage {
-	v, _ := json.Marshal(fmt.Sprintf("%v:%v", id1, id2))
+	v, _ := json.Marshal(fmt.Sprintf("%v", id2))
 	return v
 }

@@ -1,6 +1,10 @@
 package main
 
-import "github.com/Instantan/magic"
+import (
+	"time"
+
+	"github.com/Instantan/magic"
+)
 
 var homeView = magic.View(`
 	<!DOCTYPE html>
@@ -28,9 +32,19 @@ var homeView = magic.View(`
 `)
 
 var home = magic.Component(func(s magic.Socket) magic.AppliedView {
+	i := 0
 	// s.State().Set("navbar", navbarView(s))
-
 	magic.Assign(s, "navbar", navbarView(s))
+	if s.Live() {
+		go func() {
+			for {
+				time.Sleep(time.Second)
+				i++
+				println(i)
+				magic.Assign(s, "navbar", i)
+			}
+		}()
+	}
 
 	return homeView(s)
 })

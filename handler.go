@@ -21,8 +21,7 @@ func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		renderable := f(s)
-		knownSocketRefs := map[uintptr]struct{}{}
-		patches := renderable.Patch(&knownSocketRefs)
+		patches := renderable.Patch()
 		s.conn = conn
 		data := s.patchesToJson(patches)
 		wsutil.WriteServerText(s.conn, data)
