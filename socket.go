@@ -1,8 +1,10 @@
 package magic
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"io"
 	"log"
 	"net"
 	"unsafe"
@@ -14,6 +16,7 @@ type Socket interface {
 	Live() bool
 	Send(ev string, data any) error
 	HandleEvent(EventHandler)
+	Done() <-chan struct{}
 
 	id() (root uintptr, self uintptr)
 	clone() Socket
@@ -21,6 +24,8 @@ type Socket interface {
 }
 
 type socket struct {
+	ctx context.Context
+
 	conn           net.Conn
 	knownTemplates Set[int]
 	patches        *patches
@@ -32,6 +37,10 @@ func (s *socket) Live() bool {
 
 func (s *socket) HandleEvent(evh EventHandler) {
 	// we need to dispatch the event to the right ref
+}
+
+func (s *socket) Done() <-chan struct{} {
+	return s.ctx.Done()
 }
 
 func (s *socket) Send(ev string, data any) error {
@@ -56,6 +65,41 @@ func (s *socket) clone() Socket {
 }
 
 func (s *socket) assign(key string, value any) {
+}
+
+func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
+	ctx, cancel := context.WithCancel(s.ctx)
+	s.ctx = ctx
+
+	defer func() {
+		recover()
+		cancel()
+		s.conn.Close()
+		s.conn = nil
+		s.patches = nil
+		s.knownTemplates = Set[int]{}
+	}()
+
+	s.patches = NewPatches(s.onSendTemplatePatch)
+	renderable := root(s)
+	patches := renderable.Patch()
+	s.conn = conn
+	data := s.patchesToJson(patches)
+	wsutil.WriteServerText(s.conn, data)
+
+	for {
+		msg, op, err := wsutil.ReadClientData(s.conn)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				continue
+			}
+			if _, ok := err.(wsutil.ClosedError); ok {
+				break
+			}
+		}
+		_ = msg
+		_ = op
+	}
 }
 
 func (s *socket) templateIsKnown(tmpl *Template) bool {
@@ -106,9 +150,4 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 		log.Printf("Failed sending patch: %v", err)
 	}
 	return data
-}
-
-func socketid(id1, id2 uintptr) json.RawMessage {
-	v, _ := json.Marshal(fmt.Sprintf("%v", id2))
-	return v
 }

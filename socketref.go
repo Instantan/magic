@@ -20,6 +20,10 @@ func (s *socketref) Live() bool {
 	return s.root.Live()
 }
 
+func (s *socketref) Done() <-chan struct{} {
+	return s.root.Done()
+}
+
 func (s *socketref) id() (root uintptr, self uintptr) {
 	self = uintptr(unsafe.Pointer(s))
 	if s.root == nil {
@@ -43,7 +47,8 @@ func (s *socketref) assign(key string, value any) {
 	s.state[key] = value
 	if s.root != nil && s.root.conn != nil {
 		p := getPatch()
-		p.socketid = socketid(s.id())
+		_, refid := s.id()
+		p.socketid = socketid(refid)
 		p.data = map[string]any{}
 		p.data[key] = value
 		s.root.patches.append(p)

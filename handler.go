@@ -1,10 +1,10 @@
 package magic
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gobwas/ws"
-	"github.com/gobwas/ws/wsutil"
 )
 
 type HandlerFunc ComponentFn
@@ -12,19 +12,16 @@ type HandlerFunc ComponentFn
 func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := &socket{
 		conn:           nil,
+		ctx:            r.Context(),
 		knownTemplates: NewSet[int](),
 	}
 	if r.Header.Get("Upgrade") == "websocket" {
+		s.ctx = context.Background()
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		s.patches = NewPatches(s.onSendTemplatePatch)
 		if err != nil {
 			return
 		}
-		renderable := f(s)
-		patches := renderable.Patch()
-		s.conn = conn
-		data := s.patchesToJson(patches)
-		wsutil.WriteServerText(s.conn, data)
+		go s.establishConnection(ComponentFn(f), conn)
 		return
 	}
 	renderable := f(s)

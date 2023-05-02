@@ -33,11 +33,11 @@ connect()
 function handleMessage(message) {
     const socketrefsToRerender = new Set()
     message.forEach(element => {
+        console.log(element)
         if (element.length === 2 && typeof element[0] === 'number') {
             window.magic.templates[element[0]] = element[1]
             makeTemplateReferenceable(element[0])
         } else if (element.length === 2 && isSocketId(element[0])) {
-            // const ref = parseSocketId(element[0]).ref
             const ref = element[0]
             if (window.magic.socketrefs[ref] === undefined) {
                 window.magic.socketrefs[ref] = element[1]
@@ -62,18 +62,9 @@ function isSocketId(socketid) {
     return typeof socketid === 'string'
 }
 
-function parseSocketId(socketid) {
-    const parts = socketid.split(':')
-    return {
-        root: parts[0],
-        ref: parts[1]
-    }
-}
-
 function isTemplateRef(ref) {
     return ref.length === 2 && typeof ref[0] === 'string'
 }
-
 
 function renderRoot() {
     const ref = magic.socketrefs[0]['#']
@@ -114,16 +105,16 @@ function execute(tpl, fn) {
 
 function parseHtmlString(markup) {
     if (markup.toLowerCase().trim().indexOf('<!doctype') === 0) {
-        var doc = document.implementation.createHTMLDocument("");
+        const doc = document.implementation.createHTMLDocument("");
         doc.documentElement.innerHTML = markup;
         return doc;
     } else if ('content' in document.createElement('template')) {
-        var el = document.createElement('template');
+        const el = document.createElement('template');
         el.innerHTML = markup;
         return el.content;
     } else {
-        var docfrag = document.createDocumentFragment();
-        var el = document.createElement('body');
+        const docfrag = document.createDocumentFragment();
+        const el = document.createElement('body');
         el.innerHTML = markup;
         for (i = 0; 0 < el.childNodes.length;) {
             docfrag.appendChild(el.childNodes[i]);
@@ -154,8 +145,7 @@ function updateElementsOfSocketref(socketrefid) {
         morph(document, parseHtmlString(renderRoot()))
         return
     }
-    const elements = document.querySelectorAll(`[magic-id^="${socketrefid}"]`)
-    elements.forEach(elm => {
+    document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
         morph(elm, newElm.children[0])
     })

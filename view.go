@@ -62,7 +62,8 @@ func (av AppliedView) Patch() []*patch {
 	av.patch(&psBySocketRef)
 	ps := make([]*patch, len(psBySocketRef)+1)
 	ps[0] = getPatch()
-	ps[0].socketid = socketid(av.socketref.root.id())
+	_, refid := av.socketref.root.id()
+	ps[0].socketid = socketid(refid)
 	i := 1
 	for k := range psBySocketRef {
 		ps[i] = psBySocketRef[k]
@@ -78,13 +79,13 @@ func (av AppliedView) Patch() []*patch {
 }
 
 func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
-	rootid, refid := av.socketref.id()
+	_, refid := av.socketref.id()
 	if _, ok := (*patchesBySocketRef)[refid]; ok {
 		return
 	}
 	p := getPatch()
 	p.data = av.socketref.state
-	p.socketid = socketid(rootid, refid)
+	p.socketid = socketid(refid)
 	(*patchesBySocketRef)[refid] = p
 	for _, d := range p.data {
 		switch v := d.(type) {
@@ -96,7 +97,8 @@ func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
 
 func (av AppliedView) MarshalJSON() ([]byte, error) {
 	d := make([]json.RawMessage, 2)
-	d[0] = socketid(av.socketref.id())
+	_, refid := av.socketref.id()
+	d[0] = socketid(refid)
 	d[1], _ = json.Marshal(av.template.ID())
 	return json.Marshal(d)
 }

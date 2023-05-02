@@ -38,13 +38,17 @@ var home = magic.Component(func(s magic.Socket) magic.AppliedView {
 	if s.Live() {
 		go func() {
 			for {
-				time.Sleep(time.Second)
-				i++
-				println(i)
-				magic.Assign(s, "navbar", i)
+				select {
+				case <-s.Done():
+					return
+				default:
+					time.Sleep(time.Second)
+					i++
+					println(i)
+					magic.Assign(s, "navbar", i)
+				}
 			}
 		}()
 	}
-
 	return homeView(s)
 })
