@@ -9,6 +9,7 @@ import (
 	"net"
 	"unsafe"
 
+	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 )
 
@@ -37,6 +38,10 @@ func (s *socket) Live() bool {
 
 func (s *socket) HandleEvent(evh EventHandler) {
 	// we need to dispatch the event to the right ref
+}
+
+func (s *socket) handleEvent(ev Event) {
+	log.Println(ev)
 }
 
 func (s *socket) Done() <-chan struct{} {
@@ -97,8 +102,13 @@ func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
 				break
 			}
 		}
-		_ = msg
-		_ = op
+		if op == ws.OpText {
+			ev := Event{}
+			if err := json.Unmarshal(msg, &ev); err != nil {
+				log.Println(err)
+			}
+			s.handleEvent(ev)
+		}
 	}
 }
 
@@ -136,7 +146,6 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 				}
 			}
 		}
-
 		d := make([]json.RawMessage, 2)
 		d[0] = ps[i].socketid
 		d[1], _ = json.Marshal(ps[i].data)

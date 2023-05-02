@@ -3,7 +3,7 @@ package main
 import "github.com/Instantan/magic"
 
 var navbarView = magic.View(`
-	<nav>
+	<nav magic:click="test">
 		Hello
 	</nav>
 `)

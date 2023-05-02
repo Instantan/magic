@@ -4,7 +4,8 @@ window.magic = {
     templates: {},
     socketrefs: {},
     didRenderRoot: false,
-    socket: null
+    socket: null,
+    baseProps: ["metaKey", "ctrlKey", "shiftKey"]
 }
 
 function connect() {
@@ -33,7 +34,6 @@ connect()
 function handleMessage(message) {
     const socketrefsToRerender = new Set()
     message.forEach(element => {
-        console.log(element)
         if (element.length === 2 && typeof element[0] === 'number') {
             window.magic.templates[element[0]] = element[1]
             makeTemplateReferenceable(element[0])
@@ -54,6 +54,7 @@ function handleMessage(message) {
     })
     if (!window.magic.didRenderRoot) {
         morph(document, parseHtmlString(renderRoot()))
+        hydrateTree(document)
         window.magic.didRenderRoot = true
     }
 }
@@ -143,10 +144,111 @@ function makeTemplateReferenceable(templateid) {
 function updateElementsOfSocketref(socketrefid) {
     if (socketrefid === magic.socketrefs[0]['#'][0]) {
         morph(document, parseHtmlString(renderRoot()))
+        hydrateTree(tree)
         return
     }
     document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
         morph(elm, newElm.children[0])
+        hydrateTree(elm)
     })
+}
+
+function hydrateTree(tree) {
+    cleanEvents(tree)
+    const attrs = tree.attributes
+    if (attrs) {
+        for (let i = 0; i < attrs.length; i++) {
+            if (attrs[i].name.startsWith("magic")) {
+                hydrateElement(tree, attrs[i])
+            }
+        }
+    }
+    if (tree.children) {
+        for (let i = 0; i < tree.children.length; i++) {
+            hydrateTree(tree.children[i])
+        }
+    }
+}
+
+function hydrateElement(element, attribute) {
+    const kind = attribute.name.slice(6)
+    const value = attribute.value
+    const baseProps = window.magic.baseProps
+    switch (kind) {
+        case "click":
+            element.onclick = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "focus":
+            element.onfocus = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "change":
+            element.onchange = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "keydown":
+            element.onkeydown = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "keypress":
+            element.onkeypress = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "keyup":
+            element.onkeyup = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "submit":
+            element.onsubmit = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+        case "dblclick":
+            element.ondblclick = createMagicEventListener(
+                kind, [...baseProps], value
+            )
+            return
+    }
+}
+
+function cleanEvents(element) {
+    element.onclick = null
+    element.onfocus = null
+    element.onchange = null
+    element.onkeydown = null
+    element.onkeypress = null
+    element.onkeyup = null
+    element.onsubmit = null
+    element.ondblclick = null
+}
+
+function createMagicEventListener(kind, propsToTake = [], value) {
+    return (e) => {
+        const payload = Object.assign(takeFrom(e, propsToTake), { value })
+        if (window.magic.socket) {
+            window.magic.socket.send(JSON.stringify({
+                kind,
+                payload
+            }))
+        }
+    }
+}
+
+function takeFrom(obj, props, value) {
+    const n = {}
+    for (let i = 0; i < props.length; i++) {
+        const p = obj[props[i]]
+        if (p !== undefined) {
+            n[props[i]] = p
+        }
+    }
+    return n
 }
