@@ -5,7 +5,7 @@ window.magic = {
     socketrefs: {},
     didRenderRoot: false,
     socket: null,
-    baseProps: ["metaKey", "ctrlKey", "shiftKey"]
+    baseProps: ["metaKey", "ctrlKey", "shiftKey"],
 }
 
 function connect() {
@@ -13,6 +13,8 @@ function connect() {
     ws_params.append("ws", "0");
     window.magic.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
     window.magic.socket.onopen = function() {
+        window.magic.templates = {}
+        window.magic.socketrefs = {}
         window.magic.didRenderRoot = false
     };
     window.magic.socket.onmessage = function(e) {
@@ -64,7 +66,7 @@ function isSocketId(socketid) {
 }
 
 function isTemplateRef(ref) {
-    return ref.length === 2 && typeof ref[0] === 'string'
+    return ref && ref.length === 2 && typeof ref[0] === 'string'
 }
 
 function renderRoot() {
@@ -88,6 +90,9 @@ function renderTemplate(magicid, template, data) {
             return `magic-id="${magicid}"`
         }
         const toRender = data[v]
+        if (toRender === undefined || toRender === null) {
+            return ""
+        }
         if (isTemplateRef(toRender)) {
             return renderTemplateRef(toRender)
         }
@@ -144,13 +149,15 @@ function makeTemplateReferenceable(templateid) {
 function updateElementsOfSocketref(socketrefid) {
     if (socketrefid === magic.socketrefs[0]['#'][0]) {
         morph(document, parseHtmlString(renderRoot()))
-        hydrateTree(tree)
+        hydrateTree(document)
+        console.debug("[RENDERED]", document)
         return
     }
     document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
         morph(elm, newElm.children[0])
         hydrateTree(elm)
+        console.debug("[RENDERED]", elm)
     })
 }
 
@@ -230,10 +237,11 @@ function cleanEvents(element) {
     element.ondblclick = null
 }
 
-function createMagicEventListener(kind, propsToTake = [], value) {
+function createMagicEventListener(kind, propsToTake, value) {
     return (e) => {
         const payload = Object.assign(takeFrom(e, propsToTake), { value })
         if (window.magic.socket) {
+            // somehow we need to get the event target
             window.magic.socket.send(JSON.stringify({
                 kind,
                 payload

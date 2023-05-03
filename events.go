@@ -18,6 +18,7 @@ const (
 
 type Event struct {
 	Kind    string          `json:"kind"`
+	Target  uintptr         `json:"target"`
 	Payload json.RawMessage `json:"payload"`
 }
 

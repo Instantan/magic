@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/Instantan/magic"
 )
 
@@ -25,28 +27,26 @@ var homeView = magic.View(`
 
 	<body class="body">
 		{{navbar}}
+		{{liveNavbar}}
 	</body>
 	</html>
 `)
 
 var home = magic.Component(func(s magic.Socket) magic.AppliedView {
-	// i := 0
-	// s.State().Set("navbar", navbarView(s))
-	magic.Assign(s, "navbar", navbarView(s))
-	// if s.Live() {
-	// 	go func() {
-	// 		for {
-	// 			select {
-	// 			case <-s.Done():
-	// 				return
-	// 			default:
-	// 				time.Sleep(time.Second)
-	// 				i++
-	// 				println(i)
-	// 				magic.Assign(s, "navbar", i)
-	// 			}
-	// 		}
-	// 	}()
-	// }
+	magic.Assign(s, "navbar", navbarComponent(s))
+	if s.Live() {
+		t := time.NewTicker(time.Second * 5)
+		go func() {
+			for {
+				select {
+				case <-t.C:
+					magic.Assign(s, "liveNavbar", counterComponent(s))
+				case <-s.Done():
+					t.Stop()
+					return
+				}
+			}
+		}()
+	}
 	return homeView(s)
 })
