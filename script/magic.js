@@ -1,11 +1,16 @@
 import nanomorph from 'nanomorph'
 
 window.magic = {
-    templates: {},
-    socketrefs: {},
+    templates: new Map(),
+    socketrefs: new Map(),
+    socketrefs_refs: new Map(),
     didRenderRoot: false,
     socket: null,
     baseProps: ["metaKey", "ctrlKey", "shiftKey"],
+    themeColor: () => {
+        const meta = document.querySelector('meta[name="theme-color"]')
+        return meta ? meta.attributes.getNamedItem("content").value : "rgb(59,130,246)";
+    }
 }
 
 function connect() {
@@ -16,6 +21,7 @@ function connect() {
     window.magic.socket.onopen = function() {
         window.magic.templates = {}
         window.magic.socketrefs = {}
+        window.magic.socketrefs_refs = {}
         window.magic.didRenderRoot = false
     };
     window.magic.socket.onmessage = function(e) {
@@ -24,10 +30,7 @@ function connect() {
     };
     window.magic.socket.onclose = function(e) {
         showProgressBar()
-        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-        setTimeout(function() {
-            connect();
-        }, 1000);
+        setTimeout(connect, 1000);
     };
     window.magic.socket.onerror = function(err) {
         console.error('Socket encountered error: ', err, 'Closing socket');
@@ -43,10 +46,7 @@ function handleMessage(message) {
             makeTemplateReferenceable(element[0])
         } else if (element.length === 2 && isSocketId(element[0])) {
             const ref = element[0]
-            if (window.magic.socketrefs[ref] === undefined) {
-                window.magic.socketrefs[ref] = element[1]
-            }
-            Object.assign(window.magic.socketrefs[ref], element[1])
+            assignSockref(ref, element[1])
             if (!window.magic.didRenderRoot) {
                 return
             }
@@ -67,7 +67,7 @@ function isSocketId(socketid) {
     return typeof socketid === 'string'
 }
 
-function isTemplateRef(ref) {
+function isRef(ref) {
     return ref && ref.length === 2 && typeof ref[0] === 'string'
 }
 
@@ -95,7 +95,7 @@ function renderTemplate(magicid, template, data) {
         if (toRender === undefined || toRender === null) {
             return ""
         }
-        if (isTemplateRef(toRender)) {
+        if (isRef(toRender)) {
             return renderTemplateRef(toRender)
         }
         return toRender
@@ -267,8 +267,8 @@ function showProgressBar() {
     if (window.magic.topbar) {
         return
     }
-    const meta = document.querySelector('meta[name="theme-color"]')
-    const color = meta ? meta.attributes.getNamedItem("content").value : "rgb(59,130,246)";
+
+    const color = window.magic.themeColor()
 
     const wrapper = document.createElement("div")
     wrapper.style = `position:fixed;overflow:hidden;top:0;left:0;width:100%`
@@ -278,24 +278,73 @@ function showProgressBar() {
 
     const inner = document.createElement("div")
     inner.style = `background-color:${color};position:absolute;bottom:0;top:0;width:50%`
-    inner.animate([
-        { left: "-50%" },
-        { left: "100%" }
-    ], {
-        duration: 800,
-        iterations: Infinity
-    })
 
     wrapper.appendChild(bg)
     wrapper.appendChild(inner)
-    document.body.appendChild(wrapper)
-    window.magic.topbar = wrapper;
+
+    const timeout = setTimeout(() => {
+        document.body.appendChild(wrapper)
+        inner.animate([
+            { left: "-50%" },
+            { left: "100%" }
+        ], {
+            duration: 800,
+            iterations: Infinity
+        })
+    }, 120)
+
+    wrapper.destroy = () => {
+        clearInterval(timeout)
+        wrapper.remove()
+    };
+    window.magic.topbar = wrapper
 }
 
 function hideProgressBar() {
     if (window.magic.topbar) {
-        window.magic.topbar.remove();
+        window.magic.topbar.destroy();
         window.magic.topbar = null;
+    }
+}
+
+function assignSockref(ref, data) {
+    ref = Number(ref)
+    const newFields = Object.keys(data)
+    let nfl = newFields.length;
+    // incr action
+    while (nfl--) {
+        const v = data[newFields[nfl]]
+        if (isRef(v)) {
+            socketrefTrack(v[0], +1)
+        }
+    }
+
+    if (window.magic.socketrefs[ref] === undefined) {
+        window.magic.socketrefs[ref] = data
+    } else {
+        nfl = newFields.length;
+        // decr action
+        while (nfl--) {
+            const v = window.magic.socketrefs[ref][newFields[nfl]]
+            if (isRef(v)) {
+                socketrefTrack(v[0], -1)
+            }
+        }
+        Object.assign(window.magic.socketrefs[ref], data)
+    }
+}
+
+function socketrefTrack(ref, action) {
+    ref = Number(ref)
+    if (window.magic.socketrefs_refs[ref] !== undefined) {
+        window.magic.socketrefs_refs[ref] += action
+    } else {
+        window.magic.socketrefs_refs[ref] = action
+    }
+    if (action < 0 && window.magic.socketrefs_refs[ref] < 1) {
+        console.info(delete window.magic.socketrefs[ref]);
+        console.info(delete window.magic.socketrefs_refs[ref]);
+        console.log("Found orphan and removed it:", ref, Object.keys(window.magic.socketrefs_refs).length, Object.keys(window.magic.socketrefs).length)
     }
 }
 

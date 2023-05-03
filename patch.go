@@ -64,6 +64,6 @@ func (ps *patches) runSend() {
 	copy(cp, ps.p)
 	ps.p = []*patch{}
 	ps.startedFlusher = false
-	ps.l.Unlock()
 	ps.onSend(cp)
+	ps.l.Unlock()
 }
