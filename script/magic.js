@@ -91,6 +91,9 @@ function renderTemplate(magicid, template, data) {
         } else if (v === "magic:id") {
             return `magic-id="${magicid}"`
         }
+        if (data === undefined) {
+            return ""
+        }
         const toRender = data[v]
         if (toRender === undefined || toRender === null) {
             return ""
@@ -244,9 +247,11 @@ function createMagicEventListener(kind, propsToTake, value) {
         const payload = Object.assign(takeFrom(e, propsToTake), { value })
         if (window.magic.socket) {
             // somehow we need to get the event target
+            const target = Number(getSockrefId(e.target))
             window.magic.socket.send(JSON.stringify({
                 kind,
-                payload
+                target,
+                payload,
             }))
         }
     }
@@ -341,6 +346,17 @@ function socketrefTrack(ref, action) {
         delete window.magic.socketrefs[ref];
         delete window.magic.socketrefs_refs[ref];
     }
+}
+
+function getSockrefId(elm) {
+    const magicid = elm.attributes.getNamedItem("magic-id")
+    if (magicid !== null) {
+        return magicid.value.split(":", 1)[0]
+    }
+    if (elm.parentNode) {
+        return getSockrefId(elm)
+    }
+    return window.magic.socketrefs[0]['#'][0]
 }
 
 document.addEventListener('DOMContentLoaded', connect)

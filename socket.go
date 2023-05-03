@@ -43,8 +43,15 @@ func (s *socket) HandleEvent(evh EventHandler) {
 }
 
 func (s *socket) handleEvent(ev Event) {
-	s.dispatch(ev.Kind, EventData(ev.Payload))
-	log.Println(ev)
+	if ev.Target == 0 {
+		s.dispatch(ev.Kind, EventData(ev.Payload))
+		return
+	}
+	sref := s.socketrefs[ev.Target]
+	if sref == nil {
+		return
+	}
+	sref.dispatch(ev.Kind, EventData(ev.Payload))
 }
 
 func (s *socket) Send(ev string, data any) error {

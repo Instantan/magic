@@ -23,6 +23,8 @@ var navbarComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
 		}()
 		s.HandleEvent(func(ev string, data magic.EventData) {
 			switch ev {
+			case magic.ClickEvent:
+				print(string(data))
 			case magic.UnmountEvent:
 				t.Stop()
 			}
