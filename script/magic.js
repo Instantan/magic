@@ -9,6 +9,7 @@ window.magic = {
 }
 
 function connect() {
+    showProgressBar()
     const ws_params = new URLSearchParams(location.search);
     ws_params.append("ws", "0");
     window.magic.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
@@ -18,9 +19,11 @@ function connect() {
         window.magic.didRenderRoot = false
     };
     window.magic.socket.onmessage = function(e) {
+        hideProgressBar()
         handleMessage(JSON.parse(e.data))
     };
     window.magic.socket.onclose = function(e) {
+        showProgressBar()
         console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
         setTimeout(function() {
             connect();
@@ -31,7 +34,6 @@ function connect() {
         magic.socket.close();
     };
 }
-connect()
 
 function handleMessage(message) {
     const socketrefsToRerender = new Set()
@@ -260,3 +262,41 @@ function takeFrom(obj, props, value) {
     }
     return n
 }
+
+function showProgressBar() {
+    if (window.magic.topbar) {
+        return
+    }
+    const meta = document.querySelector('meta[name="theme-color"]')
+    const color = meta ? meta.attributes.getNamedItem("content").value : "rgb(59,130,246)";
+
+    const wrapper = document.createElement("div")
+    wrapper.style = `position:fixed;overflow:hidden;top:0;left:0;width:100%`
+
+    const bg = document.createElement("div")
+    bg.style = `background-color:${color};height:.2rem;width:100%;opacity:0.4`
+
+    const inner = document.createElement("div")
+    inner.style = `background-color:${color};position:absolute;bottom:0;top:0;width:50%`
+    inner.animate([
+        { left: "-50%" },
+        { left: "100%" }
+    ], {
+        duration: 800,
+        iterations: Infinity
+    })
+
+    wrapper.appendChild(bg)
+    wrapper.appendChild(inner)
+    document.body.appendChild(wrapper)
+    window.magic.topbar = wrapper;
+}
+
+function hideProgressBar() {
+    if (window.magic.topbar) {
+        window.magic.topbar.remove();
+        window.magic.topbar = null;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', connect)

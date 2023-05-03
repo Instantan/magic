@@ -45,7 +45,7 @@ func (s *socketref) assign(key string, value any) {
 		return
 	}
 	s.state[key] = value
-	if s.root != nil && s.root.conn != nil {
+	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
 		p := getPatch()
 		_, refid := s.id()
 		p.socketid = socketid(refid)

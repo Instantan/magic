@@ -12,6 +12,7 @@ var homeView = magic.View(`
 
 	<head>
 		<meta charset="UTF-8">
+		<meta name="theme-color" content="#35B6D2" />
 		<title>Test</title>
 	</head>
 	<style>
@@ -35,6 +36,7 @@ var homeView = magic.View(`
 var home = magic.Component(func(s magic.Socket) magic.AppliedView {
 	magic.Assign(s, "navbar", navbarComponent(s))
 	if s.Live() {
+		magic.Assign(s, "liveNavbar", counterComponent(s))
 		t := time.NewTicker(time.Second * 5)
 		go func() {
 			for {

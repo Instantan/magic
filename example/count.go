@@ -8,12 +8,13 @@ import (
 
 var counterView = magic.View(`
 	<h1>
-		{{ count }}
-	</g1>
+		{{name}} {{ count }}
+	</h1>
 `)
 
 var counterComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
 	c := 0
+	magic.Assign(s, "name", "Counter:")
 	magic.Assign(s, "count", c)
 	if s.Live() {
 		t := time.NewTicker(time.Second)
