@@ -46,7 +46,6 @@ function handleMessage(message) {
             makeTemplateReferenceable(element[0])
         } else if (element.length === 2 && isSocketId(element[0])) {
             const ref = element[0]
-            console.info(ref, element[1])
             assignSockref(ref, element[1])
             if (!window.magic.didRenderRoot) {
                 return
@@ -318,12 +317,10 @@ function assignSockref(ref, data) {
             socketrefTrack(v[0], +1)
         }
     }
-
     if (window.magic.socketrefs[ref] === undefined) {
         window.magic.socketrefs[ref] = data
     } else {
         nfl = newFields.length;
-        // decr action
         while (nfl--) {
             const v = window.magic.socketrefs[ref][newFields[nfl]]
             if (isRef(v)) {
@@ -341,9 +338,8 @@ function socketrefTrack(ref, action) {
         window.magic.socketrefs_refs[ref] = action
     }
     if (action < 0 && window.magic.socketrefs_refs[ref] < 1) {
-        console.info(delete window.magic.socketrefs[ref]);
-        console.info(delete window.magic.socketrefs_refs[ref]);
-        console.log("Found orphan and removed it:", ref, Object.keys(window.magic.socketrefs_refs).length, Object.keys(window.magic.socketrefs).length)
+        delete window.magic.socketrefs[ref];
+        delete window.magic.socketrefs_refs[ref];
     }
 }
 

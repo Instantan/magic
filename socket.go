@@ -1,7 +1,6 @@
 package magic
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -27,8 +26,6 @@ type Socket interface {
 }
 
 type socket struct {
-	ctx context.Context
-
 	socketrefs     map[uintptr]Socket
 	socketrefsRefs map[uintptr]uint
 	knownTemplates Set[int]
@@ -74,12 +71,9 @@ func (s *socket) assign(key string, value any) {
 }
 
 func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
-	ctx, cancel := context.WithCancel(s.ctx)
-	s.ctx = ctx
-
 	defer func() {
 		recover()
-		cancel()
+		s.dispatch(UnmountEvent, nil)
 		s.conn.Close()
 		s.conn = nil
 		s.patches = nil
@@ -181,5 +175,9 @@ func (s *socket) untrack(sock Socket) {
 }
 
 func (s *socket) dispatch(ev string, data EventData) {
-
+	for _, s := range s.socketrefs {
+		if s != nil {
+			s.dispatch(ev, data)
+		}
+	}
 }

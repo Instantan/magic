@@ -44,7 +44,6 @@ var home = magic.Component(func(s magic.Socket) magic.AppliedView {
 			}
 		}()
 		s.HandleEvent(func(ev string, data magic.EventData) {
-			print(ev, data)
 			switch ev {
 			case magic.UnmountEvent:
 				t.Stop()

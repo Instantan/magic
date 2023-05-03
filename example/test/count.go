@@ -30,7 +30,6 @@ var counterComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
 		s.HandleEvent(func(ev string, data magic.EventData) {
 			switch ev {
 			case magic.UnmountEvent:
-				println("stop")
 				t.Stop()
 			}
 		})

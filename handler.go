@@ -1,7 +1,6 @@
 package magic
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/gobwas/ws"
@@ -14,11 +13,9 @@ func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		conn:           nil,
 		socketrefs:     map[uintptr]Socket{},
 		socketrefsRefs: map[uintptr]uint{},
-		ctx:            r.Context(),
 		knownTemplates: NewSet[int](),
 	}
 	if r.Header.Get("Upgrade") == "websocket" {
-		s.ctx = context.Background()
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
 			return
