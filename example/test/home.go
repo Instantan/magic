@@ -34,21 +34,22 @@ var homeView = magic.View(`
 `)
 
 var home = magic.Component(func(s magic.Socket) magic.AppliedView {
-	// magic.Assign(s, "navbar", navbarComponent(s))
+	magic.Assign(s, "navbar", navbarComponent(s))
 	if s.Live() {
 		magic.Assign(s, "liveNavbar", counterComponent(s))
 		t := time.NewTicker(time.Second * 5)
 		go func() {
-			for {
-				select {
-				case <-t.C:
-					magic.Assign(s, "liveNavbar", counterComponent(s))
-				case <-s.Done():
-					t.Stop()
-					return
-				}
+			for range t.C {
+				magic.Assign(s, "liveNavbar", counterComponent(s))
 			}
 		}()
+		s.HandleEvent(func(ev string, data magic.EventData) {
+			print(ev, data)
+			switch ev {
+			case magic.UnmountEvent:
+				t.Stop()
+			}
+		})
 	}
 	return homeView(s)
 })

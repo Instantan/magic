@@ -1,6 +1,8 @@
 package magic
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 type socketref struct {
 	root         *socket
@@ -20,16 +22,8 @@ func (s *socketref) Live() bool {
 	return s.root.Live()
 }
 
-func (s *socketref) Done() <-chan struct{} {
-	return s.root.Done()
-}
-
-func (s *socketref) id() (root uintptr, self uintptr) {
-	self = uintptr(unsafe.Pointer(s))
-	if s.root == nil {
-		return 0, self
-	}
-	return uintptr(unsafe.Pointer(s.root)), self
+func (s *socketref) id() uintptr {
+	return uintptr(unsafe.Pointer(s))
 }
 
 func (s *socketref) clone() Socket {
@@ -45,12 +39,32 @@ func (s *socketref) assign(key string, value any) {
 		return
 	}
 	s.state[key] = value
+	if av, ok := value.(AppliedView); ok {
+		s.track(av.socketref)
+	}
+	if av, ok := prev.(AppliedView); ok {
+		s.untrack(av.socketref)
+	}
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
 		p := getPatch()
-		_, refid := s.id()
-		p.socketid = socketid(refid)
+		p.socketid = socketid(s.id())
 		p.data = map[string]any{}
 		p.data[key] = value
 		s.root.patches.append(p)
 	}
+}
+
+func (s *socketref) track(sock Socket) {
+	s.root.track(sock)
+}
+
+func (s *socketref) untrack(sock Socket) {
+	s.root.untrack(sock)
+}
+
+func (s *socketref) dispatch(ev string, data EventData) {
+	if s.eventHandler == nil {
+		return
+	}
+	s.eventHandler(ev, data)
 }

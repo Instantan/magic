@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	UnmountEvent  = "unmount"
 	ClickEvent    = "click"
 	FocusEvent    = "focus"
 	ChangeEvent   = "change"
@@ -24,8 +25,8 @@ type Event struct {
 
 type EventData json.RawMessage
 
-type EventHandler func(ev string, data any)
-type EventSender func(ev string, data any)
+type EventHandler func(ev string, data EventData)
+type EventSender func(ev string, data EventData)
 
 type ClickPayload struct {
 	Value   string `json:"value"`

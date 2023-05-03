@@ -12,6 +12,8 @@ type HandlerFunc ComponentFn
 func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := &socket{
 		conn:           nil,
+		socketrefs:     map[uintptr]Socket{},
+		socketrefsRefs: map[uintptr]uint{},
 		ctx:            r.Context(),
 		knownTemplates: NewSet[int](),
 	}

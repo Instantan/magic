@@ -16,20 +16,25 @@ var counterComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
 	c := 0
 	magic.Assign(s, "name", "Counter:")
 	magic.Assign(s, "count", c)
+
 	if s.Live() {
 		t := time.NewTicker(time.Second)
+
 		go func() {
-			for {
-				select {
-				case <-t.C:
-					c++
-					magic.Assign(s, "count", c)
-				case <-s.Done():
-					t.Stop()
-					return
-				}
+			for range t.C {
+				c++
+				magic.Assign(s, "count", c)
 			}
 		}()
+
+		s.HandleEvent(func(ev string, data magic.EventData) {
+			switch ev {
+			case magic.UnmountEvent:
+				println("stop")
+				t.Stop()
+			}
+		})
+
 	}
 	return counterView(s)
 })

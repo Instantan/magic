@@ -46,6 +46,7 @@ function handleMessage(message) {
             makeTemplateReferenceable(element[0])
         } else if (element.length === 2 && isSocketId(element[0])) {
             const ref = element[0]
+            console.info(ref, element[1])
             assignSockref(ref, element[1])
             if (!window.magic.didRenderRoot) {
                 return
@@ -72,7 +73,7 @@ function isRef(ref) {
 }
 
 function renderRoot() {
-    const ref = magic.socketrefs[0]['#']
+    const ref = window.magic.socketrefs[0]['#']
     return renderTemplateRef(ref)
 }
 
@@ -308,7 +309,6 @@ function hideProgressBar() {
 }
 
 function assignSockref(ref, data) {
-    ref = Number(ref)
     const newFields = Object.keys(data)
     let nfl = newFields.length;
     // incr action
@@ -335,7 +335,6 @@ function assignSockref(ref, data) {
 }
 
 function socketrefTrack(ref, action) {
-    ref = Number(ref)
     if (window.magic.socketrefs_refs[ref] !== undefined) {
         window.magic.socketrefs_refs[ref] += action
     } else {

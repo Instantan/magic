@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"unsafe"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -17,19 +16,25 @@ type Socket interface {
 	Live() bool
 	Send(ev string, data any) error
 	HandleEvent(EventHandler)
-	Done() <-chan struct{}
 
-	id() (root uintptr, self uintptr)
+	id() uintptr
 	clone() Socket
 	assign(key string, value any)
+
+	track(Socket)
+	untrack(Socket)
+	dispatch(ev string, data EventData)
 }
 
 type socket struct {
 	ctx context.Context
 
-	conn           net.Conn
+	socketrefs     map[uintptr]Socket
+	socketrefsRefs map[uintptr]uint
 	knownTemplates Set[int]
-	patches        *patches
+
+	conn    net.Conn
+	patches *patches
 }
 
 func (s *socket) Live() bool {
@@ -41,11 +46,8 @@ func (s *socket) HandleEvent(evh EventHandler) {
 }
 
 func (s *socket) handleEvent(ev Event) {
+	s.dispatch(ev.Kind, EventData(ev.Payload))
 	log.Println(ev)
-}
-
-func (s *socket) Done() <-chan struct{} {
-	return s.ctx.Done()
 }
 
 func (s *socket) Send(ev string, data any) error {
@@ -57,9 +59,8 @@ func (s *socket) Send(ev string, data any) error {
 	return nil
 }
 
-func (s *socket) id() (root uintptr, self uintptr) {
-	self = uintptr(unsafe.Pointer(s))
-	return self, 0
+func (s *socket) id() uintptr {
+	return 0
 }
 
 func (s *socket) clone() Socket {
@@ -159,4 +160,26 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 		log.Printf("Failed sending patch: %v", err)
 	}
 	return data
+}
+
+func (s *socket) track(sock Socket) {
+	id := sock.id()
+	s.socketrefs[id] = sock
+	s.socketrefsRefs[id]++
+}
+
+func (s *socket) untrack(sock Socket) {
+	id := sock.id()
+	s.socketrefsRefs[id]--
+	if s.socketrefsRefs[id] < 1 {
+		if sr := s.socketrefs[id]; sr != nil {
+			sr.dispatch(UnmountEvent, nil)
+		}
+		delete(s.socketrefsRefs, id)
+		delete(s.socketrefs, id)
+	}
+}
+
+func (s *socket) dispatch(ev string, data EventData) {
+
 }
