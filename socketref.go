@@ -51,6 +51,7 @@ func (s *socketref) assign(key string, value any) {
 		s.track(av.socketref)
 	}
 	if av, ok := prev.(AppliedView); ok {
+		av.socketref.untrack(nil)
 		s.untrack(av.socketref)
 	}
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
@@ -67,6 +68,14 @@ func (s *socketref) track(sock Socket) {
 }
 
 func (s *socketref) untrack(sock Socket) {
+	if sock == nil {
+		for _, v := range s.state {
+			if v, ok := v.(AppliedView); ok && v.socketref != s {
+				v.socketref.untrack(nil)
+			}
+		}
+		return
+	}
 	s.root.untrack(sock)
 }
 
