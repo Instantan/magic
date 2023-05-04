@@ -5,7 +5,7 @@ type Hook interface {
 }
 
 func Use(s Socket, hook Hook) {
-	s.HandleEvent(func(ev string, data EventData) {
+	s.HandleEvent(func(ev string, _ EventData) {
 		if ev == UnmountEvent {
 			hook.Unmount()
 		}
