@@ -73,8 +73,7 @@ function isRef(ref) {
 }
 
 function renderRoot() {
-    const ref = window.magic.socketrefs[0]['#']
-    return renderTemplateRef(ref)
+    return renderTemplateRef(window.magic.socketrefs[0]['#'])
 }
 
 function renderTemplateRef(templateref) {
@@ -86,7 +85,7 @@ function renderTemplateRef(templateref) {
 }
 
 function renderTemplate(magicid, template, data) {
-    const res = execute(template, (v) => {
+    return execute(template, (v) => {
         switch (v) {
             case "magic:live":
                 return magicLiveScript()
@@ -105,7 +104,6 @@ function renderTemplate(magicid, template, data) {
         }
         return toRender
     })
-    return res
 }
 
 function magicLiveScript() {
@@ -136,13 +134,13 @@ function parseHtmlString(markup) {
 }
 
 function makeTemplateReferenceable(templateid) {
-    window.magic.templates[templateid] = window.magic.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (match, contents, offset, input_string) => {
-        if (match.endsWith("/>")) {
-            return match.slice(0, -1) + " ~magic:id~/>"
-        } else if (match.endsWith(">")) {
-            return match.slice(0, -1) + " ~magic:id~>"
+    window.magic.templates[templateid] = window.magic.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (m) => {
+        if (m.endsWith("/>")) {
+            return m.slice(0, -1) + " ~magic:id~/>"
+        } else if (m.endsWith(">")) {
+            return m.slice(0, -1) + " ~magic:id~>"
         }
-        return match + "~magic:id~ "
+        return m + "~magic:id~ "
     })
 }
 
