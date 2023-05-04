@@ -13,7 +13,7 @@ import (
 
 type Socket interface {
 	Live() bool
-	Send(ev string, data any) error
+	DispatchEvent(ev string, data any) error
 	HandleEvent(EventHandler)
 
 	id() uintptr
@@ -54,7 +54,7 @@ func (s *socket) handleEvent(ev Event) {
 	sref.dispatch(ev.Kind, EventData(ev.Payload))
 }
 
-func (s *socket) Send(ev string, data any) error {
+func (s *socket) DispatchEvent(ev string, data any) error {
 	values, err := json.Marshal(data)
 	if err != nil {
 		return err

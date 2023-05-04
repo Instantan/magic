@@ -10,8 +10,8 @@ type socketref struct {
 	state        map[string]any
 }
 
-func (s *socketref) Send(ev string, data any) error {
-	return s.root.Send(ev, data)
+func (s *socketref) DispatchEvent(ev string, data any) error {
+	return s.root.DispatchEvent(ev, data)
 }
 
 func (s *socketref) HandleEvent(evh EventHandler) {
