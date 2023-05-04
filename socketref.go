@@ -15,7 +15,15 @@ func (s *socketref) Send(ev string, data any) error {
 }
 
 func (s *socketref) HandleEvent(evh EventHandler) {
-	s.eventHandler = evh
+	if s.eventHandler == nil {
+		s.eventHandler = evh
+		return
+	}
+	old := s.eventHandler
+	s.eventHandler = func(ev string, data EventData) {
+		evh(ev, data)
+		old(ev, data)
+	}
 }
 
 func (s *socketref) Live() bool {
