@@ -71,6 +71,7 @@ func (s *socketref) untrack(sock Socket) {
 	if sock == nil {
 		for _, v := range s.state {
 			if v, ok := v.(AppliedView); ok && v.socketref != s {
+				s.untrack(v.socketref)
 				v.socketref.untrack(nil)
 			}
 		}

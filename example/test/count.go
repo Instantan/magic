@@ -14,7 +14,7 @@ var counterView = magic.View(`
 
 var counterComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
 	c := 0
-	magic.Assign(s, "name", "Counter:")
+	magic.Assign(s, "name", nameComponent(s))
 	magic.Assign(s, "count", c)
 
 	if s.Live() {
