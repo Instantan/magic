@@ -18,22 +18,23 @@ function connect() {
     const ws_params = new URLSearchParams(location.search);
     ws_params.append("ws", "0");
     window.magic.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
-    window.magic.socket.onopen = function() {
-        window.magic.templates = {}
-        window.magic.socketrefs = {}
-        window.magic.socketrefs_refs = {}
-        window.magic.didRenderRoot = false
+    window.magic.socket.onopen = () => {
+        const m = window.magic
+        m.templates = {}
+        m.socketrefs = {}
+        m.socketrefs_refs = {}
+        m.didRenderRoot = false
     };
-    window.magic.socket.onmessage = function(e) {
+    window.magic.socket.onmessage = (e) => {
         hideProgressBar()
         handleMessage(JSON.parse(e.data))
     };
-    window.magic.socket.onclose = function(e) {
+    window.magic.socket.onclose = (e) => {
         showProgressBar()
         setTimeout(connect, 1000);
     };
-    window.magic.socket.onerror = function(err) {
-        console.error('Socket encountered error: ', err, 'Closing socket');
+    window.magic.socket.onerror = (e) => {
+        console.error('Socket encountered error: ', e, 'Closing socket');
         magic.socket.close();
     };
 }
@@ -57,7 +58,7 @@ function handleMessage(message) {
         updateElementsOfSocketref(ref)
     })
     if (!window.magic.didRenderRoot) {
-        morph(document, parseHtmlString(renderRoot()))
+        nanomorph(document, parseHtmlString(renderRoot()));
         hydrateTree(document)
         window.magic.didRenderRoot = true
     }
@@ -86,10 +87,11 @@ function renderTemplateRef(templateref) {
 
 function renderTemplate(magicid, template, data) {
     const res = execute(template, (v) => {
-        if (v === "magic:live") {
-            return magicLiveScript()
-        } else if (v === "magic:id") {
-            return `magic-id="${magicid}"`
+        switch (v) {
+            case "magic:live":
+                return magicLiveScript()
+            case "magic:id":
+                return `magic-id="${magicid}"`
         }
         if (data === undefined) {
             return ""
@@ -123,19 +125,14 @@ function parseHtmlString(markup) {
         const el = document.createElement('template');
         el.innerHTML = markup;
         return el.content;
-    } else {
-        const docfrag = document.createDocumentFragment();
-        const el = document.createElement('body');
-        el.innerHTML = markup;
-        for (i = 0; 0 < el.childNodes.length;) {
-            docfrag.appendChild(el.childNodes[i]);
-        }
-        return docfrag;
     }
-}
-
-function morph(oldTree, newTree) {
-    nanomorph(oldTree, newTree)
+    const docfrag = document.createDocumentFragment();
+    const el = document.createElement('body');
+    el.innerHTML = markup;
+    for (i = 0; 0 < el.childNodes.length;) {
+        docfrag.appendChild(el.childNodes[i]);
+    }
+    return docfrag;
 }
 
 function makeTemplateReferenceable(templateid) {
@@ -144,25 +141,23 @@ function makeTemplateReferenceable(templateid) {
             return match.slice(0, -1) + " ~magic:id~/>"
         } else if (match.endsWith(">")) {
             return match.slice(0, -1) + " ~magic:id~>"
-        } else {
-            return match + "~magic:id~ "
         }
-        return match
+        return match + "~magic:id~ "
     })
 }
 
 function updateElementsOfSocketref(socketrefid) {
     if (socketrefid === magic.socketrefs[0]['#'][0]) {
-        morph(document, parseHtmlString(renderRoot()))
+        nanomorph(document, parseHtmlString(renderRoot()));
         hydrateTree(document)
         console.debug("[RENDERED]", document)
         return
     }
     document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
-        morph(elm, newElm.children[0])
-        hydrateTree(elm)
-        console.debug("[RENDERED]", elm)
+        nanomorph(elm, newElm.children[0]);
+        hydrateTree(elm);
+        console.debug("[RENDERED]", elm);
     })
 }
 
@@ -231,23 +226,22 @@ function hydrateElement(element, attribute) {
     }
 }
 
-function cleanEvents(element) {
-    element.onclick = null
-    element.onfocus = null
-    element.onchange = null
-    element.onkeydown = null
-    element.onkeypress = null
-    element.onkeyup = null
-    element.onsubmit = null
-    element.ondblclick = null
+function cleanEvents(e) {
+    e.onclick = null
+    e.onfocus = null
+    e.onchange = null
+    e.onkeydown = null
+    e.onkeypress = null
+    e.onkeyup = null
+    e.onsubmit = null
+    e.ondblclick = null
 }
 
 function createMagicEventListener(kind, propsToTake, value) {
     return (e) => {
-        const payload = Object.assign(takeFrom(e, propsToTake), { value })
         if (window.magic.socket) {
-            // somehow we need to get the event target
             const target = Number(getSockrefId(e.target))
+            const payload = Object.assign(takeFrom(e, propsToTake), { value })
             window.magic.socket.send(JSON.stringify({
                 kind,
                 target,
@@ -259,10 +253,11 @@ function createMagicEventListener(kind, propsToTake, value) {
 
 function takeFrom(obj, props, value) {
     const n = {}
-    for (let i = 0; i < props.length; i++) {
-        const p = obj[props[i]]
+    let l = props.length
+    while (l--) {
+        const p = obj[props[l]]
         if (p !== undefined) {
-            n[props[i]] = p
+            n[props[l]] = p
         }
     }
     return n
@@ -315,7 +310,6 @@ function hideProgressBar() {
 function assignSockref(ref, data) {
     const newFields = Object.keys(data)
     let nfl = newFields.length;
-    // incr action
     while (nfl--) {
         const v = data[newFields[nfl]]
         if (isRef(v)) {
@@ -324,16 +318,16 @@ function assignSockref(ref, data) {
     }
     if (window.magic.socketrefs[ref] === undefined) {
         window.magic.socketrefs[ref] = data
-    } else {
-        nfl = newFields.length;
-        while (nfl--) {
-            const v = window.magic.socketrefs[ref][newFields[nfl]]
-            if (isRef(v)) {
-                socketrefTrack(v[0], -1)
-            }
-        }
-        Object.assign(window.magic.socketrefs[ref], data)
+        return
     }
+    nfl = newFields.length;
+    while (nfl--) {
+        const v = window.magic.socketrefs[ref][newFields[nfl]]
+        if (isRef(v)) {
+            socketrefTrack(v[0], -1)
+        }
+    }
+    Object.assign(window.magic.socketrefs[ref], data)
 }
 
 function socketrefTrack(ref, action) {

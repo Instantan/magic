@@ -12,9 +12,10 @@ var homeView = magic.View(`
 		<meta charset="UTF-8">
 		<meta name="theme-color" content="#35B6D2" />
 		<title>Test</title>
+		<link href="/assets/index.min.css" rel="stylesheet">
 	</head>
 
-	<body>
+	<body class="bg-black">
 	</body>
 	</html>
 `)
