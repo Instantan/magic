@@ -89,6 +89,7 @@ func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
 
 	s.patches = NewPatches(s.onSendTemplatePatch)
 	renderable := root(s)
+	s.track(renderable.socketref)
 	patches := renderable.Patch()
 	s.conn = conn
 	data := s.patchesToJson(patches)
@@ -127,8 +128,7 @@ func (s *socket) send(data []byte) {
 }
 
 func (s *socket) onSendTemplatePatch(ps []*patch) {
-	data := s.patchesToJson(ps)
-	s.send(data)
+	s.send(s.patchesToJson(ps))
 }
 
 func (s *socket) patchesToJson(ps []*patch) []byte {
@@ -182,8 +182,13 @@ func (s *socket) untrack(sock Socket) {
 }
 
 func (s *socket) dispatch(ev string, data EventData) {
-	for _, s := range s.socketrefs {
-		if s != nil {
+	for i, v := range s.socketrefsRefs {
+		if v < 1 {
+			continue
+		}
+		sr := s.socketrefs[i]
+		if sr != nil {
+			s.socketrefsRefs[i] = 0
 			s.dispatch(ev, data)
 		}
 	}

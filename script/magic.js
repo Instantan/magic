@@ -7,6 +7,7 @@ window.magic = {
     didRenderRoot: false,
     socket: null,
     baseProps: ["metaKey", "ctrlKey", "shiftKey"],
+    keyboardProps: ["key", "content"],
     themeColor: () => {
         const meta = document.querySelector('meta[name="theme-color"]')
         return meta ? meta.attributes.getNamedItem("content").value : "rgb(59,130,246)";
@@ -146,15 +147,13 @@ function makeTemplateReferenceable(templateid) {
 
 function updateElementsOfSocketref(socketrefid) {
     if (socketrefid === magic.socketrefs[0]['#'][0]) {
-        nanomorph(document, parseHtmlString(renderRoot()));
-        hydrateTree(document)
+        nanomorph(document, hydrateTree(parseHtmlString(renderRoot())));
         console.debug("[RENDERED]", document)
         return
     }
     document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
-        nanomorph(elm, newElm.children[0]);
-        hydrateTree(elm);
+        nanomorph(elm, hydrateTree(newElm.children[0]));
         console.debug("[RENDERED]", elm);
     })
 }
@@ -162,6 +161,12 @@ function updateElementsOfSocketref(socketrefid) {
 function hydrateTree(tree) {
     cleanEvents(tree)
     const attrs = tree.attributes
+    switch (tree.nodeName) {
+        case 'TEXTAREA':
+        case 'INPUT':
+            tree.isSameNode = handleTextFieldValues
+
+    }
     if (attrs) {
         for (let i = 0; i < attrs.length; i++) {
             if (attrs[i].name.startsWith("magic")) {
@@ -174,12 +179,14 @@ function hydrateTree(tree) {
             hydrateTree(tree.children[i])
         }
     }
+    return tree
 }
 
 function hydrateElement(element, attribute) {
     const kind = attribute.name.slice(6)
     const value = attribute.value
     const baseProps = window.magic.baseProps
+    const keyboardProps = window.magic.keyboardProps
     switch (kind) {
         case "click":
             element.onclick = createMagicEventListener(
@@ -193,22 +200,22 @@ function hydrateElement(element, attribute) {
             return
         case "change":
             element.onchange = createMagicEventListener(
-                kind, [...baseProps], value
+                kind, [...baseProps, ...keyboardProps], value
             )
             return
         case "keydown":
             element.onkeydown = createMagicEventListener(
-                kind, [...baseProps], value
+                kind, [...baseProps, ...keyboardProps], value
             )
             return
         case "keypress":
             element.onkeypress = createMagicEventListener(
-                kind, [...baseProps], value
+                kind, [...baseProps, ...keyboardProps], value
             )
             return
         case "keyup":
             element.onkeyup = createMagicEventListener(
-                kind, [...baseProps], value
+                kind, [...baseProps, ...keyboardProps], value
             )
             return
         case "submit":
@@ -253,7 +260,7 @@ function takeFrom(obj, props, value) {
     const n = {}
     let l = props.length
     while (l--) {
-        const p = obj[props[l]]
+        const p = props[l] === "content" ? (obj.value === undefined ? obj.target.value : obj.value) : obj[props[l]]
         if (p !== undefined) {
             n[props[l]] = p
         }
@@ -341,14 +348,28 @@ function socketrefTrack(ref, action) {
 }
 
 function getSockrefId(elm) {
-    const magicid = elm.attributes.getNamedItem("magic-id")
-    if (magicid !== null) {
-        return magicid.value.split(":", 1)[0]
-    }
-    if (elm.parentNode) {
-        return getSockrefId(elm)
+    if (elm) {
+        if (elm.attributes) {
+            const magicid = elm.attributes.getNamedItem("magic-id")
+            if (magicid !== null) {
+                return magicid.value.split(":", 1)[0]
+            }
+        }
+        if (elm.parentNode) {
+            return getSockrefId(elm.parentNode)
+        }
     }
     return window.magic.socketrefs[0]['#'][0]
+}
+
+function handleTextFieldValues(o) {
+    const n = this
+    if (o.prevValue === undefined || o.prevValue !== n.value) {
+        o.prevValue = n.value
+    } else {
+        n.value = o.value
+    }
+    return false
 }
 
 document.addEventListener('DOMContentLoaded', connect)

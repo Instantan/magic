@@ -44,24 +44,32 @@ type ChangePayload struct {
 	Value   string `json:"value"`
 	MetaKey bool   `json:"metaKey"`
 	CtrlKey bool   `json:"shiftKey"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
 }
 
 type KeydownPayload struct {
 	Value   string `json:"value"`
 	MetaKey bool   `json:"metaKey"`
 	CtrlKey bool   `json:"shiftKey"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
 }
 
 type KeypressPayload struct {
 	Value   string `json:"value"`
 	MetaKey bool   `json:"metaKey"`
 	CtrlKey bool   `json:"shiftKey"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
 }
 
 type KeyupPayload struct {
 	Value   string `json:"value"`
 	MetaKey bool   `json:"metaKey"`
 	CtrlKey bool   `json:"shiftKey"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
 }
 
 type SubmitPayload struct {

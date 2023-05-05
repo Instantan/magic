@@ -27,6 +27,9 @@ var homeView = magic.View(`
 	</style>
 
 	<body class="body">
+
+		<input type="text" magic:keypress="test">
+
 		{{navbar}}
 		{{liveNavbar}}
 	</body>
@@ -36,6 +39,7 @@ var homeView = magic.View(`
 var home = magic.Component(func(s magic.Socket) magic.AppliedView {
 	magic.Assign(s, "navbar", navbarComponent(s))
 	if s.Live() {
+
 		magic.Assign(s, "liveNavbar", counterComponent(s))
 		t := time.NewTicker(time.Second * 5)
 		go func() {
@@ -45,6 +49,9 @@ var home = magic.Component(func(s magic.Socket) magic.AppliedView {
 		}()
 		s.HandleEvent(func(ev string, data magic.EventData) {
 			switch ev {
+			case magic.KeypressEvent:
+				kp := data.Keypress()
+				println(kp.Content + kp.Key)
 			case magic.UnmountEvent:
 				t.Stop()
 			}
