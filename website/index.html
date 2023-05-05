@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Instant insight into your data">
+    <link rel="icon" type="image/x-icon" href="/favicon.webp?v=2">
+    <title>Any sufficiently advanced technology is indistinguishable from magic.</title>
+    <script>
+        const twlightmode = 'tw-lightmode'
+        document.documentElement.classList.add(localStorage.getItem(twlightmode) || "light")
+    </script>
+</head>
+
+<body class="bg-white dark:bg-black h-screen font-sans dark:text-white">
+    <div>
+        <div class="wrapper">
+            <div class="ball"></div>
+            <div class="ball"></div>
+            <div class="ball"></div>
+        </div>
+        <svg>
+            <defs>
+            <filter id="filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -10" result="filter" />
+                <feComposite in="SourceGraphic" in2="filter" operator="atop" />
+            </filter>
+            </defs>
+        </svg>
+    </div>
+    <script src="/src/index.js" type="module" defer></script>
+</body>
+
+
+</html>
