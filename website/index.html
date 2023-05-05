@@ -14,40 +14,17 @@
     </script>
 </head>
 
-<body class="bg-white dark:bg-zinc-900 h-screen font-sans dark:text-white">
-    <div class="bg">
-        <div class="blur"></div>
-        <div id="shape1">
-            <div class="wrapper">
-                <div class="ball"></div>
-                <div class="ball"></div>
-                <div class="ball"></div>
-            </div>
-        </div>
-        <div id="shape2">
-            <div class="wrapper">
-                <div class="ball"></div>
-                <div class="ball"></div>
-                <div class="ball"></div>
-            </div>
-        </div>
-        <div id="shape3">
-            <div class="wrapper">
-                <div class="ball"></div>
-                <div class="ball"></div>
-                <div class="ball"></div>
-            </div>
-        </div>
-        <svg>
-            <defs>
-            <filter id="filter">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -10" result="filter" />
-                <feComposite in="SourceGraphic" in2="filter" operator="atop" />
-            </filter>
-            </defs>
-        </svg>
-    </div>
+<body class="bg-white dark:bg-black h-screen font-sans dark:text-white">
+    <nav class="bg-black w-full p-4">
+        <a href="instantan.io" class="text-white">instantan.io</a>
+    </nav>
+    <nav class="h-24 backdrop-blur-sm bg-slate-600 w-full p-4">
+        <a href="/" class="flex">
+            <img src="/logo.png" class="h-16" />
+            <span class="text-3xl text-white font-sans">magic</span>
+        </a>
+
+    </nav>
     <script src="/src/index.js" type="module" defer></script>
 </body>
 

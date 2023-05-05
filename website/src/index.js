@@ -10,36 +10,6 @@ function handleLightSwitch() {
     document.documentElement.classList.replace(setTo === 'light' ? 'dark' : 'light', setTo)
 }
 
-function startEyecatcherAnimations() {
-    const shape1 = document.getElementById("shape1")
-    const shape2 = document.getElementById("shape2")
-    const shape3 = document.getElementById("shape3")
-    window.onmousemove = function(e) {
-        shape1.animate({
-            left: `${e.clientX - 100}px`,
-            top: `${e.clientY}px`
-        }, {
-            duration: 6000,
-            fill: "forwards"
-        })
-        shape2.animate({
-            left: `${e.clientX + 200}px`,
-            top: `${e.clientY + 200}px`
-        }, {
-            duration: 4000,
-            fill: "forwards"
-        })
-        shape3.animate({
-            left: `${e.clientX}px`,
-            top: `${e.clientY - 200}px`
-        }, {
-            duration: 8000,
-            fill: "forwards"
-        })
-    }
-}
-
-
 function lightSwitchEventListener() {
     Array.from(document.getElementsByClassName("lightswitch")).forEach(function(e) {
         e.addEventListener("click", function(event) {
@@ -69,5 +39,4 @@ function addShortcutEventListener() {
 document.addEventListener("DOMContentLoaded", function(event) {
     lightSwitchEventListener()
     addShortcutEventListener()
-    startEyecatcherAnimations()
 });
