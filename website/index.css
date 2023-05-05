@@ -1,13 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.wrapper {
+:root {
+    --purple: rgb(106, 40, 90);
+    --blue: rgb(42, 98, 167);
+    --dark: rgb(48, 94, 119);
+}
+
+#shape1,
+#shape2,
+#shape3 {
     position: absolute;
+}
+
+#shape1 {
+    left: calc(50% - 100px);
+    top: calc(50%);
+}
+
+#shape2 {
+    left: calc(50% + 200px);
+    top: calc(50% + 200px);
+}
+
+#shape3 {
+    left: calc(50%);
+    top: calc(50% - 200px);
+}
+
+#shape1 .ball:before {
+    background: var(--purple);
+}
+
+#shape2 .ball:before {
+    background: var(--blue);
+}
+
+#shape3 .ball:before {
+    background: var(--dark);
+}
+
+.bg {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(110px);
+    z-index: 1;
+}
+
+.wrapper {
+    position: absolute;
+    /* top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; */
     filter: url('#filter');
+    zoom: 300%;
 }
 
 .ball {
@@ -19,7 +77,6 @@
 }
 
 .ball:before {
-    background: #312e81;
     border-radius: 100%;
     position: absolute;
     top: 0;
@@ -31,19 +88,46 @@
 
 .ball:nth-child(1) {
     transform: translate(-66px);
-    animation: x-axis-lateral 2s infinite alternate ease-in-out;
 }
 
-.ball:nth-child(1):before {
-    animation: y-axis-lateral 1s infinite 0.1s alternate ease-in-out;
+#shape1 .ball:nth-child(1) {
+    animation: x-axis-lateral-purple 2s infinite alternate ease-in-out;
+}
+
+#shape2 .ball:nth-child(1) {
+    animation: x-axis-lateral-blue 3s infinite alternate ease-in-out;
+}
+
+#shape3 .ball:nth-child(1) {
+    animation: x-axis-lateral-dark 3s infinite alternate ease-in-out;
+}
+
+#shape1 .ball:nth-child(1):before {
+    animation: y-axis-lateral-purple 1s infinite 0.1s alternate ease-in-out;
+}
+
+#shape2 .ball:nth-child(1):before {
+    animation: y-axis-lateral-blue 2s infinite 0.1s alternate ease-in-out;
+}
+
+#shape3 .ball:nth-child(1):before {
+    animation: y-axis-lateral-dark 2s infinite 0.1s alternate ease-in-out;
 }
 
 .ball:nth-child(2) {
     animation: x-axis 2s infinite alternate ease-in-out;
 }
 
-.ball:nth-child(2):before {
-    animation: y-axis 1s infinite 0.5s alternate ease-in-out;
+#shape1 .ball:nth-child(2):before {
+    animation: y-axis-purple 1s infinite 0.5s alternate ease-in-out;
+}
+
+#shape2 .ball:nth-child(2):before {
+    animation: y-axis-blue 2s infinite 0.5s alternate ease-in-out;
+}
+
+#shape3 .ball:nth-child(2):before {
+    animation: y-axis-dark 2s infinite 0.5s alternate ease-in-out;
 }
 
 .ball:nth-child(3) {
@@ -64,13 +148,33 @@
     }
 }
 
-@keyframes y-axis {
+@keyframes y-axis-purple {
     0% {
         transform: translateY(42px);
     }
     100% {
         transform: translateY(-66px) scale(0.8);
-        background: #312e81;
+        background: var(--purple);
+    }
+}
+
+@keyframes y-axis-blue {
+    0% {
+        transform: translateY(42px);
+    }
+    100% {
+        transform: translateY(-66px) scale(0.8);
+        background: var(--blue);
+    }
+}
+
+@keyframes y-axis-dark {
+    0% {
+        transform: translateY(42px);
+    }
+    100% {
+        transform: translateY(-66px) scale(0.8);
+        background: var(--dark);
     }
 }
 
@@ -83,12 +187,32 @@
     }
 }
 
-@keyframes y-axis-lateral {
+@keyframes y-axis-lateral-purple {
     0% {
         transform: translateY(12px);
     }
     100% {
         transform: translateY(-60px);
-        background: #312e81;
+        background: var(--purple);
+    }
+}
+
+@keyframes y-axis-lateral-blue {
+    0% {
+        transform: translateY(12px);
+    }
+    100% {
+        transform: translateY(-60px);
+        background: var(--blue);
+    }
+}
+
+@keyframes y-axis-lateral-dark {
+    0% {
+        transform: translateY(12px);
+    }
+    100% {
+        transform: translateY(-60px);
+        background: var(--dark);
     }
 }
