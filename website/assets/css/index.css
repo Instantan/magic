@@ -26,6 +26,7 @@
     user-select: none;
 }
 
+.active,
 .magic-text-hover:hover,
 .magic-text {
     animation: background-pan 4s linear infinite;
