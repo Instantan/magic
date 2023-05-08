@@ -77,7 +77,7 @@ func (s *socket) clone() Socket {
 func (s *socket) assign(key string, value any) {
 }
 
-func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
+func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	defer func() {
 		recover()
 		s.dispatch(UnmountEvent, nil)
@@ -88,7 +88,7 @@ func (s *socket) establishConnection(root ComponentFn, conn net.Conn) {
 	}()
 
 	s.patches = NewPatches(s.onSendTemplatePatch)
-	renderable := root(s)
+	renderable := root(s, Empty{})
 	s.track(renderable.socketref)
 	patches := renderable.Patch()
 	s.conn = conn
@@ -145,6 +145,18 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 					t, _ := json.Marshal(m)
 					templatesToSend = append(templatesToSend, t)
 					s.markTemplateAsKnown(av.template)
+				}
+			case []AppliedView:
+				for v := range av {
+					e := av[v]
+					if !s.templateIsKnown(e.template) {
+						m := make([]json.RawMessage, 2)
+						m[0], _ = json.Marshal(e.template.ID())
+						m[1], _ = json.Marshal(e.template.String())
+						t, _ := json.Marshal(m)
+						templatesToSend = append(templatesToSend, t)
+						s.markTemplateAsKnown(e.template)
+					}
 				}
 			}
 		}

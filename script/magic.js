@@ -73,6 +73,10 @@ function isRef(ref) {
     return ref && ref.length === 2 && typeof ref[0] === 'string'
 }
 
+function isRefArray(ref) {
+    return ref && Array.isArray(ref) && ref.length > 0 && isRef(ref[0])
+}
+
 function renderRoot() {
     return renderTemplateRef(window.magic.socketrefs[0]['#'])
 }
@@ -102,6 +106,12 @@ function renderTemplate(magicid, template, data) {
         }
         if (isRef(toRender)) {
             return renderTemplateRef(toRender)
+        } else if (isRefArray(toRender)) {
+            let res = ""
+            for (let i = 0; i < toRender.length; i++) {
+                res += renderTemplateRef(toRender[i])
+            }
+            return res
         }
         return toRender
     })
@@ -313,13 +323,17 @@ function hideProgressBar() {
 }
 
 function assignSockref(ref, data) {
-    console.log("Items", Object.keys(window.magic.socketrefs).length)
+    console.log(Object.keys(window.magic.socketrefs).length)
     const newFields = Object.keys(data)
     let nfl = newFields.length;
     while (nfl--) {
         const v = data[newFields[nfl]]
         if (isRef(v)) {
             socketrefTrack(v[0], +1)
+        } else if (isRefArray(v)) {
+            for (let i = 0; i < v.length; i++) {
+                socketrefTrack(v[i][0], +1)
+            }
         }
     }
     if (window.magic.socketrefs[ref] === undefined) {
@@ -331,6 +345,10 @@ function assignSockref(ref, data) {
         const v = window.magic.socketrefs[ref][newFields[nfl]]
         if (isRef(v)) {
             socketrefTrack(v[0], -1)
+        } else if (isRefArray(v)) {
+            for (let i = 0; i < v.length; i++) {
+                socketrefTrack(v[i][0], -1)
+            }
         }
     }
     Object.assign(window.magic.socketrefs[ref], data)

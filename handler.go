@@ -6,7 +6,7 @@ import (
 	"github.com/gobwas/ws"
 )
 
-type HandlerFunc ComponentFn
+type HandlerFunc ComponentFn[Empty]
 
 func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := &socket{
@@ -20,9 +20,9 @@ func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
-		go s.establishConnection(ComponentFn(f), conn)
+		go s.establishConnection(ComponentFn[Empty](f), conn)
 		return
 	}
-	renderable := f(s)
+	renderable := f(s, Empty{})
 	renderable.HTML(w)
 }

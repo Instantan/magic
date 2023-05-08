@@ -8,13 +8,17 @@ import (
 
 var counterView = magic.View(`
 	<h1>
-		{{name}} {{ count }}
+		{{names}} {{ count }}
 	</h1>
 `)
 
-var counterComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
+var counterComponent = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
 	c := 0
-	magic.Assign(s, "name", nameComponent(s))
+	magic.Assign(s, "names", magic.Views{
+		nameComponent(s, "Felix"),
+		nameComponent(s, "Joachim"),
+		nameComponent(s, "Wieland"),
+	})
 	magic.Assign(s, "count", c)
 
 	if s.Live() {

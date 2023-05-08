@@ -17,3 +17,6 @@ func socketid(id uintptr) json.RawMessage {
 	v, _ := json.Marshal(fmt.Sprintf("%v", id))
 	return v
 }
+
+type Empty = struct{}
+type Nothing = Empty

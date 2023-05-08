@@ -12,7 +12,7 @@ var navbarView = magic.View(`
 	</nav>
 `)
 
-var navbarComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
+var navbarComponent = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedView {
 	magic.Assign(s, "content", time.Now().Local().Format(time.RFC1123))
 	if s.Live() {
 		t := time.NewTicker(time.Second)

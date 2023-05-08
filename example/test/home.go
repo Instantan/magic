@@ -36,15 +36,15 @@ var homeView = magic.View(`
 	</html>
 `)
 
-var home = magic.Component(func(s magic.Socket) magic.AppliedView {
-	magic.Assign(s, "navbar", navbarComponent(s))
+var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+	magic.Assign(s, "navbar", navbarComponent(s, e))
 	if s.Live() {
 
-		magic.Assign(s, "liveNavbar", counterComponent(s))
+		magic.Assign(s, "liveNavbar", counterComponent(s, e))
 		t := time.NewTicker(time.Second * 5)
 		go func() {
 			for range t.C {
-				magic.Assign(s, "liveNavbar", counterComponent(s))
+				magic.Assign(s, "liveNavbar", counterComponent(s, e))
 			}
 		}()
 		s.HandleEvent(func(ev string, data magic.EventData) {

@@ -47,13 +47,24 @@ func (s *socketref) assign(key string, value any) {
 		return
 	}
 	s.state[key] = value
+
 	if av, ok := value.(AppliedView); ok {
 		s.track(av.socketref)
+	} else if avs, ok := value.([]AppliedView); ok {
+		for v := range avs {
+			s.track(avs[v].socketref)
+		}
 	}
+
 	if av, ok := prev.(AppliedView); ok {
 		av.socketref.untrack(nil)
 		s.untrack(av.socketref)
+	} else if avs, ok := value.([]AppliedView); ok {
+		for v := range avs {
+			s.track(avs[v].socketref)
+		}
 	}
+
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
 		p := getPatch()
 		p.socketid = socketid(s.id())

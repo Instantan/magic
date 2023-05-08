@@ -16,6 +16,7 @@ type AppliedView struct {
 	socketref *socketref
 	template  *Template
 }
+type Views = []AppliedView
 
 func View(templ string) ViewFn {
 	t := template.Parse(injectLiveScript(templ))
@@ -47,7 +48,7 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 			n := 0
 			for i := range v {
 				m, _ := v[i].HTML(w)
-				m += n
+				n += m
 			}
 			return n, nil
 		default:

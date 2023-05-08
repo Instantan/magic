@@ -10,7 +10,7 @@ var nameView = magic.View(`
 	</span>
 `)
 
-var nameComponent = magic.Component(func(s magic.Socket) magic.AppliedView {
-	magic.Assign(s, "name", "Child")
+var nameComponent = magic.Component(func(s magic.Socket, name string) magic.AppliedView {
+	magic.Assign(s, "name", name)
 	return nameView(s)
 })

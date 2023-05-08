@@ -20,6 +20,6 @@ var homeView = magic.View(`
 	</html>
 `)
 
-var home = magic.Component(func(s magic.Socket) magic.AppliedView {
+var home = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedView {
 	return homeView(s)
 })
