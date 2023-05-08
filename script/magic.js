@@ -148,13 +148,13 @@ function makeTemplateReferenceable(templateid) {
 function updateElementsOfSocketref(socketrefid) {
     if (socketrefid === magic.socketrefs[0]['#'][0]) {
         nanomorph(document, hydrateTree(parseHtmlString(renderRoot())));
-        console.debug("[RENDERED]", document)
+        // console.debug("[RENDERED]", document)
         return
     }
     document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
         const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
         nanomorph(elm, hydrateTree(newElm.children[0]));
-        console.debug("[RENDERED]", elm);
+        // console.debug("[RENDERED]", elm);
     })
 }
 
@@ -313,6 +313,7 @@ function hideProgressBar() {
 }
 
 function assignSockref(ref, data) {
+    console.log("Items", Object.keys(window.magic.socketrefs).length)
     const newFields = Object.keys(data)
     let nfl = newFields.length;
     while (nfl--) {
@@ -341,10 +342,23 @@ function socketrefTrack(ref, action) {
     } else {
         window.magic.socketrefs_refs[ref] = action
     }
-    if (action < 0 && window.magic.socketrefs_refs[ref] < 1) {
+    if (action < 0) {
+        trackSocketrefChilds(ref, action)
+    }
+    if (window.magic.socketrefs_refs[ref] < 1) {
         delete window.magic.socketrefs[ref];
         delete window.magic.socketrefs_refs[ref];
     }
+}
+
+function trackSocketrefChilds(ref, action) {
+    const socketref = window.magic.socketrefs[ref]
+    Object.keys(socketref).forEach((e) => {
+        const field = socketref[e]
+        if (isRef(field)) {
+            socketrefTrack(field[0], action)
+        }
+    })
 }
 
 function getSockrefId(elm) {
