@@ -42,12 +42,24 @@ func (s *socketref) clone() Socket {
 }
 
 func (s *socketref) assign(key string, value any) {
+	switch s.Live() {
+	case true:
+		s.assignLive(key, value)
+	case false:
+		s.assignStatic(key, value)
+	}
+}
+
+func (s *socketref) assignStatic(key string, value any) {
+	s.state[key] = value
+}
+
+func (s *socketref) assignLive(key string, value any) {
 	prev := s.state[key]
 	if prev == value {
 		return
 	}
 	s.state[key] = value
-
 	if av, ok := value.(AppliedView); ok {
 		s.track(av.socketref)
 	} else if avs, ok := value.([]AppliedView); ok {
@@ -55,16 +67,15 @@ func (s *socketref) assign(key string, value any) {
 			s.track(avs[v].socketref)
 		}
 	}
-
 	if av, ok := prev.(AppliedView); ok {
 		av.socketref.untrack(nil)
 		s.untrack(av.socketref)
 	} else if avs, ok := value.([]AppliedView); ok {
 		for v := range avs {
-			s.track(avs[v].socketref)
+			avs[v].socketref.untrack(nil)
+			s.untrack(avs[v].socketref)
 		}
 	}
-
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
 		p := getPatch()
 		p.socketid = socketid(s.id())

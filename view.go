@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/Instantan/template"
 )
@@ -47,7 +48,10 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 		case []AppliedView:
 			n := 0
 			for i := range v {
-				m, _ := v[i].HTML(w)
+				m, err := v[i].HTML(w)
+				if err != nil {
+					log.Println(err)
+				}
 				n += m
 			}
 			return n, nil
@@ -91,6 +95,10 @@ func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
 		switch v := d.(type) {
 		case AppliedView:
 			v.patch(patchesBySocketRef)
+		case []AppliedView:
+			for i := range v {
+				v[i].patch(patchesBySocketRef)
+			}
 		}
 	}
 }

@@ -3,6 +3,7 @@ package magic
 import (
 	"encoding/json"
 	"sync"
+	"time"
 )
 
 /*
@@ -59,6 +60,7 @@ func (ps *patches) append(p ...*patch) {
 }
 
 func (ps *patches) runSend() {
+	time.Sleep(time.Millisecond)
 	ps.l.Lock()
 	cp := make([]*patch, len(ps.p))
 	copy(cp, ps.p)
