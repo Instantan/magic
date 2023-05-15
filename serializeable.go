@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Serializeable interface {
+type Value interface {
 	int |
 		int8 |
 		int16 |
@@ -26,6 +26,6 @@ type Serializeable interface {
 }
 
 // Assign assigns a new value to the given socket
-func Assign[T Serializeable](s Socket, key string, value T) {
+func Assign[T Value](s Socket, key string, value T) {
 	s.assign(key, value)
 }

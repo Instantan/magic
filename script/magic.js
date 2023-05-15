@@ -266,14 +266,7 @@ function hydrateElement(element, attribute) {
 }
 
 function cleanEvents(e) {
-    e.onclick = null
-    e.onfocus = null
-    e.onchange = null
-    e.onkeydown = null
-    e.onkeypress = null
-    e.onkeyup = null
-    e.onsubmit = null
-    e.ondblclick = null
+    e.onclick = e.onfocus = e.onchange = e.onkeydown = e.onkeypress = e.onkeyup = e.onsubmit = e.ondblclick = null
 }
 
 function createMagicEventListener(kind, propsToTake, value) {

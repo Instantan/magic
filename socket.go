@@ -180,13 +180,11 @@ func (s *socket) track(sock Socket) {
 	id := sock.id()
 	s.socketrefs[id] = sock
 	s.socketrefsRefs[id]++
-	//log.Printf("Tracked: %+v refs %v, amount in store: %v\n", s.socketrefs[id].(*socketref).state, s.socketrefsRefs[id], len(s.socketrefs))
 }
 
 func (s *socket) untrack(sock Socket) {
 	id := sock.id()
 	s.socketrefsRefs[id]--
-	//log.Printf("Untracked: %v refs %v amount in store: %v\n", id, s.socketrefsRefs[id], len(s.socketrefs))
 	if s.socketrefsRefs[id] < 1 {
 		if sr := s.socketrefs[id]; sr != nil {
 			sr.dispatch(UnmountEvent, nil)
@@ -210,11 +208,11 @@ func (s *socket) dispatch(ev string, data EventData) {
 }
 
 func (s *socket) dumpStore() {
-	log.Println("Store: ")
-	for id, s := range s.socketrefs {
-		log.Printf("\t%v\n", id)
-		for key, value := range s.(*socketref).state {
-			log.Printf("\t\t%v - %v\n", key, value)
-		}
-	}
+	log.Printf("Store: %v\n", len(s.socketrefs))
+	// for id, s := range s.socketrefs {
+	// 	log.Printf("\t%v\n", id)
+	// 	for key, value := range s.(*socketref).state {
+	// 		log.Printf("\t\t%v - %v\n", key, value)
+	// 	}
+	// }
 }
