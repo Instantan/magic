@@ -1,9 +1,8 @@
 import nanomorph from 'nanomorph'
 
 window.magic = {
-    templates: new Map(),
-    socketrefs: new Map(),
-    socketrefs_refs: new Map(),
+    templates: {},
+    socketrefs: {},
     didRenderRoot: false,
     socket: null,
     baseProps: ["metaKey", "ctrlKey", "shiftKey"],
@@ -14,55 +13,54 @@ window.magic = {
     }
 }
 
+const m = window.magic
+
 function connect() {
     showProgressBar()
     const ws_params = new URLSearchParams(location.search);
     ws_params.append("ws", "0");
-    window.magic.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
-    window.magic.socket.onopen = () => {
-        const m = window.magic
+    m.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
+    m.socket.onopen = () => {
         m.templates = {}
         m.socketrefs = {}
-        m.socketrefs_refs = {}
         m.didRenderRoot = false
     };
-    window.magic.socket.onmessage = (e) => {
+    m.socket.onmessage = (e) => {
         hideProgressBar()
         handleMessage(JSON.parse(e.data))
     };
-    window.magic.socket.onclose = (e) => {
+    m.socket.onclose = (e) => {
         showProgressBar()
         setTimeout(connect, 1000);
     };
-    window.magic.socket.onerror = (e) => {
+    m.socket.onerror = (e) => {
         console.error('Socket encountered error: ', e, 'Closing socket');
         magic.socket.close();
     };
 }
 
-function handleMessage(message) {
+function handleMessage(messages) {
     const socketrefsToRerender = new Set()
-    message.forEach(element => {
+    messages.forEach(element => {
         if (element.length === 2 && typeof element[0] === 'number') {
-            window.magic.templates[element[0]] = element[1]
+            m.templates[element[0]] = element[1]
             makeTemplateReferenceable(element[0])
         } else if (element.length === 2 && isSocketId(element[0])) {
             const ref = element[0]
             assignSockref(ref, element[1])
-            if (!window.magic.didRenderRoot) {
+            if (!m.didRenderRoot) {
                 return
             }
             socketrefsToRerender.add(ref)
         }
     })
-    socketrefsToRerender.forEach(ref => {
-        updateElementsOfSocketref(ref)
-    })
-    if (!window.magic.didRenderRoot) {
+    socketrefsToRerender.forEach(updateElementsOfSocketref)
+    if (!m.didRenderRoot) {
         nanomorph(document, parseHtmlString(renderRoot()));
         hydrateTree(document)
-        window.magic.didRenderRoot = true
+        m.didRenderRoot = true
     }
+    gc()
 }
 
 function isSocketId(socketid) {
@@ -70,7 +68,7 @@ function isSocketId(socketid) {
 }
 
 function isRef(ref) {
-    return ref && ref.length === 2 && typeof ref[0] === 'string'
+    return ref && ref.length === 2 && !isNaN(ref[1])
 }
 
 function isRefArray(ref) {
@@ -78,14 +76,39 @@ function isRefArray(ref) {
 }
 
 function renderRoot() {
-    return renderTemplateRef(window.magic.socketrefs[0]['#'])
+    return renderTemplateRef(m.socketrefs[0]['#'])
+}
+
+function gc() {
+    let d = m.socketrefs
+    let s = new Set(Object.keys(d))
+    _gc(s, d, '0')
+    s.forEach(e => delete d[e])
+}
+
+function _gc(s, d, id) {
+    s.delete(id)
+    let o = d[id]
+    if (!o) return
+    for (let k in o) {
+        let e = o[k]
+        if (Array.isArray(e)) {
+            if (isRef(e)) {
+                _gc(s, d, e[0])
+            } else if (isRef(e[0])) {
+                for (let i = 0; i < e.length; i++) {
+                    _gc(s, d, e[i][0])
+                }
+            }
+        }
+    }
 }
 
 function renderTemplateRef(templateref) {
     return renderTemplate(
         `${templateref[0]}:${templateref[1]}`,
-        window.magic.templates[templateref[1]],
-        window.magic.socketrefs[templateref[0]]
+        m.templates[templateref[1]],
+        m.socketrefs[templateref[0]]
     )
 }
 
@@ -106,7 +129,8 @@ function renderTemplate(magicid, template, data) {
         }
         if (isRef(toRender)) {
             return renderTemplateRef(toRender)
-        } else if (isRefArray(toRender)) {
+        }
+        if (isRefArray(toRender)) {
             let res = ""
             for (let i = 0; i < toRender.length; i++) {
                 res += renderTemplateRef(toRender[i])
@@ -145,7 +169,7 @@ function parseHtmlString(markup) {
 }
 
 function makeTemplateReferenceable(templateid) {
-    window.magic.templates[templateid] = window.magic.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (m) => {
+    m.templates[templateid] = m.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (m) => {
         if (m.endsWith("/>")) {
             return m.slice(0, -1) + " ~magic:id~/>"
         } else if (m.endsWith(">")) {
@@ -195,8 +219,8 @@ function hydrateTree(tree) {
 function hydrateElement(element, attribute) {
     const kind = attribute.name.slice(6)
     const value = attribute.value
-    const baseProps = window.magic.baseProps
-    const keyboardProps = window.magic.keyboardProps
+    const baseProps = m.baseProps
+    const keyboardProps = m.keyboardProps
     switch (kind) {
         case "click":
             element.onclick = createMagicEventListener(
@@ -254,10 +278,10 @@ function cleanEvents(e) {
 
 function createMagicEventListener(kind, propsToTake, value) {
     return (e) => {
-        if (window.magic.socket) {
+        if (m.socket) {
             const target = Number(getSockrefId(e.target))
             const payload = Object.assign(takeFrom(e, propsToTake), { value })
-            window.magic.socket.send(JSON.stringify({
+            m.socket.send(JSON.stringify({
                 kind,
                 target,
                 payload,
@@ -279,11 +303,10 @@ function takeFrom(obj, props, value) {
 }
 
 function showProgressBar() {
-    if (window.magic.topbar) {
+    if (m.topbar) {
         return
     }
-
-    const color = window.magic.themeColor()
+    const color = m.themeColor()
 
     const wrapper = document.createElement("div")
     wrapper.style = `position:fixed;overflow:hidden;top:0;left:0;width:100%`
@@ -312,71 +335,22 @@ function showProgressBar() {
         clearInterval(timeout)
         wrapper.remove()
     };
-    window.magic.topbar = wrapper
+    m.topbar = wrapper
 }
 
 function hideProgressBar() {
-    if (window.magic.topbar) {
-        window.magic.topbar.destroy();
-        window.magic.topbar = null;
+    if (m.topbar) {
+        m.topbar.destroy();
+        m.topbar = null;
     }
 }
 
 function assignSockref(ref, data) {
-    console.log(Object.keys(window.magic.socketrefs).length)
-    const newFields = Object.keys(data)
-    let nfl = newFields.length;
-    while (nfl--) {
-        const v = data[newFields[nfl]]
-        if (isRef(v)) {
-            socketrefTrack(v[0], +1)
-        } else if (isRefArray(v)) {
-            for (let i = 0; i < v.length; i++) {
-                socketrefTrack(v[i][0], +1)
-            }
-        }
-    }
-    if (window.magic.socketrefs[ref] === undefined) {
-        window.magic.socketrefs[ref] = data
+    if (m.socketrefs[ref] === undefined) {
+        m.socketrefs[ref] = data
         return
     }
-    nfl = newFields.length;
-    while (nfl--) {
-        const v = window.magic.socketrefs[ref][newFields[nfl]]
-        if (isRef(v)) {
-            socketrefTrack(v[0], -1)
-        } else if (isRefArray(v)) {
-            for (let i = 0; i < v.length; i++) {
-                socketrefTrack(v[i][0], -1)
-            }
-        }
-    }
-    Object.assign(window.magic.socketrefs[ref], data)
-}
-
-function socketrefTrack(ref, action) {
-    if (window.magic.socketrefs_refs[ref] !== undefined) {
-        window.magic.socketrefs_refs[ref] += action
-    } else {
-        window.magic.socketrefs_refs[ref] = action
-    }
-    if (action < 0) {
-        trackSocketrefChilds(ref, action)
-    }
-    if (window.magic.socketrefs_refs[ref] < 1) {
-        delete window.magic.socketrefs[ref];
-        delete window.magic.socketrefs_refs[ref];
-    }
-}
-
-function trackSocketrefChilds(ref, action) {
-    const socketref = window.magic.socketrefs[ref]
-    Object.keys(socketref).forEach((e) => {
-        const field = socketref[e]
-        if (isRef(field)) {
-            socketrefTrack(field[0], action)
-        }
-    })
+    Object.assign(m.socketrefs[ref], data)
 }
 
 function getSockrefId(elm) {
@@ -391,7 +365,7 @@ function getSockrefId(elm) {
             return getSockrefId(elm.parentNode)
         }
     }
-    return window.magic.socketrefs[0]['#'][0]
+    return m.socketrefs[0]['#'][0]
 }
 
 function handleTextFieldValues(o) {
