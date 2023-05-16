@@ -11,8 +11,8 @@ type HandlerFunc ComponentFn[Empty]
 func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := &socket{
 		conn:           nil,
-		socketrefs:     map[uintptr]Socket{},
-		socketrefsRefs: map[uintptr]uint{},
+		refs:           map[uintptr]Socket{},
+		refsRefs:       map[uintptr]uint{},
 		knownTemplates: NewSet[int](),
 	}
 	if r.Header.Get("Upgrade") == "websocket" {

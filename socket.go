@@ -26,8 +26,8 @@ type Socket interface {
 }
 
 type socket struct {
-	socketrefs     map[uintptr]Socket
-	socketrefsRefs map[uintptr]uint
+	refs           map[uintptr]Socket
+	refsRefs       map[uintptr]uint
 	knownTemplates Set[int]
 
 	conn    net.Conn
@@ -47,7 +47,7 @@ func (s *socket) handleEvent(ev Event) {
 		s.dispatch(ev.Kind, EventData(ev.Payload))
 		return
 	}
-	sref := s.socketrefs[ev.Target]
+	sref := s.refs[ev.Target]
 	if sref == nil {
 		return
 	}
@@ -68,7 +68,7 @@ func (s *socket) id() uintptr {
 }
 
 func (s *socket) clone() Socket {
-	return &socketref{
+	return &ref{
 		root:  s,
 		state: map[string]any{},
 	}
@@ -86,7 +86,7 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 
 	s.patches = NewPatches(s.onSendTemplatePatch)
 	renderable := root(s, Empty{})
-	s.track(renderable.socketref)
+	s.track(renderable.ref)
 	patches := renderable.Patch()
 	s.conn = conn
 	data := s.patchesToJson(patches)
@@ -175,19 +175,19 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 
 func (s *socket) track(sock Socket) {
 	id := sock.id()
-	s.socketrefs[id] = sock
-	s.socketrefsRefs[id]++
+	s.refs[id] = sock
+	s.refsRefs[id]++
 }
 
 func (s *socket) untrack(sock Socket) {
 	id := sock.id()
-	s.socketrefsRefs[id]--
-	if s.socketrefsRefs[id] < 1 {
-		if sr := s.socketrefs[id]; sr != nil {
+	s.refsRefs[id]--
+	if s.refsRefs[id] < 1 {
+		if sr := s.refs[id]; sr != nil {
 			sr.dispatch(UnmountEvent, nil)
 		}
-		delete(s.socketrefsRefs, id)
-		delete(s.socketrefs, id)
+		delete(s.refsRefs, id)
+		delete(s.refs, id)
 	}
 }
 
@@ -200,23 +200,23 @@ func (s *socket) close() {
 }
 
 func (s *socket) dispatch(ev string, data EventData) {
-	for i, v := range s.socketrefsRefs {
+	for i, v := range s.refsRefs {
 		if v < 1 {
 			continue
 		}
-		sr := s.socketrefs[i]
+		sr := s.refs[i]
 		if sr != nil {
-			s.socketrefsRefs[i] = 0
+			s.refsRefs[i] = 0
 			s.dispatch(ev, data)
 		}
 	}
 }
 
 func (s *socket) dumpStore() {
-	log.Printf("Store: %v\n", len(s.socketrefs))
-	// for id, s := range s.socketrefs {
+	log.Printf("Store: %v\n", len(s.refs))
+	// for id, s := range s.refs {
 	// 	log.Printf("\t%v\n", id)
-	// 	for key, value := range s.(*socketref).state {
+	// 	for key, value := range s.(*ref).state {
 	// 		log.Printf("\t\t%v - %v\n", key, value)
 	// 	}
 	// }

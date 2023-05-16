@@ -2,7 +2,7 @@ import nanomorph from 'nanomorph'
 
 window.magic = {
     templates: {},
-    socketrefs: {},
+    refs: {},
     didRenderRoot: false,
     socket: null,
     baseProps: ["metaKey", "ctrlKey", "shiftKey"],
@@ -17,6 +17,7 @@ const m = window.magic
 
 function connect(href = "") {
     showProgressBar()
+    setDocumentClassConnectionState("connecting")
     const previousSocket = m.socket
     if (typeof href !== "string" || href === "") {
         const ws_params = new URLSearchParams(location.search);
@@ -30,11 +31,12 @@ function connect(href = "") {
             previousSocket.close();
         }
         m.templates = {}
-        m.socketrefs = {}
+        m.refs = {}
         m.didRenderRoot = false
     };
     m.socket.onmessage = (e) => {
         hideProgressBar()
+        setDocumentClassConnectionState("connected")
         handleMessage(JSON.parse(e.data))
     };
     m.socket.onclose = (e) => {
@@ -43,6 +45,7 @@ function connect(href = "") {
             return
         }
         showProgressBar()
+        setDocumentClassConnectionState("disconnected")
         setTimeout(connect, 1000);
     };
     m.socket.onerror = (e) => {
@@ -52,26 +55,27 @@ function connect(href = "") {
 }
 
 function handleMessage(messages) {
-    const socketrefsToRerender = new Set()
-    messages.forEach(element => {
-        if (element.length === 2 && typeof element[0] === 'number') {
-            m.templates[element[0]] = element[1]
-            makeTemplateReferenceable(element[0])
-        } else if (element.length === 2 && isSocketId(element[0])) {
-            const ref = element[0]
-            assignSockref(ref, element[1])
+    const refsToRerender = new Set()
+    messages.forEach(e => {
+        if (e.length === 2 && typeof e[0] === 'number') {
+            m.templates[e[0]] = e[1]
+            makeTemplateReferenceable(e[0])
+        } else if (e.length === 2 && isSocketId(e[0])) {
+            const ref = e[0]
+            assignSockref(ref, e[1])
             if (!m.didRenderRoot) {
                 return
             }
-            socketrefsToRerender.add(ref)
+            refsToRerender.add(ref)
         }
     })
-    socketrefsToRerender.forEach(updateElementsOfSocketref)
+    refsToRerender.forEach(updateElementsOfref)
     if (!m.didRenderRoot) {
         nanomorph(document, parseHtmlString(renderRoot()));
         hydrateTree(document)
         m.didRenderRoot = true
     }
+    setDocumentClassConnectionState("connected")
     gc()
 }
 
@@ -88,11 +92,11 @@ function isRefArray(ref) {
 }
 
 function renderRoot() {
-    return renderTemplateRef(m.socketrefs[0]['#'])
+    return renderRef(m.refs[0]['#'])
 }
 
 function gc() {
-    let d = m.socketrefs
+    let d = m.refs
     let s = new Set(Object.keys(d))
     gcRec(s, d, '0')
     s.forEach(e => delete d[e])
@@ -116,11 +120,11 @@ function gcRec(s, d, id) {
     }
 }
 
-function renderTemplateRef(templateref) {
+function renderRef(templateref) {
     return renderTemplate(
         `${templateref[0]}:${templateref[1]}`,
         m.templates[templateref[1]],
-        m.socketrefs[templateref[0]]
+        m.refs[templateref[0]]
     )
 }
 
@@ -140,12 +144,12 @@ function renderTemplate(magicid, template, data) {
             return ""
         }
         if (isRef(toRender)) {
-            return renderTemplateRef(toRender)
+            return renderRef(toRender)
         }
         if (isRefArray(toRender)) {
             let res = ""
             for (let i = 0; i < toRender.length; i++) {
-                res += renderTemplateRef(toRender[i])
+                res += renderRef(toRender[i])
             }
             return res
         }
@@ -182,24 +186,25 @@ function parseHtmlString(markup) {
 
 function makeTemplateReferenceable(templateid) {
     m.templates[templateid] = m.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (m) => {
+        let i = " ~magic:id~ "
         if (m.endsWith("/>")) {
-            return m.slice(0, -1) + " ~magic:id~/>"
+            return m.slice(0, -1) + i + "/>"
         } else if (m.endsWith(">")) {
-            return m.slice(0, -1) + " ~magic:id~>"
+            return m.slice(0, -1) + i + ">"
         }
-        return m + "~magic:id~ "
+        return m + i
     })
 }
 
-function updateElementsOfSocketref(socketrefid) {
-    if (socketrefid === magic.socketrefs[0]['#'][0]) {
+function updateElementsOfref(refid) {
+    if (refid === magic.refs[0]['#'][0]) {
         nanomorph(document, hydrateTree(parseHtmlString(renderRoot())));
         // console.debug("[RENDERED]", document)
         return
     }
-    document.querySelectorAll(`[magic:id^="${socketrefid}"]`).forEach(elm => {
-        const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic:id").value.split(":")))
-        nanomorph(elm, hydrateTree(newElm.children[0]));
+    document.querySelectorAll(`[magic:id^="${refid}"]`).forEach(e => {
+        const n = parseHtmlString(renderTemplateRef(e.attributes.getNamedItem("magic:id").value.split(":")))
+        nanomorph(e, hydrateTree(n.children[0]));
         // console.debug("[RENDERED]", elm);
     })
 }
@@ -352,11 +357,11 @@ function hideProgressBar() {
 }
 
 function assignSockref(ref, data) {
-    if (m.socketrefs[ref] === undefined) {
-        m.socketrefs[ref] = data
+    if (m.refs[ref] === undefined) {
+        m.refs[ref] = data
         return
     }
-    Object.assign(m.socketrefs[ref], data)
+    Object.assign(m.refs[ref], data)
 }
 
 function getSockrefId(elm) {
@@ -369,7 +374,7 @@ function getSockrefId(elm) {
     if (elm && elm.parentNode) {
         return getSockrefId(elm.parentNode)
     }
-    return m.socketrefs[0]['#'][0]
+    return m.refs[0]['#'][0]
 }
 
 function handleTextFieldValues(o) {
@@ -393,6 +398,13 @@ function liveNavigation(e) {
         e.stopPropagation()
     }
     return false
+}
+
+function setDocumentClassConnectionState(s) {
+    if (document.children.length === 0) return
+    const h = document.children[0];
+    ["connected", "connecting", "disconnected"].forEach(e => h.classList.remove("magic-" + e))
+    h.classList.add("magic-" + s)
 }
 
 document.addEventListener('DOMContentLoaded', connect)

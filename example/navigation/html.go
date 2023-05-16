@@ -27,6 +27,9 @@ var htmlView = magic.View(`
 		.true {
 			color: blueviolet;
 		}
+		.magic-connecting {
+			background-color: white;
+		}
 	</style>
 
 	<body class="body">

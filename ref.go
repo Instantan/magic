@@ -4,17 +4,17 @@ import (
 	"unsafe"
 )
 
-type socketref struct {
+type ref struct {
 	root         *socket
 	eventHandler EventHandler
 	state        map[string]any
 }
 
-func (s *socketref) DispatchEvent(ev string, data any) error {
+func (s *ref) DispatchEvent(ev string, data any) error {
 	return s.root.DispatchEvent(ev, data)
 }
 
-func (s *socketref) HandleEvent(evh EventHandler) {
+func (s *ref) HandleEvent(evh EventHandler) {
 	if s.eventHandler == nil {
 		s.eventHandler = evh
 		return
@@ -26,22 +26,22 @@ func (s *socketref) HandleEvent(evh EventHandler) {
 	}
 }
 
-func (s *socketref) Live() bool {
+func (s *ref) Live() bool {
 	return s.root.Live()
 }
 
-func (s *socketref) id() uintptr {
+func (s *ref) id() uintptr {
 	return uintptr(unsafe.Pointer(s))
 }
 
-func (s *socketref) clone() Socket {
-	return &socketref{
+func (s *ref) clone() Socket {
+	return &ref{
 		root:  s.root,
 		state: map[string]any{},
 	}
 }
 
-func (s *socketref) assign(key string, value any) {
+func (s *ref) assign(key string, value any) {
 	switch s.Live() {
 	case true:
 		s.assignLive(key, value)
@@ -50,30 +50,30 @@ func (s *socketref) assign(key string, value any) {
 	}
 }
 
-func (s *socketref) assignStatic(key string, value any) {
+func (s *ref) assignStatic(key string, value any) {
 	s.state[key] = value
 }
 
-func (s *socketref) assignLive(key string, value any) {
+func (s *ref) assignLive(key string, value any) {
 	prev := s.state[key]
 	if prev == value {
 		return
 	}
 	s.state[key] = value
 	if av, ok := value.(AppliedView); ok {
-		s.track(av.socketref)
+		s.track(av.ref)
 	} else if avs, ok := value.([]AppliedView); ok {
 		for v := range avs {
-			s.track(avs[v].socketref)
+			s.track(avs[v].ref)
 		}
 	}
 	if av, ok := prev.(AppliedView); ok {
-		av.socketref.untrack(nil)
-		s.untrack(av.socketref)
+		av.ref.untrack(nil)
+		s.untrack(av.ref)
 	} else if avs, ok := value.([]AppliedView); ok {
 		for v := range avs {
-			avs[v].socketref.untrack(nil)
-			s.untrack(avs[v].socketref)
+			avs[v].ref.untrack(nil)
+			s.untrack(avs[v].ref)
 		}
 	}
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
@@ -85,16 +85,16 @@ func (s *socketref) assignLive(key string, value any) {
 	}
 }
 
-func (s *socketref) track(sock Socket) {
+func (s *ref) track(sock Socket) {
 	s.root.track(sock)
 }
 
-func (s *socketref) untrack(sock Socket) {
+func (s *ref) untrack(sock Socket) {
 	if sock == nil {
 		for _, v := range s.state {
-			if v, ok := v.(AppliedView); ok && v.socketref != s {
-				s.untrack(v.socketref)
-				v.socketref.untrack(nil)
+			if v, ok := v.(AppliedView); ok && v.ref != s {
+				s.untrack(v.ref)
+				v.ref.untrack(nil)
 			}
 		}
 		return
@@ -102,7 +102,7 @@ func (s *socketref) untrack(sock Socket) {
 	s.root.untrack(sock)
 }
 
-func (s *socketref) dispatch(ev string, data EventData) {
+func (s *ref) dispatch(ev string, data EventData) {
 	if s.eventHandler == nil {
 		return
 	}

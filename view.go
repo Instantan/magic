@@ -14,8 +14,8 @@ type Template = template.Template
 type ViewFn func(s Socket) AppliedView
 
 type AppliedView struct {
-	socketref *socketref
-	template  *Template
+	ref      *ref
+	template *Template
 }
 type Views = []AppliedView
 
@@ -23,8 +23,8 @@ func View(templ string) ViewFn {
 	t := template.Parse(injectLiveScript(templ))
 	return func(s Socket) AppliedView {
 		return AppliedView{
-			socketref: s.(*socketref),
-			template:  t,
+			ref:      s.(*ref),
+			template: t,
 		}
 	}
 }
@@ -34,7 +34,7 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 		if tag == "magic:live" {
 			return w.Write(magicMinScript)
 		}
-		rv, ok := av.socketref.state[tag]
+		rv, ok := av.ref.state[tag]
 		if !ok {
 			return 0, nil
 		}
@@ -63,41 +63,41 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 }
 
 func (av AppliedView) Patch() []*patch {
-	psBySocketRef := map[uintptr]*patch{}
-	av.patch(&psBySocketRef)
-	ps := make([]*patch, len(psBySocketRef)+1)
+	psByref := map[uintptr]*patch{}
+	av.patch(&psByref)
+	ps := make([]*patch, len(psByref)+1)
 	ps[0] = getPatch()
-	ps[0].socketid = socketid(av.socketref.root.id())
+	ps[0].socketid = socketid(av.ref.root.id())
 	i := 1
-	for k := range psBySocketRef {
-		ps[i] = psBySocketRef[k]
+	for k := range psByref {
+		ps[i] = psByref[k]
 		i++
 	}
 	ps[0].data = map[string]any{
 		"#": AppliedView{
-			socketref: av.socketref,
-			template:  av.template,
+			ref:      av.ref,
+			template: av.template,
 		},
 	}
 	return ps
 }
 
-func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
-	refid := av.socketref.id()
-	if _, ok := (*patchesBySocketRef)[refid]; ok {
+func (av AppliedView) patch(patchesByref *map[uintptr]*patch) {
+	refid := av.ref.id()
+	if _, ok := (*patchesByref)[refid]; ok {
 		return
 	}
 	p := getPatch()
-	p.data = av.socketref.state
+	p.data = av.ref.state
 	p.socketid = socketid(refid)
-	(*patchesBySocketRef)[refid] = p
+	(*patchesByref)[refid] = p
 	for _, d := range p.data {
 		switch v := d.(type) {
 		case AppliedView:
-			v.patch(patchesBySocketRef)
+			v.patch(patchesByref)
 		case []AppliedView:
 			for i := range v {
-				v[i].patch(patchesBySocketRef)
+				v[i].patch(patchesByref)
 			}
 		}
 	}
@@ -105,7 +105,7 @@ func (av AppliedView) patch(patchesBySocketRef *map[uintptr]*patch) {
 
 func (av AppliedView) MarshalJSON() ([]byte, error) {
 	d := make([]json.RawMessage, 2)
-	d[0] = socketid(av.socketref.id())
+	d[0] = socketid(av.ref.id())
 	d[1], _ = json.Marshal(av.template.ID())
 	return json.Marshal(d)
 }
