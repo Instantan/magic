@@ -13,6 +13,7 @@ func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		conn:           nil,
 		refs:           map[uintptr]Socket{},
 		refsRefs:       map[uintptr]int{},
+		request:        r,
 		knownTemplates: NewSet[int](),
 	}
 	if r.Header.Get("Upgrade") == "websocket" {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -15,11 +16,11 @@ type Socket interface {
 	Live() bool
 	DispatchEvent(ev string, data any) error
 	HandleEvent(EventHandler)
+	Request() *http.Request
 
 	id() uintptr
 	clone() Socket
 	assign(key string, value any)
-
 	track(Socket)
 	untrack(Socket)
 	dispatch(ev string, data EventData)
@@ -31,6 +32,7 @@ type socket struct {
 	knownTemplates Set[int]
 
 	conn    net.Conn
+	request *http.Request
 	patches *patches
 }
 
@@ -40,6 +42,10 @@ func (s *socket) Live() bool {
 
 func (s *socket) HandleEvent(_ EventHandler) {
 	// we need to dispatch the event to the right ref
+}
+
+func (s *socket) Request() *http.Request {
+	return s.request
 }
 
 func (s *socket) handleEvent(ev Event) {
@@ -194,6 +200,7 @@ func (s *socket) close() {
 	s.conn.Close()
 	s.conn = nil
 	s.patches = nil
+	s.request = nil
 	s.knownTemplates = Set[int]{}
 }
 

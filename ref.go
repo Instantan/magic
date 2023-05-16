@@ -1,6 +1,7 @@
 package magic
 
 import (
+	"net/http"
 	"unsafe"
 )
 
@@ -28,6 +29,10 @@ func (s *ref) HandleEvent(evh EventHandler) {
 
 func (s *ref) Live() bool {
 	return s.root.Live()
+}
+
+func (s *ref) Request() *http.Request {
+	return s.root.Request()
 }
 
 func (s *ref) id() uintptr {

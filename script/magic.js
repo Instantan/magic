@@ -20,10 +20,9 @@ function connect(href = "") {
     setDocumentClassConnectionState("connecting")
     const previousSocket = m.socket
     if (typeof href !== "string" || href === "") {
-        const ws_params = new URLSearchParams(location.search);
-        // ws_params.append("ws", "0");
-        href = location.host + location.pathname
-            // + "?" + ws_params
+        const url = new URL(location.host + location.pathname)
+        url.searchParams = new URLSearchParams(location.search)
+        href = url.toString()
     }
     m.socket = new WebSocket("ws://" + href);
     m.socket.onopen = () => {
