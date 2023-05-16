@@ -7,15 +7,15 @@
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Instant insight into your data">
     <link rel="icon" type="image/x-icon" href="assets/images/magic-logo.webp">
-    <title>Make your life easier</title>
+    <title>Magic</title>
 </head>
 
-<body class="bg-black h-screen font-sans text-white">
-    <div class="top-0 left-0 w-[100vw] h-[100vh] bg-black fixed blur-[500px] -z-10 overflow-hidden">
-        <div class="absolute top-1/3 left-0 right-[100px] w-[50vh] h-[50vh] bg-[var(--blue)] rounded-full"></div>
+<body class="bg-white h-screen font-sans text-white">
+    <div class="top-0 left-0 w-[100vw] h-[100vh] bg-white fixed blur-[500px] -z-10 overflow-hidden">
+        <div class="absolute top-1/3 left-0 right-[100px] w-[100vh] h-[100vh] bg-[var(--blue)] rounded-full"></div>
         <div class="absolute top-1/3 left-1/3 w-[50vh] h-[50vh] bg-[var(--purple)] rounded-full"></div>
-        <div class="absolute bottom-2/3 left-1/2 w-[50vh] h-[50vh] bg-[var(--dark)] rounded-full"></div>
-        <div class="absolute bottom-0 right-[100px] w-[50vh] h-[50vh] bg-[var(--blue)] rounded-full"></div>
+        <div class="absolute bottom-2/3 left-1/2 w-[50vh] h-[60vh] bg-[var(--dark)] rounded-full"></div>
+        <div class="absolute bottom-0 right-[100px] w-[50vh] h-[60vh] bg-[var(--blue)] rounded-full"></div>
     </div>
     <nav class="md:px-16 bg-black w-full p-2">
         <a href="https://instantan.io" class="text-white inline align-baseline">
@@ -23,7 +23,7 @@
             <h3 class="text-l text-white font-sans inline align-middle">instantan.io</h3>
         </a>
     </nav>
-    <nav class="px-4 md:px-16 bg-black bg-opacity-10 backdrop-blur-xl flex items-center w-full p-2 gap-5">
+    <nav class="px-4 md:px-16 bg-black bg-opacity-50 backdrop-blur-xl flex items-center w-full p-2 gap-5">
         <a href="/">
             <img src="assets/images/magic-logo-text.webp" class="h-16 inline" />
         </a>
@@ -45,33 +45,16 @@
         </div>
     </nav>
 
-    <section class="lg:pl-16 lg:pr-16 flex w-100 justify-center mt-[12vh] flex-row">
+    <section class="lg:pl-16 lg:pr-16 flex w-100 justify-center mt-[8vh] md:mt-[15vh] flex-row text-black">
         <div class="flex flex-col text-center gap-4">
-            <h1 class="text-4xl md:text-7xl font-bold">Forget about<br/>
-                <div id="container" class="md:[&_span]:text-7xl h-10  md:h-20">
-                    <span id="text1">JavaScript</span>
-                    <span id="text2"></span>
-                    <svg id="filters">
-                        <defs>
-                            <filter id="threshold">
-                                <feColorMatrix in="SourceGraphic" type="matrix" values="
-                                    1 0 0 0 0
-                                    0 1 0 0 0
-                                    0 0 1 0 0
-                                    0 0 0 255 -140
-                                "/>
-                            </filter>
-                        </defs>
-                    </svg>
-                </div>
-            </h1>
-            <h2 class="text-md px-10 md:px-0 md:text-2xl">Build realtime web apps without the complexity <br/>of modern frameworks</h2>
+            <h1 class="text-5xl md:text-7xl font-bold">The web development<br />framework that works<br />like Magic</h1>
+            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-2xl">Magic is a Golang web framework that simplifies web development.<br /> With under 10kb JavaScript, it's powerful yet easy to use for building <br />efficient web applications.</h2>
             <div class="flex justify-center">
-                <div class="mt-10 gap-3 grid grid-cols-1 md:grid-cols-2 w-60 md:w-auto">
-                    <a href="/docs" class="p-4 bg-white text-black rounded-lg">
-                        Take a tour
+                <div class="mt-2 gap-3 grid grid-cols-1 md:grid-cols-2 w-60 md:w-auto text-md md:text-xl">
+                    <a href="/docs" class="p-5 bg-white text-black rounded-lg">
+                        Quickstart
                     </a>
-                    <a href="/docs" class="p-4 bg-black text-white  rounded-lg">
+                    <a href="/docs" class="p-5 bg-black text-white rounded-lg">
                         Explore the docs
                     </a>
                 </div>
