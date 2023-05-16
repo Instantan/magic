@@ -18,9 +18,9 @@ const (
 )
 
 type Event struct {
-	Kind    string          `json:"kind"`
-	Target  uintptr         `json:"target"`
-	Payload json.RawMessage `json:"payload"`
+	Kind    string          `json:"k"`
+	Target  uintptr         `json:"t"`
+	Payload json.RawMessage `json:"p"`
 }
 
 type EventData json.RawMessage

@@ -59,27 +59,26 @@ function handleMessage(messages) {
         if (e.length === 2 && typeof e[0] === 'number') {
             m.templates[e[0]] = e[1]
             makeTemplateReferenceable(e[0])
-        } else if (e.length === 2 && isSocketId(e[0])) {
+        } else if (e.length === 2 && typeof e[0] === 'string') {
             const ref = e[0]
             assignSockref(ref, e[1])
             if (!m.didRenderRoot) {
                 return
             }
             refsToRerender.add(ref)
+        } else {
+            receivedEvent(e)
         }
     })
     refsToRerender.forEach(updateElementsOfref)
     if (!m.didRenderRoot) {
-        nanomorph(document, parseHtmlString(renderRoot()));
+        const n = parseHtmlString(renderRoot())
+        setDocumentClassConnectionState("connected", n)
+        nanomorph(document, n);
         hydrateTree(document)
         m.didRenderRoot = true
     }
-    setDocumentClassConnectionState("connected")
     gc()
-}
-
-function isSocketId(socketid) {
-    return typeof socketid === 'string'
 }
 
 function isRef(ref) {
@@ -197,7 +196,9 @@ function makeTemplateReferenceable(templateid) {
 
 function updateElementsOfref(refid) {
     if (refid === magic.refs[0]['#'][0]) {
-        nanomorph(document, hydrateTree(parseHtmlString(renderRoot())));
+        const n = parseHtmlString(renderRoot())
+        setDocumentClassConnectionState("connected", n)
+        nanomorph(document, hydrateTree(n));
         // console.debug("[RENDERED]", document)
         return
     }
@@ -286,16 +287,12 @@ function cleanEvents(e) {
     e.onclick = e.onfocus = e.onchange = e.onkeydown = e.onkeypress = e.onkeyup = e.onsubmit = e.ondblclick = null
 }
 
-function createMagicEventListener(kind, propsToTake, value) {
+function createMagicEventListener(k, propsToTake, value) {
     return (e) => {
         if (m.socket) {
-            const target = Number(getSockrefId(e.target))
-            const payload = Object.assign(takeFrom(e, propsToTake), { value })
-            m.socket.send(JSON.stringify({
-                kind,
-                target,
-                payload,
-            }))
+            const t = Number(getSockrefId(e.target))
+            const p = Object.assign(takeFrom(e, propsToTake), { value })
+            m.socket.send(JSON.stringify({ k, t, p }))
         }
     }
 }
@@ -399,11 +396,19 @@ function liveNavigation(e) {
     return false
 }
 
-function setDocumentClassConnectionState(s) {
-    if (document.children.length === 0) return
-    const h = document.children[0];
+function setDocumentClassConnectionState(s, d = document) {
+    if (d.children.length === 0) return
+    const h = d.children[0];
+    const state = "magic-" + s
+    if (h.classList.contains(state)) return;
     ["connected", "connecting", "disconnected"].forEach(e => h.classList.remove("magic-" + e))
-    h.classList.add("magic-" + s)
+    h.classList.add(state)
+}
+
+function receivedEvent(e) {
+    const event = new CustomEvent(e.k, { target: e.t, detail: e.p });
+    document.querySelectorAll(`[magic-id^="${e.t}"]`).forEach(e => e.dispatchEvent(event))
+    window.dispatchEvent(event)
 }
 
 document.addEventListener('DOMContentLoaded', connect)

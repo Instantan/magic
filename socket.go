@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -34,6 +35,7 @@ type socket struct {
 	conn    net.Conn
 	request *http.Request
 	patches *patches
+	sending sync.Mutex
 }
 
 func (s *socket) Live() bool {
@@ -61,11 +63,26 @@ func (s *socket) handleEvent(ev Event) {
 }
 
 func (s *socket) DispatchEvent(ev string, data any) error {
-	values, err := json.Marshal(data)
+	if !s.Live() {
+		return nil
+	}
+	s.dispatchEvent(ev, data, s.id())
+	return nil
+}
+
+func (s *socket) dispatchEvent(ev string, data any, target uintptr) error {
+	m, _ := json.Marshal(data)
+	d, err := json.Marshal([]Event{
+		{
+			Kind:    ev,
+			Target:  target,
+			Payload: m,
+		},
+	})
 	if err != nil {
 		return err
 	}
-	_ = values
+	s.send(d)
 	return nil
 }
 
@@ -126,8 +143,9 @@ func (s *socket) markTemplateAsKnown(tmpl *Template) {
 }
 
 func (s *socket) send(data []byte) {
-	s.dumpStore()
+	s.sending.Lock()
 	wsutil.WriteServerText(s.conn, data)
+	s.sending.Unlock()
 }
 
 func (s *socket) onSendTemplatePatch(ps []*patch) {
@@ -215,8 +233,4 @@ func (s *socket) dispatch(ev string, data EventData) {
 			s.dispatch(ev, data)
 		}
 	}
-}
-
-func (s *socket) dumpStore() {
-	log.Printf("Store: %v\n", s.refsRefs)
 }

@@ -14,6 +14,7 @@ var homeView = magic.View(`
 		<meta charset="UTF-8">
 		<meta name="theme-color" content="#35B6D2" />
 		<title>Test</title>
+		
 	</head>
 	<style>
 		html {

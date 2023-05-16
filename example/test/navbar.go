@@ -17,8 +17,9 @@ var navbarComponent = magic.Component(func(s magic.Socket, _ magic.Empty) magic.
 	if s.Live() {
 		t := time.NewTicker(time.Second)
 		go func() {
-			for range t.C {
-				magic.Assign(s, "content", time.Now().Local().Format(time.RFC1123))
+			for t := range t.C {
+				magic.Assign(s, "content", t.Local().Format(time.RFC1123))
+				s.DispatchEvent("navbarContent", time.Now())
 			}
 		}()
 		s.HandleEvent(func(ev string, data magic.EventData) {

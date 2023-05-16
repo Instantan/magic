@@ -12,7 +12,10 @@ type ref struct {
 }
 
 func (s *ref) DispatchEvent(ev string, data any) error {
-	return s.root.DispatchEvent(ev, data)
+	if !s.Live() {
+		return nil
+	}
+	return s.root.dispatchEvent(ev, data, s.id())
 }
 
 func (s *ref) HandleEvent(evh EventHandler) {
