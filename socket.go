@@ -81,10 +81,7 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	defer func() {
 		recover()
 		s.dispatch(UnmountEvent, nil)
-		s.conn.Close()
-		s.conn = nil
-		s.patches = nil
-		s.knownTemplates = Set[int]{}
+		s.close()
 	}()
 
 	s.patches = NewPatches(s.onSendTemplatePatch)
@@ -192,6 +189,14 @@ func (s *socket) untrack(sock Socket) {
 		delete(s.socketrefsRefs, id)
 		delete(s.socketrefs, id)
 	}
+}
+
+func (s *socket) close() {
+	s.dispatch(UnmountEvent, nil)
+	s.conn.Close()
+	s.conn = nil
+	s.patches = nil
+	s.knownTemplates = Set[int]{}
 }
 
 func (s *socket) dispatch(ev string, data EventData) {

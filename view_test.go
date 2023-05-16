@@ -8,10 +8,6 @@ func TestParseTemplate(t *testing.T) {
 		<h2 class="{{bla}}">
 			<p>bla</p>
 			<p>bla<p>
-
-			{{ range data }}
-				{{ . }}
-			{{ end }}
 		</h2>
 	`)(nil)
 	t.Log(n)

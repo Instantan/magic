@@ -9,7 +9,7 @@ import (
 /*
 [
 	[templateID, TEMPLATE]
-	[socketID, templateID, [POSITIONS], [DATA]]
+	[socketID, templateID, DATA]
 ]
 */
 
