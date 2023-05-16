@@ -38,6 +38,16 @@ type socket struct {
 	sending sync.Mutex
 }
 
+func NewSocket(request *http.Request) *socket {
+	return &socket{
+		conn:           nil,
+		refs:           map[uintptr]Socket{},
+		refsRefs:       map[uintptr]int{},
+		request:        request,
+		knownTemplates: NewSet[int](),
+	}
+}
+
 func (s *socket) Live() bool {
 	return s.patches != nil
 }
@@ -71,7 +81,10 @@ func (s *socket) DispatchEvent(ev string, data any) error {
 }
 
 func (s *socket) dispatchEvent(ev string, data any, target uintptr) error {
-	m, _ := json.Marshal(data)
+	m, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
 	d, err := json.Marshal([]Event{
 		{
 			Kind:    ev,

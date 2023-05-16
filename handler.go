@@ -9,13 +9,7 @@ import (
 type HandlerFunc ComponentFn[Empty]
 
 func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s := &socket{
-		conn:           nil,
-		refs:           map[uintptr]Socket{},
-		refsRefs:       map[uintptr]int{},
-		request:        r,
-		knownTemplates: NewSet[int](),
-	}
+	s := NewSocket(r)
 	if r.Header.Get("Upgrade") == "websocket" {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
