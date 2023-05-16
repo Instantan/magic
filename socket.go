@@ -27,7 +27,7 @@ type Socket interface {
 
 type socket struct {
 	refs           map[uintptr]Socket
-	refsRefs       map[uintptr]uint
+	refsRefs       map[uintptr]int
 	knownTemplates Set[int]
 
 	conn    net.Conn
@@ -38,7 +38,7 @@ func (s *socket) Live() bool {
 	return s.patches != nil
 }
 
-func (s *socket) HandleEvent(evh EventHandler) {
+func (s *socket) HandleEvent(_ EventHandler) {
 	// we need to dispatch the event to the right ref
 }
 
@@ -80,7 +80,6 @@ func (s *socket) assign(key string, value any) {
 func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	defer func() {
 		recover()
-		s.dispatch(UnmountEvent, nil)
 		s.close()
 	}()
 
@@ -176,12 +175,19 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 func (s *socket) track(sock Socket) {
 	id := sock.id()
 	s.refs[id] = sock
-	s.refsRefs[id]++
+	s.refsRefs[id] = s.refsRefs[id] + 1
+	s.check(id)
+	log.Printf("Track: %v\n", id)
 }
 
 func (s *socket) untrack(sock Socket) {
 	id := sock.id()
-	s.refsRefs[id]--
+	s.refsRefs[id] = s.refsRefs[id] - 1
+	s.check(id)
+	log.Printf("Untrack: %v\n", id)
+}
+
+func (s *socket) check(id uintptr) {
 	if s.refsRefs[id] < 1 {
 		if sr := s.refs[id]; sr != nil {
 			sr.dispatch(UnmountEvent, nil)
@@ -213,7 +219,11 @@ func (s *socket) dispatch(ev string, data EventData) {
 }
 
 func (s *socket) dumpStore() {
-	log.Printf("Store: %v\n", len(s.refs))
+	// i := 0
+	// for _, l := range s.refsRefs {
+	// 	i += int(l)
+	// }
+	log.Printf("Store: %v\n", s.refsRefs)
 	// for id, s := range s.refs {
 	// 	log.Printf("\t%v\n", id)
 	// 	for key, value := range s.(*ref).state {

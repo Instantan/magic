@@ -59,21 +59,19 @@ func (s *ref) assignLive(key string, value any) {
 	if prev == value {
 		return
 	}
+	if av, ok := prev.(AppliedView); ok {
+		av.ref.untrack(nil)
+	} else if avs, ok := prev.([]AppliedView); ok {
+		for v := range avs {
+			avs[v].ref.untrack(nil)
+		}
+	}
 	s.state[key] = value
 	if av, ok := value.(AppliedView); ok {
 		s.track(av.ref)
 	} else if avs, ok := value.([]AppliedView); ok {
 		for v := range avs {
 			s.track(avs[v].ref)
-		}
-	}
-	if av, ok := prev.(AppliedView); ok {
-		av.ref.untrack(nil)
-		s.untrack(av.ref)
-	} else if avs, ok := value.([]AppliedView); ok {
-		for v := range avs {
-			avs[v].ref.untrack(nil)
-			s.untrack(avs[v].ref)
 		}
 	}
 	if s.root != nil && s.root.conn != nil && s.root.patches != nil {
@@ -92,11 +90,16 @@ func (s *ref) track(sock Socket) {
 func (s *ref) untrack(sock Socket) {
 	if sock == nil {
 		for _, v := range s.state {
-			if v, ok := v.(AppliedView); ok && v.ref != s {
-				s.untrack(v.ref)
+			switch v := v.(type) {
+			case AppliedView:
 				v.ref.untrack(nil)
+			case []AppliedView:
+				for i := range v {
+					v[i].ref.untrack(nil)
+				}
 			}
 		}
+		s.root.untrack(s)
 		return
 	}
 	s.root.untrack(sock)

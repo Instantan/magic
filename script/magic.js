@@ -133,8 +133,8 @@ function renderTemplate(magicid, template, data) {
         switch (v) {
             case "magic:live":
                 return magicLiveScript()
-            case "magic:id":
-                return `magic:id="${magicid}"`
+            case "magic-id":
+                return `magic-id="${magicid}"`
         }
         if (data === undefined) {
             return ""
@@ -186,7 +186,7 @@ function parseHtmlString(markup) {
 
 function makeTemplateReferenceable(templateid) {
     m.templates[templateid] = m.templates[templateid].replace(/<\w*(\s|>|\/>)/m, (m) => {
-        let i = " ~magic:id~ "
+        let i = " ~magic-id~ "
         if (m.endsWith("/>")) {
             return m.slice(0, -1) + i + "/>"
         } else if (m.endsWith(">")) {
@@ -202,8 +202,8 @@ function updateElementsOfref(refid) {
         // console.debug("[RENDERED]", document)
         return
     }
-    document.querySelectorAll(`[magic:id^="${refid}"]`).forEach(e => {
-        const n = parseHtmlString(renderTemplateRef(e.attributes.getNamedItem("magic:id").value.split(":")))
+    document.querySelectorAll(`[magic-id^="${refid}"]`).forEach(e => {
+        const n = parseHtmlString(renderRef(e.attributes.getNamedItem("magic-id").value.split(":")))
         nanomorph(e, hydrateTree(n.children[0]));
         // console.debug("[RENDERED]", elm);
     })
@@ -366,7 +366,7 @@ function assignSockref(ref, data) {
 
 function getSockrefId(elm) {
     if (elm && elm.attributes) {
-        const magicid = elm.attributes.getNamedItem("magic:id")
+        const magicid = elm.attributes.getNamedItem("magic-id")
         if (magicid !== null) {
             return magicid.value.split(":", 1)[0]
         }
