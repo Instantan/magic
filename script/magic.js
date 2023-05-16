@@ -40,7 +40,6 @@ function connect(href = "") {
     };
     m.socket.onclose = (e) => {
         if (m.socket && e.srcElement.url !== m.socket.url) {
-            console.log("close:", e.srcElement.url)
             return
         }
         showProgressBar()
@@ -48,7 +47,7 @@ function connect(href = "") {
         setTimeout(connect, 1000);
     };
     m.socket.onerror = (e) => {
-        console.error('Socket encountered error: ', e, 'Closing socket');
+        console.error('Error: ', e, 'Closing socket');
         m.socket.close();
     };
 }
@@ -72,9 +71,7 @@ function handleMessage(messages) {
     })
     refsToRerender.forEach(updateElementsOfref)
     if (!m.didRenderRoot) {
-        const n = parseHtmlString(renderRoot())
-        setDocumentClassConnectionState("connected", n)
-        nanomorph(document, n);
+        nanomorph(document, setDocumentClassConnectionState("connected", parseHtmlString(renderRoot())));
         hydrateTree(document)
         m.didRenderRoot = true
     }
@@ -132,7 +129,7 @@ function renderTemplate(magicid, template, data) {
             case "magic:live":
                 return magicLiveScript()
             case "magic-id":
-                return `magic-id="${magicid}"`
+                return v + `="${magicid}"`
         }
         if (data === undefined) {
             return ""
@@ -160,7 +157,7 @@ function magicLiveScript() {
 }
 
 function execute(tpl, fn) {
-    return tpl.replace(/~.+?~/g, (match, contents, offset, input_string) => fn(match.slice(1, -1)))
+    return tpl.replace(/~.+?~/g, (match) => fn(match.slice(1, -1)))
 }
 
 function parseHtmlString(markup) {
@@ -196,16 +193,11 @@ function makeTemplateReferenceable(templateid) {
 
 function updateElementsOfref(refid) {
     if (refid === magic.refs[0]['#'][0]) {
-        const n = parseHtmlString(renderRoot())
-        setDocumentClassConnectionState("connected", n)
-        nanomorph(document, hydrateTree(n));
-        // console.debug("[RENDERED]", document)
+        nanomorph(document, hydrateTree(setDocumentClassConnectionState("connected", parseHtmlString(renderRoot()))));
         return
     }
     document.querySelectorAll(`[magic-id^="${refid}"]`).forEach(e => {
-        const n = parseHtmlString(renderRef(e.attributes.getNamedItem("magic-id").value.split(":")))
-        nanomorph(e, hydrateTree(n.children[0]));
-        // console.debug("[RENDERED]", elm);
+        nanomorph(e, hydrateTree(parseHtmlString(renderRef(e.attributes.getNamedItem("magic-id").value.split(":"))).children[0]));
     })
 }
 
@@ -290,9 +282,11 @@ function cleanEvents(e) {
 function createMagicEventListener(k, propsToTake, value) {
     return (e) => {
         if (m.socket) {
-            const t = Number(getSockrefId(e.target))
-            const p = Object.assign(takeFrom(e, propsToTake), { value })
-            m.socket.send(JSON.stringify({ k, t, p }))
+            m.socket.send(JSON.stringify({
+                k: k,
+                t: Number(getSockrefId(e.target)),
+                p: Object.assign(takeFrom(e, propsToTake), { value })
+            }))
         }
     }
 }
@@ -403,6 +397,7 @@ function setDocumentClassConnectionState(s, d = document) {
     if (h.classList.contains(state)) return;
     ["connected", "connecting", "disconnected"].forEach(e => h.classList.remove("magic-" + e))
     h.classList.add(state)
+    return d
 }
 
 function receivedEvent(e) {

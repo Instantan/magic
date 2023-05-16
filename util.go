@@ -3,6 +3,8 @@ package magic
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"unsafe"
 )
 
 type Empty = struct{}
@@ -27,4 +29,13 @@ func Map[T any, R any](s []T, f func(e T) R) []R {
 func socketid(id uintptr) json.RawMessage {
 	v, _ := json.Marshal(fmt.Sprintf("%v", id))
 	return v
+}
+
+func unsafeStringToBytes(s string) (b []byte) {
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	bh.Data = sh.Data
+	bh.Cap = sh.Len
+	bh.Len = sh.Len
+	return b
 }
