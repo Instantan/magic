@@ -3,7 +3,7 @@ package main
 import "github.com/Instantan/magic"
 
 var overviewView = magic.View(`
-	<a href="/index.html">
+	<a href="/index.html" magic:patch>
 		Navigate to home
 	</a>
 `)

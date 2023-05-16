@@ -15,12 +15,20 @@ window.magic = {
 
 const m = window.magic
 
-function connect() {
+function connect(href = "") {
     showProgressBar()
-    const ws_params = new URLSearchParams(location.search);
-    ws_params.append("ws", "0");
-    m.socket = new WebSocket("ws://" + location.host + location.pathname + "?" + ws_params);
+    const previousSocket = m.socket
+    if (typeof href !== "string" || href === "") {
+        const ws_params = new URLSearchParams(location.search);
+        // ws_params.append("ws", "0");
+        href = location.host + location.pathname
+            // + "?" + ws_params
+    }
+    m.socket = new WebSocket("ws://" + href);
     m.socket.onopen = () => {
+        if (previousSocket) {
+            previousSocket.close();
+        }
         m.templates = {}
         m.socketrefs = {}
         m.didRenderRoot = false
@@ -30,12 +38,16 @@ function connect() {
         handleMessage(JSON.parse(e.data))
     };
     m.socket.onclose = (e) => {
+        if (m.socket && e.srcElement.url !== m.socket.url) {
+            console.log("close:", e.srcElement.url)
+            return
+        }
         showProgressBar()
         setTimeout(connect, 1000);
     };
     m.socket.onerror = (e) => {
         console.error('Socket encountered error: ', e, 'Closing socket');
-        magic.socket.close();
+        m.socket.close();
     };
 }
 
@@ -82,11 +94,11 @@ function renderRoot() {
 function gc() {
     let d = m.socketrefs
     let s = new Set(Object.keys(d))
-    _gc(s, d, '0')
+    gcRec(s, d, '0')
     s.forEach(e => delete d[e])
 }
 
-function _gc(s, d, id) {
+function gcRec(s, d, id) {
     s.delete(id)
     let o = d[id]
     if (!o) return
@@ -94,10 +106,10 @@ function _gc(s, d, id) {
         let e = o[k]
         if (Array.isArray(e)) {
             if (isRef(e)) {
-                _gc(s, d, e[0])
+                gcRec(s, d, e[0])
             } else if (isRef(e[0])) {
                 for (let i = 0; i < e.length; i++) {
-                    _gc(s, d, e[i][0])
+                    gcRec(s, d, e[i][0])
                 }
             }
         }
@@ -118,7 +130,7 @@ function renderTemplate(magicid, template, data) {
             case "magic:live":
                 return magicLiveScript()
             case "magic:id":
-                return `magic-id="${magicid}"`
+                return `magic:id="${magicid}"`
         }
         if (data === undefined) {
             return ""
@@ -185,8 +197,8 @@ function updateElementsOfSocketref(socketrefid) {
         // console.debug("[RENDERED]", document)
         return
     }
-    document.querySelectorAll(`[magic-id^="${socketrefid}"]`).forEach(elm => {
-        const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic-id").value.split(":")))
+    document.querySelectorAll(`[magic:id^="${socketrefid}"]`).forEach(elm => {
+        const newElm = parseHtmlString(renderTemplateRef(elm.attributes.getNamedItem("magic:id").value.split(":")))
         nanomorph(elm, hydrateTree(newElm.children[0]));
         // console.debug("[RENDERED]", elm);
     })
@@ -199,11 +211,10 @@ function hydrateTree(tree) {
         case 'TEXTAREA':
         case 'INPUT':
             tree.isSameNode = handleTextFieldValues
-
     }
     if (attrs) {
         for (let i = 0; i < attrs.length; i++) {
-            if (attrs[i].name.startsWith("magic")) {
+            if (attrs[i].name.startsWith("magic:")) {
                 hydrateElement(tree, attrs[i])
             }
         }
@@ -261,6 +272,8 @@ function hydrateElement(element, attribute) {
             element.ondblclick = createMagicEventListener(
                 kind, [...baseProps], value
             )
+        case "patch":
+            element.onclick = liveNavigation
             return
     }
 }
@@ -347,16 +360,14 @@ function assignSockref(ref, data) {
 }
 
 function getSockrefId(elm) {
-    if (elm) {
-        if (elm.attributes) {
-            const magicid = elm.attributes.getNamedItem("magic-id")
-            if (magicid !== null) {
-                return magicid.value.split(":", 1)[0]
-            }
+    if (elm && elm.attributes) {
+        const magicid = elm.attributes.getNamedItem("magic:id")
+        if (magicid !== null) {
+            return magicid.value.split(":", 1)[0]
         }
-        if (elm.parentNode) {
-            return getSockrefId(elm.parentNode)
-        }
+    }
+    if (elm && elm.parentNode) {
+        return getSockrefId(elm.parentNode)
     }
     return m.socketrefs[0]['#'][0]
 }
@@ -367,6 +378,19 @@ function handleTextFieldValues(o) {
         o.prevValue = n.value
     } else {
         n.value = o.value
+    }
+    return false
+}
+
+function liveNavigation(e) {
+    let href = e.srcElement.attributes.getNamedItem("href").value + ""
+    const path = href.startsWith("/") ? location.host + href : href
+    history.pushState({}, "", href)
+    connect(path)
+    if (e.preventDefault) {
+        e.preventDefault()
+    } else if (e.stopPropagation) {
+        e.stopPropagation()
     }
     return false
 }

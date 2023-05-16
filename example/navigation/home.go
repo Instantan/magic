@@ -5,7 +5,7 @@ import (
 )
 
 var homeView = magic.View(`
-	<a href="/overview.html">
+	<a href="/overview.html" magic:patch>
 		Navigate to overview
 	</a>
 `)
