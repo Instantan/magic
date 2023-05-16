@@ -109,3 +109,10 @@ func (av AppliedView) MarshalJSON() ([]byte, error) {
 	d[1], _ = json.Marshal(av.template.ID())
 	return json.Marshal(d)
 }
+
+func (av AppliedView) MarshalPatchJSON() ([]byte, error) {
+	m := make([]json.RawMessage, 2)
+	m[0], _ = json.Marshal(av.template.ID())
+	m[1], _ = json.Marshal(av.template.String())
+	return json.Marshal(m)
+}

@@ -136,10 +136,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 			switch av := v.(type) {
 			case AppliedView:
 				if !s.templateIsKnown(av.template) {
-					m := make([]json.RawMessage, 2)
-					m[0], _ = json.Marshal(av.template.ID())
-					m[1], _ = json.Marshal(av.template.String())
-					t, _ := json.Marshal(m)
+					t, _ := av.MarshalPatchJSON()
 					templatesToSend = append(templatesToSend, t)
 					s.markTemplateAsKnown(av.template)
 				}
@@ -147,10 +144,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 				for v := range av {
 					e := av[v]
 					if !s.templateIsKnown(e.template) {
-						m := make([]json.RawMessage, 2)
-						m[0], _ = json.Marshal(e.template.ID())
-						m[1], _ = json.Marshal(e.template.String())
-						t, _ := json.Marshal(m)
+						t, _ := e.MarshalPatchJSON()
 						templatesToSend = append(templatesToSend, t)
 						s.markTemplateAsKnown(e.template)
 					}
@@ -177,14 +171,12 @@ func (s *socket) track(sock Socket) {
 	s.refs[id] = sock
 	s.refsRefs[id] = s.refsRefs[id] + 1
 	s.check(id)
-	log.Printf("Track: %v\n", id)
 }
 
 func (s *socket) untrack(sock Socket) {
 	id := sock.id()
 	s.refsRefs[id] = s.refsRefs[id] - 1
 	s.check(id)
-	log.Printf("Untrack: %v\n", id)
 }
 
 func (s *socket) check(id uintptr) {
@@ -219,15 +211,5 @@ func (s *socket) dispatch(ev string, data EventData) {
 }
 
 func (s *socket) dumpStore() {
-	// i := 0
-	// for _, l := range s.refsRefs {
-	// 	i += int(l)
-	// }
 	log.Printf("Store: %v\n", s.refsRefs)
-	// for id, s := range s.refs {
-	// 	log.Printf("\t%v\n", id)
-	// 	for key, value := range s.(*ref).state {
-	// 		log.Printf("\t\t%v - %v\n", key, value)
-	// 	}
-	// }
 }
