@@ -8,9 +8,9 @@ const elts = {
 
 const texts = [
     "JavaScript",
+    "REST",
     "TypeScript",
     "GraphQL",
-    "REST",
     "Bundle sizes",
     "NPM",
     "Build times",
