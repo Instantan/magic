@@ -24,7 +24,7 @@ function connect(href = "") {
         url.searchParams = new URLSearchParams(location.search)
         href = url.toString()
     }
-    m.socket = new WebSocket("ws://" + href);
+    m.socket = new WebSocket((window.location.protocol === "https:" ? "wss://" : "ws://") + href);
     m.socket.onopen = () => {
         if (previousSocket) {
             previousSocket.close();
@@ -47,7 +47,7 @@ function connect(href = "") {
         setTimeout(connect, 1000);
     };
     m.socket.onerror = (e) => {
-        console.error('Error: ', e, 'Closing socket');
+        console.error("Error: ", e, "Closing socket");
         m.socket.close();
     };
 }
@@ -55,10 +55,10 @@ function connect(href = "") {
 function handleMessage(messages) {
     const refsToRerender = new Set()
     messages.forEach(e => {
-        if (e.length === 2 && typeof e[0] === 'number') {
+        if (e.length === 2 && typeof e[0] === "number") {
             m.templates[e[0]] = e[1]
             makeTemplateReferenceable(e[0])
-        } else if (e.length === 2 && typeof e[0] === 'string') {
+        } else if (e.length === 2 && typeof e[0] === "string") {
             const ref = e[0]
             assignSockref(ref, e[1])
             if (!m.didRenderRoot) {
@@ -93,7 +93,7 @@ function renderRoot() {
 function gc() {
     let d = m.refs
     let s = new Set(Object.keys(d))
-    gcRec(s, d, '0')
+    gcRec(s, d, "0")
     s.forEach(e => delete d[e])
 }
 
@@ -269,6 +269,7 @@ function hydrateElement(element, attribute) {
             element.ondblclick = createMagicEventListener(
                 kind, [...baseProps], value
             )
+            return
         case "patch":
             element.onclick = liveNavigation
             return
