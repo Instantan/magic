@@ -381,8 +381,8 @@ function handleTextFieldValues(o) {
 function liveNavigation(e) {
     let href = e.srcElement.attributes.getNamedItem("href").value + ""
     const path = href.startsWith("/") ? location.host + href : href
-    history.pushState({}, "", href)
     connect(path)
+    history.pushState({}, "", href)
     if (e.preventDefault) {
         e.preventDefault()
     } else if (e.stopPropagation) {
