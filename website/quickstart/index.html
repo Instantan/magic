@@ -9,7 +9,7 @@
     <link rel="icon" type="image/x-icon" href="/assets/images/magic-logo.webp">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <link rel="stylesheet" href="//unpkg.com/@catppuccin/highlightjs/css/catppuccin-latte.css">
-    <title>Magic</title>
+    <title>Quickstart - Magic</title>
 </head>
 
 <body class="bg-zinc-900 h-screen font-sans text-white flex flex-col">
@@ -73,15 +73,19 @@
                 <li class="magic-text-hover">
                     <a href="#makeitlive">Make it live</a>
                 </li>
+                <li class="magic-text-hover">
+                    <a href="#whatnow">What now</a>
+                </li>
             </ul>
         </aside>
         <section class="px-5 md:px-20 mt-[-80px] w-full overflow-y-scroll [&>article]:pt-32 [&>article:not(:first-child)]:-mt-20 pb-96 [&>article]:prose [&>article]:prose-invert [&>article]:max-w-none [&>article>pre]:relative" style="height: calc(100vh - 41px);">
             <article id="installation">
-                <h1 class="text-4xl pb-4">Installation</h1>Start with a blank Go project and install magic with the following command.<pre><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code></pre>
+                <h1 class="text-4xl pb-4">Installation</h1>Start with a blank Go project and install <strong>magic</strong> with the following command.<pre><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code></pre>
             </article>
             <article id="webserver">
                 <h1 class="text-4xl pb-4">Web server</h1>In the
-                <cite>main.go</cite> file, create a simple web server. Note: The following snippet wont compile on its own because we are missing our index component. The only <strong>magic</strong> specific thing here is the <cite>magic.HandlerFunc(index)</cite>                wich takes a component and returns a http.Handler. You can use any std-library compatible router/server/mux you want.
+                <cite>main.go</cite> file, create a simple web server. The only <strong>magic</strong> specific thing here is the <cite>magic.HandlerFunc(index)</cite> wich takes a component and returns a http.Handler. You can use any std-library compatible
+                router/server/mux you want.
                 <blockquote>Note that the following code wont compile on it's own.</blockquote>
                 <pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">package main
     
@@ -109,7 +113,7 @@ func main() {
                 that the views are created on the top level, because the view creation is somewhat expensive.<br/> The <cite>indexView</cite> contains a basic HTML page. The body includes a tag with the name <cite>body</cite>. In this placeholder we will
                 render the to displaying data.
                 <blockquote>Note that the following code wont compile on it's own.</blockquote>
-                <pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><code class="language-go" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">package main
+                <pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">index.go</div><code class="language-go" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">package main
 
 import (
     "github.com/Instantan/magic"
@@ -129,7 +133,12 @@ var indexView = magic.View(`
             </article>
             <article id="simplecomponent">
                 <h1 class="text-4xl pb-4">Simple component</h1>
-                To render a view we need to create a component. We will add the component just under the view we just created. The <cite>index.go</cite> will looks afterwards like this.
+                To render a view we need to create a component. The first argument of the component takes always a <cite>magic.Socket</cite>. The second argument is a generic one. It can take any type you want and is used to pass down data to the component.
+                In this example we use the type <cite>magic.Empty</cite> wich is just a empty struct. <br/> We will add the component just under the view we just created. In that component we use the <cite>magic.Assign</cite> function to assign the value
+                <cite>"Hello World"</cite> to the Socket.
+
+                <br/>The <cite>index.go</cite> will looks afterwards like the following snippet.<br/>Now the project is runnable (<cite>go run .</cite>) and shows under the url <a href="http://localhost:8070">http://localhost:8070</a> the expected site.
+
                 <pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded">index.go</div><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;" class="language-go">package main
 
 import (
@@ -155,14 +164,53 @@ var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedVie
             </article>
             <article id="makeitlive">
                 <h1 class="text-4xl pb-4">Make it live</h1>
-                <p>
-                    Start with a blank Go project and install magic with the following command.
-                </p>
-                <div>
-                    <pre>
-                          <code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code>
-                        </pre>
-                </div>
+                So far there is nothing much magical about this. You can statically render websites based on composeable components, but thats it.
+                <br/><br/>This is where the magic starts. Magic injects a 9.6kb small JavaScript script into the header of each website. This script turns every site into a soft realtime updateable web app. To demonstrate this we add the following code
+                into our index component. So that our <cite>index.go</cite> file looks like the following snippet.<br/><br/>This snippet checks if the socket is a live socket. Then it starts a ticker. Every seconds we call <cite>magic.Assign</cite> and
+                assign the value of the current ticker time to the tag <cite>"body"</cite>.
+                <br /> after the we call the <cite>s.HandleEvent</cite> method and stop the timer when we receive the unmount event.<br/><br/>If you run the project (<cite>go run .</cite>) and visit the site under <a href="http://localhost:8070">http://localhost:8070</a>                you will see that the <cite>Hello World</cite> on the screen will turn into the current Date and Time that updates every second.
+
+                <pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded">index.go</div><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;" class="language-go">package main
+
+import (
+    "github.com/Instantan/magic"
+)
+
+var indexView = magic.View(`
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Quickstart&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        {{ body }}
+    &lt;/body&gt;
+    &lt;/html&gt;
+`)
+
+var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedView {
+    magic.Assign(s, "body", "Hello World")
+    if s.Live() {
+        t := time.NewTicker(time.Second)
+		go func() {
+			for r := range t.C {
+				magic.Assign(s, "body", r.String())
+			}
+		}()
+		s.HandleEvent(func(e string, d magic.EventData) {
+			switch e {
+			case magic.UnmountEvent:
+				t.Stop()
+			}
+		})
+    }
+    return indexView(s)
+})</code></pre>
+            </article>
+            <article id="whatnow" class="mb-[30vh]">
+                <h1 class="text-4xl pb-4">What now</h1>
+                Magic can do more then "just" updating webpages in soft realtime. It can navigate between sites without completly reloading the site. It can send events to server and the client. Consult the <a href="/docs">docs</a> for hooks, events and
+                more.
             </article>
         </section>
     </main>
