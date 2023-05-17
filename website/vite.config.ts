@@ -2,6 +2,15 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path'
 import { createHtmlPlugin } from 'vite-plugin-html'
 
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+var __dirname;
+
+const _dirname = typeof (__dirname) !== 'undefined'
+  ? __dirname
+  : dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
   plugins: [
     createHtmlPlugin({
@@ -24,8 +33,9 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       input: {
-        main: resolve("./", 'index.html'),
-        sammelsurium: resolve("./", 'sammelsurium/index.html'),
+        main: resolve(_dirname, 'index.html'),
+        ecosystem: resolve(_dirname, 'ecosystem'),
+        docs: resolve(_dirname, 'docs')
       },
     },
   },

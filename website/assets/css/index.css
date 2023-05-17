@@ -100,3 +100,11 @@
 .close:after {
     transform: rotate(-45deg);
 }
+
+.hljs-string {
+    color: var(--dark) !important;
+}
+
+.hljs-title {
+    color: var(--blue) !important;
+}
