@@ -305,26 +305,24 @@ function takeFrom(obj, props, value) {
 }
 
 function showProgressBar() {
-    if (m.topbar) {
-        return
+    if (m.topbar) return
+
+    const div = (style) => {
+        const d = document.createElement("div")
+        d.style.cssText = style
+        return d
     }
-    const color = m.themeColor()
+    const append = (s, t) => s.appendChild(t)
 
-    const wrapper = document.createElement("div")
-    wrapper.style = `position:fixed;overflow:hidden;top:0;left:0;width:100%`
-
-    const bg = document.createElement("div")
-    bg.style = `background-color:${color};height:.2rem;width:100%;opacity:0.4`
-
-    const inner = document.createElement("div")
-    inner.style = `background-color:${color};position:absolute;bottom:0;top:0;width:50%`
-
-    wrapper.appendChild(bg)
-    wrapper.appendChild(inner)
+    const col = m.themeColor()
+    const wrp = div(`position:fixed;overflow:hidden;top:0;left:0;width:100%`)
+    const inn = div(`background-color:${col};position:absolute;bottom:0;top:0;width:50%`)
+    append(wrp, div(`background-color:${col};height:.2rem;width:100%;opacity:0.4`))
+    append(wrp, inn)
 
     const timeout = setTimeout(() => {
-        document.body.appendChild(wrapper)
-        inner.animate([
+        append(document.body, wrp)
+        inn.animate([
             { left: "-50%" },
             { left: "100%" }
         ], {
@@ -333,11 +331,11 @@ function showProgressBar() {
         })
     }, 120)
 
-    wrapper.destroy = () => {
+    wrp.destroy = () => {
         clearInterval(timeout)
-        wrapper.remove()
+        wrp.remove()
     };
-    m.topbar = wrapper
+    m.topbar = wrp
 }
 
 function hideProgressBar() {
