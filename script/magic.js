@@ -165,13 +165,13 @@ function parseHtmlString(markup) {
         const doc = document.implementation.createHTMLDocument("");
         doc.documentElement.innerHTML = markup;
         return doc;
-    } else if ('content' in document.createElement('template')) {
-        const el = document.createElement('template');
+    } else if ('content' in createElement('template')) {
+        const el = createElement('template');
         el.innerHTML = markup;
         return el.content;
     }
     const docfrag = document.createDocumentFragment();
-    const el = document.createElement('body');
+    const el = createElement('body');
     el.innerHTML = markup;
     for (i = 0; 0 < el.childNodes.length;) {
         docfrag.appendChild(el.childNodes[i]);
@@ -262,7 +262,7 @@ function hydrateElement(element, attribute) {
             return
         case "submit":
             element.onsubmit = createMagicEventListener(
-                kind, [...baseProps], value
+                kind, [...baseProps, "form"], value, stopPropagation
             )
             return
         case "dblclick":
@@ -280,14 +280,18 @@ function cleanEvents(e) {
     e.onclick = e.onfocus = e.onchange = e.onkeydown = e.onkeypress = e.onkeyup = e.onsubmit = e.ondblclick = null
 }
 
-function createMagicEventListener(k, propsToTake, value) {
+function createMagicEventListener(k, propsToTake, value, after) {
     return (e) => {
         if (m.socket) {
+            console.log(e)
             m.socket.send(JSON.stringify({
                 k: k,
                 t: Number(getSockrefId(e.target)),
                 p: Object.assign(takeFrom(e, propsToTake), { value })
             }))
+        }
+        if (typeof after === "function") {
+            return after(e)
         }
     }
 }
@@ -296,7 +300,9 @@ function takeFrom(obj, props, value) {
     const n = {}
     let l = props.length
     while (l--) {
-        const p = props[l] === "content" ? (obj.value === undefined ? obj.target.value : obj.value) : obj[props[l]]
+        const p = props[l] === "form" ?
+            Object.fromEntries((new FormData(obj.srcElement)).entries()) :
+            props[l] === "content" ? (obj.value === undefined ? obj.target.value : obj.value) : obj[props[l]]
         if (p !== undefined) {
             n[props[l]] = p
         }
@@ -308,7 +314,7 @@ function showProgressBar() {
     if (m.topbar) return
 
     const div = (style) => {
-        const d = document.createElement("div")
+        const d = createElement("div")
         d.style.cssText = style
         return d
     }
@@ -379,6 +385,10 @@ function handleTextFieldValues(o) {
 function liveNavigationEvent(e) {
     let href = e.srcElement.attributes.getNamedItem("href").value + ""
     liveNavigation(href)
+    return stopPropagation(e)
+}
+
+function stopPropagation(e) {
     if (e.preventDefault) {
         e.preventDefault()
     } else if (e.stopPropagation) {
@@ -417,42 +427,9 @@ function receivedEvent(e) {
     window.dispatchEvent(event)
 }
 
-// function ensureScript(src, onload) {
-//     if (src === "") return
-//     if (document.querySelector(`script[src="${src}"`)) {
-//         onload()
-//         return
-//     }
-//     const e = document.createElement('script')
-//     e.onload = onload
-//     e.src = src
-//     document.head.appendChild(e)
-// }
 
-// function callFunction(fn) {
-//     try {
-//         (new Function(`${fn}()`))()
-//     } catch (e) {
-//         console.error(e)
-//     }
-// }
-
-// customElements.define("magic-script", class extends HTMLElement {
-//     constructor() {
-//         super();
-//     }
-//     static get observedAttributes() { return ['src', 'mount']; }
-
-//     connectedCallback() {
-//         if (document.head) {
-//             ensureScript(this.attributes.getNamedItem("src").value, () => callFunction(this.attributes.getNamedItem("mount").value))
-//         }
-//     }
-//     attributeChangedCallback(name, oldValue, newValue) {
-//         if (document.head) {
-//             ensureScript(this.attributes.getNamedItem("src").value, () => callFunction(this.attributes.getNamedItem("mount").value))
-//         }
-//     }
-// })
+function createElement(tag) {
+    return document.createElement(tag)
+}
 
 document.addEventListener('DOMContentLoaded', connect)

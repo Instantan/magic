@@ -74,9 +74,10 @@ type KeyupPayload struct {
 }
 
 type SubmitPayload struct {
-	Value   string `json:"value"`
-	MetaKey bool   `json:"metaKey"`
-	CtrlKey bool   `json:"shiftKey"`
+	Value   string          `json:"value"`
+	MetaKey bool            `json:"metaKey"`
+	CtrlKey bool            `json:"shiftKey"`
+	Form    json.RawMessage `json:"form"`
 }
 
 type DblclickPayload struct {
