@@ -40,6 +40,7 @@ var homeView = magic.View(`
 var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
 	magic.Assign(s, "navbar", navbarComponent(s, e))
 	magic.Assign(s, "liveNavbar", counterComponent(s, e))
+
 	if s.Live() {
 
 		t := time.NewTicker(time.Second * 5)

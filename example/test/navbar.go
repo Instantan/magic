@@ -26,6 +26,7 @@ var navbarComponent = magic.Component(func(s magic.Socket, _ magic.Empty) magic.
 			switch ev {
 			case magic.ClickEvent:
 				print(string(data))
+				magic.Reload(s)
 			case magic.UnmountEvent:
 				t.Stop()
 			}

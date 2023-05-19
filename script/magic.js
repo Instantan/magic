@@ -271,7 +271,7 @@ function hydrateElement(element, attribute) {
             )
             return
         case "patch":
-            element.onclick = liveNavigation
+            element.onclick = liveNavigationEvent
             return
     }
 }
@@ -376,17 +376,21 @@ function handleTextFieldValues(o) {
     return false
 }
 
-function liveNavigation(e) {
+function liveNavigationEvent(e) {
     let href = e.srcElement.attributes.getNamedItem("href").value + ""
-    const path = href.startsWith("/") ? location.host + href : href
-    connect(path)
-    history.pushState({}, "", href)
+    liveNavigation(href)
     if (e.preventDefault) {
         e.preventDefault()
     } else if (e.stopPropagation) {
         e.stopPropagation()
     }
     return false
+}
+
+function liveNavigation(href) {
+    const path = href.startsWith("/") ? location.host + href : href
+    connect(path)
+    history.pushState({}, "", href)
 }
 
 function setDocumentClassConnectionState(s, d = document) {
@@ -400,6 +404,14 @@ function setDocumentClassConnectionState(s, d = document) {
 }
 
 function receivedEvent(e) {
+    switch (e.k) {
+        case "navigate":
+            if (m.socket) {
+                m.socket.onclose = undefined;
+            }
+            liveNavigation(e.p)
+            return
+    }
     const event = new CustomEvent(e.k, { target: e.t, detail: e.p });
     document.querySelectorAll(`[magic-id^="${e.t}"]`).forEach(e => e.dispatchEvent(event))
     window.dispatchEvent(event)

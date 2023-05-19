@@ -15,6 +15,7 @@ const (
 	KeyupEvent    = "keyup"
 	SubmitEvent   = "submit"
 	DblclickEvent = "dblclick"
+	NavigateEvent = "navigate"
 )
 
 type Event struct {
