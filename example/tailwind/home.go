@@ -16,6 +16,10 @@ var homeView = magic.View(`
 	</head>
 
 	<body class="bg-black">
+		<magic-script 
+			src="test"
+			mount="ok"
+		/>
 	</body>
 	</html>
 `)

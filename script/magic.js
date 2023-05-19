@@ -405,4 +405,42 @@ function receivedEvent(e) {
     window.dispatchEvent(event)
 }
 
+// function ensureScript(src, onload) {
+//     if (src === "") return
+//     if (document.querySelector(`script[src="${src}"`)) {
+//         onload()
+//         return
+//     }
+//     const e = document.createElement('script')
+//     e.onload = onload
+//     e.src = src
+//     document.head.appendChild(e)
+// }
+
+// function callFunction(fn) {
+//     try {
+//         (new Function(`${fn}()`))()
+//     } catch (e) {
+//         console.error(e)
+//     }
+// }
+
+// customElements.define("magic-script", class extends HTMLElement {
+//     constructor() {
+//         super();
+//     }
+//     static get observedAttributes() { return ['src', 'mount']; }
+
+//     connectedCallback() {
+//         if (document.head) {
+//             ensureScript(this.attributes.getNamedItem("src").value, () => callFunction(this.attributes.getNamedItem("mount").value))
+//         }
+//     }
+//     attributeChangedCallback(name, oldValue, newValue) {
+//         if (document.head) {
+//             ensureScript(this.attributes.getNamedItem("src").value, () => callFunction(this.attributes.getNamedItem("mount").value))
+//         }
+//     }
+// })
+
 document.addEventListener('DOMContentLoaded', connect)
