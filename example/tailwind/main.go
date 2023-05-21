@@ -10,7 +10,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.Handle("/", magic.HandlerFunc(home))
+	mux.Handle("/", magic.CompressedComponentHTTPHandler(home))
 	mux.Handle("/assets/index.min.css", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/index.min.css")
 	}))

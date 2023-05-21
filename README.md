@@ -10,7 +10,6 @@ Magic is a powerful, yet easy-to-use web development framework written in Golang
 - Authorization
 - Internationalization
 
-- Form handling / validation
 - Array rendering
 
 - File upload handling

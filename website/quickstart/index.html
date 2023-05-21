@@ -84,8 +84,8 @@
             </article>
             <article id="webserver">
                 <h1 class="text-4xl pb-4">Web server</h1>In the
-                <cite>main.go</cite> file, create a simple web server. The only <strong>magic</strong> specific thing here is the <cite>magic.HandlerFunc(index)</cite> wich takes a component and returns a http.Handler. You can use any std-library compatible
-                router/server/mux you want.
+                <cite>main.go</cite> file, create a simple web server. The only <strong>magic</strong> specific thing here is the <cite>magic.CompressedComponentHTTPHandler(index)</cite> wich takes a component and returns a http.Handler. You can use any
+                std-library compatible router/server/mux you want.
                 <blockquote>Note that the following code wont compile on it's own.</blockquote>
                 <pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><code style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">package main
     
@@ -99,7 +99,7 @@ import (
 func main() {
     mux := http.NewServeMux()
 
-    mux.Handle("/", magic.HandlerFunc(index))
+    mux.Handle("/", magic.CompressedComponentHTTPHandler(index))
 
     log.Print("Listening to http://localhost:8070")
     if err := http.ListenAndServe(":8070", mux); err != nil {

@@ -8,8 +8,10 @@ require (
 )
 
 require (
+	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/tdewolff/minify v2.3.6+incompatible // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.8 // indirect
