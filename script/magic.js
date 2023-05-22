@@ -131,17 +131,13 @@ function renderTemplate(magicid, template, data) {
             case "magic-id":
                 return v + `="${magicid}"`
         }
-        if (data === undefined) {
+        if (data === undefined || data[v] === undefined || data[v] === null) {
             return ""
         }
         const toRender = data[v]
-        if (toRender === undefined || toRender === null) {
-            return ""
-        }
         if (isRef(toRender)) {
             return renderRef(toRender)
-        }
-        if (isRefArray(toRender)) {
+        } else if (isRefArray(toRender)) {
             let res = ""
             for (let i = 0; i < toRender.length; i++) {
                 res += renderRef(toRender[i])

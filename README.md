@@ -18,3 +18,8 @@ Magic is a powerful, yet easy-to-use web development framework written in Golang
 
 - Fully integrated server with ready routing, performance boost
 - Conjure template magic-ready (creates a new magic project with fully working login etc)
+
+
+# Rebrand
+
+maybe rebrand to "morph" (DE: Ein Morph ist die kleinste bedeutungstragende Einheit der Sprache auf der Ebene der Parole, die man gewinnt, wenn man Wörter zerlegt, segmentiert.)
