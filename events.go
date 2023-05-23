@@ -6,16 +6,22 @@ import (
 )
 
 const (
-	UnmountEvent  = "unmount"
-	ClickEvent    = "click"
-	FocusEvent    = "focus"
-	ChangeEvent   = "change"
-	KeydownEvent  = "keydown"
-	KeypressEvent = "keypress"
-	KeyupEvent    = "keyup"
-	SubmitEvent   = "submit"
-	DblclickEvent = "dblclick"
-	NavigateEvent = "navigate"
+	UnmountEvent         = "m:unmount"
+	ClickEvent           = "m:click"
+	FocusEvent           = "m:focus"
+	ChangeEvent          = "m:change"
+	KeydownEvent         = "m:keydown"
+	KeypressEvent        = "m:keypress"
+	KeyupEvent           = "m:keyup"
+	SubmitEvent          = "m:submit"
+	DblclickEvent        = "m:dblclick"
+	NavigateEvent        = "m:navigate"
+	ResetEvent           = "m:reset"
+	BlurEvent            = "m:blur"
+	OpenFullscreenEvent  = "m:openFullscreen"
+	CloseFullscreenEvent = "m:closeFullscreen"
+	AnimateEvent         = "m:animate"
+	ScrollIntoViewEvent  = "m:scrollIntoView"
 )
 
 type Event struct {

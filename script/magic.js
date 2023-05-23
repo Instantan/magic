@@ -277,6 +277,7 @@ function cleanEvents(e) {
 }
 
 function createMagicEventListener(k, propsToTake, value, after) {
+    k = "m:" + k;
     return (e) => {
         if (m.socket) {
             console.log(e)
@@ -410,22 +411,78 @@ function setDocumentClassConnectionState(s, d = document) {
 }
 
 function receivedEvent(e) {
-    switch (e.k) {
-        case "navigate":
-            if (m.socket) {
-                m.socket.onclose = undefined;
-            }
-            liveNavigation(e.p)
-            return
+    if (e.k.startsWith("m:")) {
+        e.k = e.k.slice(2)
+        switch (e.k) {
+            case "navigate":
+                if (m.socket) {
+                    m.socket.onclose = undefined;
+                }
+                liveNavigation(e.p)
+                return
+            case "reset":
+            case "click":
+            case "blur":
+            case "submit":
+                callFnForAllElements(e.p, e.t, e.k)
+                return
+            case "animate":
+                callFnForAllElements(e.p.ids, e.t, e.k, e.p.args.keyframes, e.p.args.options ? e.p.args.options : e.p.args.duration)
+                return
+            case "scrollIntoView":
+                callFnForAllElements(e.p.ids, e.t, e.k, e.p.args.options ? e.p.args.options : e.p.args.alignToTop)
+                return
+            case "openFullscreen":
+                openFullscreen()
+                return
+            case "closeFullscreen":
+                closeFullscreen()
+                return
+        }
     }
     const event = new CustomEvent(e.k, { target: e.t, detail: e.p });
     document.querySelectorAll(`[magic-id^="${e.t}"]`).forEach(e => e.dispatchEvent(event))
     window.dispatchEvent(event)
 }
 
-
 function createElement(tag) {
     return document.createElement(tag)
+}
+
+function callFnForAllElements(ids = [], socket = null, fn = "", ...args) {
+    const call = (elm) => {
+        try {
+            if (elm && elm[fn]) {
+                elm[fn](...args)
+            }
+        } catch (ex) {
+            console.error(ex)
+        }
+    }
+    ids.forEach(id => call(document.getElementById(id)))
+    if (ids.length === 0) {
+        document.querySelectorAll(`[magic-id^="${e.t}"]`).forEach(call)
+    }
+}
+
+function openFullscreen() {
+    if (document.requestFullscreen) {
+        document.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        document.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+        document.msRequestFullscreen();
+    }
+}
+
+function closeFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', connect)

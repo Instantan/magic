@@ -25,7 +25,7 @@ var homeView = magic.View(`
 	</style>
 
 	<body class="body">
-		<form action="/" magic:submit="/">
+		<form id="testform" action="/" magic:submit="/">
 			<label for="name">Name:</label><br>
 			<input type="text" id="name" name="name" />
 			<input type="submit" value="Submit" />
@@ -38,6 +38,17 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 	s.HandleEvent(func(ev string, data magic.EventData) {
 		switch ev {
 		case magic.SubmitEvent:
+			magic.Reset(s, "testform")
+			magic.Animate(s, magic.AnimateArgs{
+				Keyframes: []magic.AnimationKeyframe{
+					{"transform": "rotate(0) scale(1)"},
+					{"transform": "rotate(360deg) scale(0)"},
+				},
+				Options: magic.AnimateOptions{
+					Duration:   2000,
+					Iterations: "1",
+				},
+			}, "testform")
 			s := data.Submit()
 			m := make(map[string]any)
 			json.Unmarshal(s.Form, &m)
