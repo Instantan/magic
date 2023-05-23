@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/Instantan/magic"
@@ -37,7 +39,11 @@ var homeView = magic.View(`
 	</html>
 `)
 
+var connectedUsers = &atomic.Int64{}
+
 var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+	connectedUsers.Add(1)
+	fmt.Printf("Connected: %v\n", connectedUsers.Load())
 	magic.Assign(s, "navbar", navbarComponent(s, e))
 	magic.Assign(s, "liveNavbar", counterComponent(s, e))
 
@@ -55,6 +61,8 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 				kp := data.Keypress()
 				println(kp.Content + kp.Key)
 			case magic.UnmountEvent:
+				connectedUsers.Add(-1)
+				fmt.Printf("Connected: %v\v", connectedUsers.Load())
 				t.Stop()
 			}
 		})

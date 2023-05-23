@@ -1,0 +1,17 @@
+config:
+    target: "ws://localhost:8070/ws"
+    ensure:
+      maxErrorRate: 1
+    phases:
+      - duration: 20
+        arrivalRate: 5
+        rampTo: 10
+        name: "Warming up"
+      - duration: 60
+        arrivalRate: 10
+        rampTo: 100
+        name: "Max load"
+scenarios:
+  - engine: "ws"
+    flow:
+      - think: 3

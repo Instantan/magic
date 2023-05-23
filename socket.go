@@ -32,10 +32,11 @@ type socket struct {
 	refsRefs       map[uintptr]int
 	knownTemplates Set[int]
 
-	conn    net.Conn
-	request *http.Request
-	patches *patches
-	sending sync.Mutex
+	conn     net.Conn
+	request  *http.Request
+	patches  *patches
+	sending  sync.Mutex
+	tracking sync.Mutex
 }
 
 func NewSocket(request *http.Request) *socket {
@@ -124,8 +125,7 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	s.track(renderable.ref)
 	patches := renderable.Patch()
 	s.conn = conn
-	data := s.patchesToJson(patches)
-	wsutil.WriteServerText(s.conn, data)
+	s.send(s.patchesToJson(patches))
 
 	for {
 		msg, op, err := wsutil.ReadClientData(s.conn)
@@ -204,16 +204,20 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 }
 
 func (s *socket) track(sock Socket) {
+	s.tracking.Lock()
 	id := sock.id()
 	s.refs[id] = sock
 	s.refsRefs[id] = s.refsRefs[id] + 1
 	s.check(id)
+	s.tracking.Unlock()
 }
 
 func (s *socket) untrack(sock Socket) {
+	s.tracking.Lock()
 	id := sock.id()
 	s.refsRefs[id] = s.refsRefs[id] - 1
 	s.check(id)
+	s.tracking.Unlock()
 }
 
 func (s *socket) check(id uintptr) {
@@ -229,10 +233,10 @@ func (s *socket) check(id uintptr) {
 func (s *socket) close() {
 	s.dispatch(UnmountEvent, nil)
 	s.conn.Close()
-	s.conn = nil
-	s.patches = nil
-	s.request = nil
-	s.knownTemplates = Set[int]{}
+	// s.conn = nil
+	// s.patches = nil
+	// s.request = nil
+	// s.knownTemplates = Set[int]{}
 }
 
 func (s *socket) dispatch(ev string, data EventData) {

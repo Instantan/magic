@@ -2,6 +2,7 @@ package magic
 
 import (
 	"net/http"
+	"sync"
 	"unsafe"
 )
 
@@ -9,6 +10,7 @@ type ref struct {
 	root         *socket
 	eventHandler EventHandler
 	state        map[string]any
+	assigning    sync.Mutex
 }
 
 func (s *ref) DispatchEvent(ev string, data any) error {
@@ -63,7 +65,9 @@ func (s *ref) assignStatic(key string, value any) {
 }
 
 func (s *ref) assignLive(key string, value any) {
+	s.assigning.Lock()
 	prev := s.state[key]
+	s.assigning.Unlock()
 	if prev == value {
 		return
 	}
@@ -97,6 +101,7 @@ func (s *ref) track(sock Socket) {
 
 func (s *ref) untrack(sock Socket) {
 	if sock == nil {
+		s.assigning.Lock()
 		for _, v := range s.state {
 			switch v := v.(type) {
 			case AppliedView:
@@ -107,6 +112,7 @@ func (s *ref) untrack(sock Socket) {
 				}
 			}
 		}
+		s.assigning.Unlock()
 		s.root.untrack(s)
 		return
 	}
