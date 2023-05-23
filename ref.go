@@ -78,7 +78,9 @@ func (s *ref) assignLive(key string, value any) {
 			avs[v].ref.untrack(nil)
 		}
 	}
+	s.assigning.Lock()
 	s.state[key] = value
+	s.assigning.Unlock()
 	if av, ok := value.(AppliedView); ok {
 		s.track(av.ref)
 	} else if avs, ok := value.([]AppliedView); ok {
