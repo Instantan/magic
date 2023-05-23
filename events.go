@@ -22,6 +22,7 @@ const (
 	CloseFullscreenEvent = "m:closeFullscreen"
 	AnimateEvent         = "m:animate"
 	ScrollIntoViewEvent  = "m:scrollIntoView"
+	DisconnectEvent      = "m:disconnect"
 )
 
 type Event struct {

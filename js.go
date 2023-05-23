@@ -88,3 +88,8 @@ func ScrollIntoView(s Socket, args ScrollIntoViewArgs, ids ...string) {
 		Ids  []string           `json:"ids"`
 	}{args, ids})
 }
+
+// Disconnects the socket from the client side. It wont reconnect afterwards
+func Disconnect(s Socket) {
+	s.DispatchEvent(DisconnectEvent, nil)
+}
