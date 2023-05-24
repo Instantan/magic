@@ -3,6 +3,7 @@ package magic
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
@@ -74,3 +75,6 @@ func urlToStringWithoutSchemeAndHost(u *url.URL) string {
 	}
 	return buf.String()
 }
+
+//go:linkname acceptsGzip gzhttp.acceptsGzip
+func acceptsGzip(r *http.Request) bool
