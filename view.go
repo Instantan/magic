@@ -23,6 +23,7 @@ type Views = []AppliedView
 type htmlRenderConfig struct {
 	magicScriptInline bool
 	magicScriptUrl    string
+	static            bool
 }
 
 func View(templ string) ViewFn {
@@ -38,6 +39,9 @@ func View(templ string) ViewFn {
 func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err error) {
 	av.template.Execute(w, func(w io.Writer, tag string) (int, error) {
 		if tag == "magic:live" {
+			if config != nil && config.static {
+				return w.Write([]byte{})
+			}
 			if config != nil && !config.magicScriptInline && config.magicScriptUrl != "" {
 				return w.Write(unsafeStringToBytes(`<script src=\"` + config.magicScriptUrl + `\" defer/>`))
 			}

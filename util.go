@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"unsafe"
+
+	"github.com/klauspost/compress/gzhttp"
 )
 
 type Empty = struct{}
@@ -74,6 +76,10 @@ func urlToStringWithoutSchemeAndHost(u *url.URL) string {
 		buf.WriteString(u.EscapedFragment())
 	}
 	return buf.String()
+}
+
+func Compressor(h http.Handler) http.HandlerFunc {
+	return gzhttp.GzipHandler(h)
 }
 
 //go:linkname acceptsGzip gzhttp.acceptsGzip

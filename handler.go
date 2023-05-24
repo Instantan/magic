@@ -8,6 +8,7 @@ import (
 )
 
 type ComponentHTTPHandler ComponentFn[Empty]
+type StaticComponentHTTPHandler ComponentFn[Empty]
 
 func (f ComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := NewSocket(r)
@@ -29,6 +30,13 @@ func CompressedComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
 	return gzhttp.GzipHandler(ComponentHTTPHandler(fn))
 }
 
-func Compressor(h http.Handler) http.HandlerFunc {
-	return gzhttp.GzipHandler(h)
+func (f StaticComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s := NewSocket(r)
+	f(s, Empty{}).html(w, &htmlRenderConfig{
+		static: true,
+	})
+}
+
+func CompressedStaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
+	return gzhttp.GzipHandler(StaticComponentHTTPHandler(fn))
 }
