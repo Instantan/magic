@@ -17,7 +17,13 @@ type AppliedView struct {
 	ref      *ref
 	template *Template
 }
+
 type Views = []AppliedView
+
+type htmlRenderConfig struct {
+	magicScriptInline bool
+	magicScriptUrl    string
+}
 
 func View(templ string) ViewFn {
 	t := template.Parse(injectLiveScript(templ))
@@ -29,10 +35,13 @@ func View(templ string) ViewFn {
 	}
 }
 
-func (av AppliedView) HTML(w io.Writer) (n int, err error) {
+func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err error) {
 	av.template.Execute(w, func(w io.Writer, tag string) (int, error) {
 		if tag == "magic:live" {
-			return w.Write(magicMinScript)
+			if config != nil && !config.magicScriptInline && config.magicScriptUrl != "" {
+				return w.Write(unsafeStringToBytes(`<script src=\"` + config.magicScriptUrl + `\" defer/>`))
+			}
+			return w.Write(magicMinScriptWithTags)
 		}
 		rv, ok := av.ref.state[tag]
 		if !ok {
@@ -44,11 +53,11 @@ func (av AppliedView) HTML(w io.Writer) (n int, err error) {
 		case string:
 			return w.Write(unsafeStringToBytes(v))
 		case AppliedView:
-			return v.HTML(w)
+			return v.html(w, config)
 		case []AppliedView:
 			n := 0
 			for i := range v {
-				m, err := v[i].HTML(w)
+				m, err := v[i].html(w, config)
 				if err != nil {
 					log.Println(err)
 				}
@@ -110,7 +119,7 @@ func (av AppliedView) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d)
 }
 
-func (av AppliedView) MarshalPatchJSON() ([]byte, error) {
+func (av AppliedView) marshalPatchJSON() ([]byte, error) {
 	m := make([]json.RawMessage, 2)
 	m[0], _ = json.Marshal(av.template.ID())
 	m[1], _ = json.Marshal(av.template.String())

@@ -437,12 +437,16 @@ function receivedEvent(e) {
                 return
             case "closeFullscreen":
                 closeFullscreen()
+                return
             case "disconnect":
                 if (m.socket) {
                     m.socket.onclose = undefined;
                     m.socket.close();
                     setDocumentClassConnectionState("disconnected")
                 }
+                return
+            case "updateUrl":
+                history.pushState({}, "", e.p)
                 return
         }
     }

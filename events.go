@@ -23,6 +23,7 @@ const (
 	AnimateEvent         = "m:animate"
 	ScrollIntoViewEvent  = "m:scrollIntoView"
 	DisconnectEvent      = "m:disconnect"
+	UpdateURLEvent       = "m:updateUrl"
 )
 
 type Event struct {

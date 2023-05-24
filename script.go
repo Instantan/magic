@@ -8,9 +8,10 @@ import (
 
 //go:embed script/magic.min.js
 var magicMinScript []byte
+var magicMinScriptWithTags []byte
 
 func init() {
-	magicMinScript = append(append([]byte("<script>"), magicMinScript...), []byte("</script>")...)
+	magicMinScriptWithTags = append(append([]byte("<script>"), magicMinScript...), []byte("</script>")...)
 }
 
 var regexpHeadTag = regexp.MustCompile("<head.*>")

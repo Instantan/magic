@@ -93,3 +93,8 @@ func ScrollIntoView(s Socket, args ScrollIntoViewArgs, ids ...string) {
 func Disconnect(s Socket) {
 	s.DispatchEvent(DisconnectEvent, nil)
 }
+
+// UpdateURL changes the clients url to the request url without navigating
+func UpdateURL(s Socket) {
+	s.DispatchEvent(UpdateURLEvent, urlToStringWithoutSchemeAndHost(s.Request().URL))
+}

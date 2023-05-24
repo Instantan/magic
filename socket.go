@@ -32,11 +32,12 @@ type socket struct {
 	refsRefs       map[uintptr]int
 	knownTemplates Set[int]
 
-	conn     net.Conn
-	request  *http.Request
-	patches  *patches
-	sending  sync.Mutex
-	tracking sync.Mutex
+	conn        net.Conn
+	initialized bool
+	request     *http.Request
+	patches     *patches
+	sending     sync.Mutex
+	tracking    sync.Mutex
 }
 
 func NewSocket(request *http.Request) *socket {
@@ -121,10 +122,12 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	}()
 
 	s.patches = NewPatches(s.onSendTemplatePatch)
+	s.conn = conn
 	renderable := root(s, Empty{})
 	s.track(renderable.ref)
 	patches := renderable.Patch()
-	s.conn = conn
+	s.initialized = true
+
 	s.send(s.patchesToJson(patches))
 
 	for {
@@ -157,7 +160,9 @@ func (s *socket) markTemplateAsKnown(tmpl *Template) {
 
 func (s *socket) send(data []byte) {
 	s.sending.Lock()
-	wsutil.WriteServerText(s.conn, data)
+	if s.conn != nil {
+		wsutil.WriteServerText(s.conn, data)
+	}
 	s.sending.Unlock()
 }
 
@@ -173,7 +178,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 			switch av := v.(type) {
 			case AppliedView:
 				if !s.templateIsKnown(av.template) {
-					t, _ := av.MarshalPatchJSON()
+					t, _ := av.marshalPatchJSON()
 					templatesToSend = append(templatesToSend, t)
 					s.markTemplateAsKnown(av.template)
 				}
@@ -181,7 +186,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 				for v := range av {
 					e := av[v]
 					if !s.templateIsKnown(e.template) {
-						t, _ := e.MarshalPatchJSON()
+						t, _ := e.marshalPatchJSON()
 						templatesToSend = append(templatesToSend, t)
 						s.markTemplateAsKnown(e.template)
 					}
@@ -232,7 +237,9 @@ func (s *socket) check(id uintptr) {
 
 func (s *socket) close() {
 	s.dispatch(UnmountEvent, nil)
-	s.conn.Close()
+	if s.conn != nil {
+		s.conn.Close()
+	}
 	// s.conn = nil
 	// s.patches = nil
 	// s.request = nil

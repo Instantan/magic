@@ -3,7 +3,9 @@ package magic
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -38,4 +40,37 @@ func unsafeStringToBytes(s string) (b []byte) {
 	bh.Cap = sh.Len
 	bh.Len = sh.Len
 	return b
+}
+
+func urlToStringWithoutSchemeAndHost(u *url.URL) string {
+	var buf strings.Builder
+	if u.Opaque != "" {
+		buf.WriteString(u.Opaque)
+	} else {
+		path := u.EscapedPath()
+		if path != "" && path[0] != '/' && u.Host != "" {
+			buf.WriteByte('/')
+		}
+		if buf.Len() == 0 {
+			// RFC 3986 §4.2
+			// A path segment that contains a colon character (e.g., "this:that")
+			// cannot be used as the first segment of a relative-path reference, as
+			// it would be mistaken for a scheme name. Such a segment must be
+			// preceded by a dot-segment (e.g., "./this:that") to make a relative-
+			// path reference.
+			if segment, _, _ := strings.Cut(path, "/"); strings.Contains(segment, ":") {
+				buf.WriteString("./")
+			}
+		}
+		buf.WriteString(path)
+	}
+	if u.ForceQuery || u.RawQuery != "" {
+		buf.WriteByte('?')
+		buf.WriteString(u.RawQuery)
+	}
+	if u.Fragment != "" {
+		buf.WriteByte('#')
+		buf.WriteString(u.EscapedFragment())
+	}
+	return buf.String()
 }

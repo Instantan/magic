@@ -20,8 +20,9 @@ func (f ComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		go s.establishConnection(ComponentFn[Empty](f), conn)
 		return
 	}
-	renderable := f(s, Empty{})
-	renderable.HTML(w)
+	f(s, Empty{}).html(w, &htmlRenderConfig{
+		magicScriptInline: true,
+	})
 }
 
 func CompressedComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {

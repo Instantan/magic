@@ -35,6 +35,13 @@ var homeView = magic.View(`
 `)
 
 var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+	if s.Live() {
+		q := s.Request().URL.Query()
+		q.Add("bla", "bla")
+		s.Request().URL.RawQuery = q.Encode()
+		magic.UpdateURL(s)
+	}
+
 	s.HandleEvent(func(ev string, data magic.EventData) {
 		switch ev {
 		case magic.SubmitEvent:
