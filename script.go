@@ -13,6 +13,7 @@ import (
 var magicMinScript []byte
 var magicMinScriptWithTags []byte
 var gzippedMagicMinScript []byte
+var regexpHeadTag = regexp.MustCompile("<head.*>")
 
 func init() {
 	magicMinScriptWithTags = append(append([]byte("<script>"), magicMinScript...), []byte("</script>")...)
@@ -31,8 +32,6 @@ func init() {
 		gzippedMagicMinScript = buf.Bytes()
 	}
 }
-
-var regexpHeadTag = regexp.MustCompile("<head.*>")
 
 func injectLiveScript(templ string) string {
 	return regexpHeadTag.ReplaceAllStringFunc(templ, func(s string) string {
