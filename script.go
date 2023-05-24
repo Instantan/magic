@@ -42,6 +42,7 @@ func injectLiveScript(templ string) string {
 
 func ServeMagicScript(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/javascript")
+	w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
 	if acceptsGzip(r) {
 		w.Header().Add("Content-Encoding", "gzip")
 		w.Header().Add("Vary", "Accept-Encoding")

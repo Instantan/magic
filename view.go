@@ -81,16 +81,16 @@ func (av AppliedView) Patch() []*patch {
 	ps := make([]*patch, len(psByref)+1)
 	ps[0] = getPatch()
 	ps[0].socketid = socketid(av.ref.root.id())
-	i := 1
-	for k := range psByref {
-		ps[i] = psByref[k]
-		i++
-	}
 	ps[0].data = map[string]any{
 		"#": AppliedView{
 			ref:      av.ref,
 			template: av.template,
 		},
+	}
+	i := 1
+	for k := range psByref {
+		ps[i] = psByref[k]
+		i++
 	}
 	return ps
 }
