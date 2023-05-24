@@ -240,10 +240,6 @@ func (s *socket) close() {
 	if s.conn != nil {
 		s.conn.Close()
 	}
-	// s.conn = nil
-	// s.patches = nil
-	// s.request = nil
-	// s.knownTemplates = Set[int]{}
 }
 
 func (s *socket) dispatch(ev string, data EventData) {

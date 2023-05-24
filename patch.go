@@ -7,12 +7,14 @@ import (
 )
 
 /*
+a patch has the following format when it gets sent to the client
 [
+
 	[templateID, TEMPLATE]
 	[socketID, templateID, DATA]
+
 ]
 */
-
 type patch struct {
 	socketid json.RawMessage
 	data     map[string]any
