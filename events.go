@@ -24,6 +24,7 @@ const (
 	ScrollIntoViewEvent  = "m:scrollIntoView"
 	DisconnectEvent      = "m:disconnect"
 	UpdateURLEvent       = "m:updateUrl"
+	RefreshFileEvent     = "m:refreshFile"
 )
 
 type Event struct {

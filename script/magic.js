@@ -453,6 +453,8 @@ function receivedEvent(e) {
                 return
             case "updateUrl":
                 history.pushState({}, "", e.p)
+            case "refreshFile":
+                callFnForAllElements(e.p, e.t, refreshFile)
                 return
         }
     }
@@ -468,7 +470,9 @@ function createElement(tag) {
 function callFnForAllElements(ids = [], socket = null, fn = "", ...args) {
     const call = (elm) => {
         try {
-            if (elm && elm[fn]) {
+            if (typeof fn === 'function') {
+                fn(elm)
+            } else if (elm && elm[fn]) {
                 elm[fn](...args)
             }
         } catch (ex) {
@@ -498,6 +502,17 @@ function closeFullscreen() {
         document.webkitExitFullscreen();
     } else if (document.msExitFullscreen) { /* IE11 */
         document.msExitFullscreen();
+    }
+}
+
+function refreshFile(elm) {
+    if (elm.src) {
+        let breaker = elm.src.includes("?") && !elm.src.includes("?t=") ? "&t=" : "?t="
+        let src = elm.src;
+        if (src.indexOf(breaker) != -1) {
+            src = src.split(breaker)[0];
+        }
+        elm.src = src + breaker + Date.now();
     }
 }
 

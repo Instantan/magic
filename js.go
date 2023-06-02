@@ -98,3 +98,8 @@ func Disconnect(s Socket) {
 func UpdateURL(s Socket) {
 	s.DispatchEvent(UpdateURLEvent, urlToStringWithoutSchemeAndHost(s.Request().URL))
 }
+
+// RefreshFile reloads a img, script, favicon or source element (every element with a "src" attribute)
+func RefreshFile(s Socket, ids ...string) {
+	s.DispatchEvent(RefreshFileEvent, ids)
+}

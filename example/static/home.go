@@ -21,6 +21,7 @@ var homeView = magic.View(`
 		}
 	</style>
 	<body magic:static="a">
+		<img id="test" src="https://picsum.photos/200/300" />
 		<p>{{time}}</p>
 	</body>
 	</html>
@@ -33,6 +34,7 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 			select {
 			case c := <-t.C:
 				magic.Assign(s, "time", c.String())
+				magic.RefreshFile(s, "test")
 			case <-quit:
 			}
 		}
