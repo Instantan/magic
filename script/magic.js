@@ -71,7 +71,8 @@ function handleMessage(messages) {
     })
     refsToRerender.forEach(updateElementsOfref)
     if (!m.didRenderRoot) {
-        nanomorph(document, setDocumentClassConnectionState("connected", parseHtmlString(renderRoot())));
+        hydrateTree(document)
+        nanomorph(document, setDocumentClassConnectionState("connected", parseHtmlString(renderRoot())), { childrenOnly: true });
         hydrateTree(document)
         m.didRenderRoot = true
     }
@@ -189,7 +190,7 @@ function makeTemplateReferenceable(templateid) {
 
 function updateElementsOfref(refid) {
     if (refid === magic.refs[0]['#'][0]) {
-        nanomorph(document, hydrateTree(setDocumentClassConnectionState("connected", parseHtmlString(renderRoot()))));
+        nanomorph(document, hydrateTree(setDocumentClassConnectionState("connected", parseHtmlString(renderRoot()))), { childrenOnly: true });
         return
     }
     document.querySelectorAll(`[magic-id^="${refid}"]`).forEach(e => {
@@ -268,6 +269,11 @@ function hydrateElement(element, attribute) {
             return
         case "patch":
             element.onclick = liveNavigationEvent
+        case "static":
+            element.isSameNode = (o) => {
+                const s = o.attributes.getNamedItem("magic:static")
+                return Boolean(s && s.value === value)
+            }
             return
     }
 }
