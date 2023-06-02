@@ -36,6 +36,8 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 				magic.Assign(s, "time", c.String())
 				magic.RefreshFile(s, "test")
 			case <-quit:
+				t.Stop()
+				return
 			}
 		}
 	})

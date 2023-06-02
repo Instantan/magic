@@ -2,24 +2,63 @@
 
 > Transform your web development with a touch of Magic
 
-Magic is a powerful, yet easy-to-use web development framework written in Golang that simplifies the web development process. With its small JavaScript footprint of under 10kb, Magic helps you build fast and efficient web applications.
+Magic is a powerful, yet easy-to-use web development framework written in Golang that simplifies the web development process. With its small JavaScript footprint of under 12kb (4.6kb gzipped), Magic helps you build fast and efficient web applications.
 
-## Todo
-
-- Authentication
-- Authorization
-- Internationalization
-
-- Array rendering
-
-- File upload handling
-- JavaScript integration
-- 
-
-- Fully integrated server with ready routing, performance boost
-- Conjure template magic-ready (creates a new magic project with fully working login etc)
+## Getting started
 
 
-# Rebrand
+For a simple live counter example:
 
-maybe rebrand to "morph" (DE: Ein Morph ist die kleinste bedeutungstragende Einheit der Sprache auf der Ebene der Parole, die man gewinnt, wenn man Wörter zerlegt, segmentiert.)
+> main.go
+```go
+package main
+
+func main() {
+    mux := http.NewServeMux()
+	mux.Handle("/", magic.CompressedComponentHTTPHandler(home))
+	log.Print("Listening to http://localhost:8070")
+	if err := http.ListenAndServe(":8070", mux); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+> home.go
+```go
+package main
+
+import (
+	"time"
+
+	"github.com/Instantan/magic"
+)
+
+var homeView = magic.View(`
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Time</title>
+	</head>
+	<body>
+		<p>{{counter}}</p>
+	</body>
+	</html>
+`)
+
+var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+	magic.UseLiveRoutine(s, func(quit <-chan struct{}) {
+		t := time.NewTicker(time.Millisecond * 1000)
+		for {
+			select {
+			case c := <-t.C:
+				magic.Assign(s, "time", c.String())
+			case <-quit:
+                t.Stop()
+                return
+			}
+		}
+	})
+	return homeView(s)
+})
+
+```
