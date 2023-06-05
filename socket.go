@@ -134,7 +134,7 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 		msg, op, err := wsutil.ReadClientData(s.conn)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				continue
+				break
 			}
 			if _, ok := err.(wsutil.ClosedError); ok {
 				break
