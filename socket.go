@@ -35,7 +35,7 @@ type socket struct {
 	conn        net.Conn
 	initialized bool
 	request     *http.Request
-	patches     *patches
+	assignments *assignments
 	sending     sync.Mutex
 	tracking    sync.Mutex
 }
@@ -51,7 +51,7 @@ func NewSocket(request *http.Request) *socket {
 }
 
 func (s *socket) Live() bool {
-	return s.patches != nil
+	return s.assignments != nil
 }
 
 func (s *socket) HandleEvent(_ EventHandler) {
@@ -121,14 +121,14 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 		s.close()
 	}()
 
-	s.patches = NewPatches(s.onSendTemplatePatch)
+	s.assignments = NewPatches(s.onSendTemplatePatch)
 	s.conn = conn
 	renderable := root(s, Empty{})
 	s.track(renderable.ref)
-	patches := renderable.Patch()
+	assignments := renderable.assignments()
 	s.initialized = true
 
-	s.send(s.patchesToJson(patches))
+	s.send(s.patchesToJson(assignments))
 
 	for {
 		msg, op, err := wsutil.ReadClientData(s.conn)
@@ -166,11 +166,11 @@ func (s *socket) send(data []byte) {
 	s.sending.Unlock()
 }
 
-func (s *socket) onSendTemplatePatch(ps []*patch) {
+func (s *socket) onSendTemplatePatch(ps []*assignment) {
 	s.send(s.patchesToJson(ps))
 }
 
-func (s *socket) patchesToJson(ps []*patch) []byte {
+func (s *socket) patchesToJson(ps []*assignment) []byte {
 	templatesToSend := []json.RawMessage{}
 	dataToSend := []json.RawMessage{}
 	for i := range ps {
@@ -178,7 +178,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 			switch av := v.(type) {
 			case AppliedView:
 				if !s.templateIsKnown(av.template) {
-					t, _ := av.marshalPatchJSON()
+					t, _ := av.marshalAssignmentJSON()
 					templatesToSend = append(templatesToSend, t)
 					s.markTemplateAsKnown(av.template)
 				}
@@ -186,7 +186,7 @@ func (s *socket) patchesToJson(ps []*patch) []byte {
 				for v := range av {
 					e := av[v]
 					if !s.templateIsKnown(e.template) {
-						t, _ := e.marshalPatchJSON()
+						t, _ := e.marshalAssignmentJSON()
 						templatesToSend = append(templatesToSend, t)
 						s.markTemplateAsKnown(e.template)
 					}

@@ -75,11 +75,11 @@ func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err er
 	return n, err
 }
 
-func (av AppliedView) Patch() []*patch {
-	psByref := map[uintptr]*patch{}
-	av.patch(&psByref)
-	ps := make([]*patch, len(psByref)+1)
-	ps[0] = getPatch()
+func (av AppliedView) assignments() []*assignment {
+	psByref := map[uintptr]*assignment{}
+	av.assignment(&psByref)
+	ps := make([]*assignment, len(psByref)+1)
+	ps[0] = getAssignment()
 	ps[0].socketid = socketid(av.ref.root.id())
 	ps[0].data = map[string]any{
 		"#": AppliedView{
@@ -95,22 +95,22 @@ func (av AppliedView) Patch() []*patch {
 	return ps
 }
 
-func (av AppliedView) patch(patchesByref *map[uintptr]*patch) {
+func (av AppliedView) assignment(assignmentsByref *map[uintptr]*assignment) {
 	refid := av.ref.id()
-	if _, ok := (*patchesByref)[refid]; ok {
+	if _, ok := (*assignmentsByref)[refid]; ok {
 		return
 	}
-	p := getPatch()
+	p := getAssignment()
 	p.data = av.ref.state
 	p.socketid = socketid(refid)
-	(*patchesByref)[refid] = p
+	(*assignmentsByref)[refid] = p
 	for _, d := range p.data {
 		switch v := d.(type) {
 		case AppliedView:
-			v.patch(patchesByref)
+			v.assignment(assignmentsByref)
 		case []AppliedView:
 			for i := range v {
-				v[i].patch(patchesByref)
+				v[i].assignment(assignmentsByref)
 			}
 		}
 	}
@@ -123,7 +123,7 @@ func (av AppliedView) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d)
 }
 
-func (av AppliedView) marshalPatchJSON() ([]byte, error) {
+func (av AppliedView) marshalAssignmentJSON() ([]byte, error) {
 	m := make([]json.RawMessage, 2)
 	m[0], _ = json.Marshal(av.template.ID())
 	m[1], _ = json.Marshal(av.template.String())

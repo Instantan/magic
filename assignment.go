@@ -15,21 +15,21 @@ a patch has the following format when it gets sent to the client
 
 ]
 */
-type patch struct {
+type assignment struct {
 	socketid json.RawMessage
 	data     map[string]any
 }
 
-type patches struct {
-	p              []*patch
+type assignments struct {
+	p              []*assignment
 	l              sync.Mutex
 	startedFlusher bool
-	onSend         func(ps []*patch)
+	onSend         func(ps []*assignment)
 }
 
-func NewPatches(onSend func(ps []*patch)) *patches {
-	return &patches{
-		p:      []*patch{},
+func NewPatches(onSend func(ps []*assignment)) *assignments {
+	return &assignments{
+		p:      []*assignment{},
 		l:      sync.Mutex{},
 		onSend: onSend,
 	}
@@ -37,21 +37,21 @@ func NewPatches(onSend func(ps []*patch)) *patches {
 
 var patchPool = sync.Pool{
 	New: func() any {
-		return new(patch)
+		return new(assignment)
 	},
 }
 
-func getPatch() *patch {
-	return patchPool.Get().(*patch)
+func getAssignment() *assignment {
+	return patchPool.Get().(*assignment)
 }
 
-func (p *patch) free() {
+func (p *assignment) free() {
 	p.data = map[string]any{}
 	p.socketid = []byte{}
 	patchPool.Put(p)
 }
 
-func (ps *patches) append(p ...*patch) {
+func (ps *assignments) append(p ...*assignment) {
 	ps.l.Lock()
 	ps.p = append(ps.p, p...)
 	if !ps.startedFlusher {
@@ -61,12 +61,12 @@ func (ps *patches) append(p ...*patch) {
 	ps.l.Unlock()
 }
 
-func (ps *patches) runSend() {
+func (ps *assignments) runSend() {
 	time.Sleep(time.Millisecond)
 	ps.l.Lock()
-	cp := make([]*patch, len(ps.p))
+	cp := make([]*assignment, len(ps.p))
 	copy(cp, ps.p)
-	ps.p = []*patch{}
+	ps.p = []*assignment{}
 	ps.startedFlusher = false
 	ps.onSend(cp)
 	ps.l.Unlock()

@@ -88,13 +88,13 @@ func (s *ref) assignLive(key string, value any) {
 			s.track(avs[v].ref)
 		}
 	}
-	if s.root != nil && s.root.conn != nil && s.root.patches != nil && s.root.initialized {
-		p := getPatch()
+	if s.root != nil && s.root.conn != nil && s.root.assignments != nil && s.root.initialized {
+		p := getAssignment()
 		p.socketid = socketid(s.id())
 		p.data = map[string]any{
 			key: value,
 		}
-		s.root.patches.append(p)
+		s.root.assignments.append(p)
 	}
 }
 
