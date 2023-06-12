@@ -3,11 +3,11 @@
 > Transform your web development with a touch of Magic
 
 <img src="https://raw.githubusercontent.com/Instantan/magic/main/website/assets/images/magic-logo.svg?token=GHSAT0AAAAAAB7YBL5YY7SBTOQFTZ52KSNIZEHSFYQ" align="right"
-     title="Magic logo" width="120" style="margin-bottom: 20px">
+     title="Magic logo" width="120">
 
 Magic is a powerful, yet easy-to-use web development framework written in Golang that simplifies the web development process. With its small JavaScript footprint of under 12kb (4.6kb gzipped), Magic helps you build fast and efficient web applications.
 
-## Getting started
+# Getting started
 
 
 For a simple live counter example:
@@ -66,7 +66,7 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 
 ```
 
-## Roadmap
+# Roadmap
 
 - Clean up socket.go, ref.go and view.go
 - Benchmarking, memory reduction and performance improvements
