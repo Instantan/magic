@@ -10,8 +10,8 @@
     <title>Magic</title>
 </head>
 
-<body class="bg-[#1D1D1D] h-screen font-sans text-white">
-    <nav class="px-4 py-4 md:px-16 bg-opacity-50 backdrop-blur-xl flex items-center w-full p-2 gap-5 -mt-[2px]">
+<body class="bg-[#1D1D1D] h-screen font-sans text-white [&>section]:border-b [&>section]:border-b-zinc-700">
+    <nav class="px-4 py-4 md:px-16 bg-opacity-50 backdrop-blur-xl flex items-center w-full p-2 gap-5 -mt-[2px] fixed top-0 z-10">
         <a href="/" class="flex items-center">
             <img src="/assets/images/magic-logo.svg" height="45px" width="45px" class="inline mr-1" />
             <h1 class="text-2xl -mt-1.5 ml-1 font-extralight">magic</h1>
@@ -65,7 +65,7 @@
 
     </nav>
 
-    <section class="lg:pl-16 lg:pr-16 flex w-100 justify-center mt-[8vh] md:mt-[13vh] flex-row text-white">
+    <section class="lg:pl-16 lg:pr-16 flex w-100 justify-center mt-[12vh] md:mt-[12vh] flex-row text-white pb-[8vh] md:pb-[8vh]">
         <div class="flex flex-col justify-center text-center gap-4">
             <img src="/assets/images/magic-logo.svg" height="175px" width="175px" class="text-center mx-auto" />
             <h1 class="text-5xl font-extralight">magic</h1>
@@ -73,10 +73,10 @@
                 <br />efficient web applications.</h2>
             <div class="flex justify-center">
                 <div class="mt-2 gap-3 grid grid-cols-1 md:grid-cols-2 w-60 md:w-auto text-md md:text-xl">
-                    <a href="/learn" class="p-5 bg-[var(--purple-dark)] text-white rounded-lg magic-button">
+                    <a href="/learn" class="p-5 bg-[var(--purple-dark)] text-white rounded-2xl magic-button">
                         Learn
                     </a>
-                    <a href="/docs" class="p-5 bg-[var(--purple)] text-white rounded-lg magic-button">
+                    <a href="/docs" class="p-5 bg-[var(--purple)] text-white rounded-2xl magic-button">
                         Explore the docs
                     </a>
                 </div>
@@ -84,16 +84,16 @@
         </div>
     </section>
 
-    <section class="lg:pl-16 lg:pr-16 py-20 flex w-100 justify-center mt-[8vh] md:mt-[13vh] flex-row text-white bg-black">
+    <section class="lg:pl-16 lg:pr-16 py-20 flex w-100 justify-center flex-row text-white bg-black">
         <div class="flex flex-col justify-center text-center gap-4 overflow-hidden md:overflow-visible">
             <h1 class="text-3xl md:text-5xl font-extralight px-2">Build full-stack applications<br/> without JavaScript</h1>
             <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl w-full">Magic allows you to build applications out of components known out of popular libraries like React or Vue.<br /> The components are written in HTML and Go.</h2>
             <div class="flex justify-center mt-8">
-                <div class="w-2/3 hidden md:block md:-ml-20 h-96 p-4 bg-[#1D1D1D] rounded-3xl rounded-r-none text-left">
+                <div class="w-2/3 hidden md:block md:-ml-20 h-96 p-4 bg-[#1D1D1D] rounded-2xl rounded-r-none text-left">
                     Hello World
                 </div>
-                <div class="w-full md:w-2/3 p-4 md:-mr-20 -mt-8 bg-[#1D1D1D] rounded-3xl border-4 border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert [&>pre>code]:text-sm [&>pre>code]:md:text-base relative">
-                    <pre class="text-left prose prose-invert"><div class="absolute top-1 right-2 bg-zinc-900 px-1 rounded">main.go</div><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;"><span class="hljs-keyword">package</span> main
+                <div class="w-full md:w-2/3 p-4 md:-mr-20 -mt-8 bg-[#1D1D1D] rounded-2xl border border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert [&>pre>code]:text-sm [&>pre>code]:md:text-base relative">
+                    <pre class="text-left prose prose-invert"><div class="absolute top-1 right-1 bg-zinc-900 px-2 rounded-2xl">main.go</div><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;"><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"net/http"</span>
@@ -196,17 +196,17 @@
         <div class="flex flex-col justify-center text-center gap-4">
             <h1 class="text-3xl md:text-5xl font-extralight">Hot reloading baked in <img src="assets/images/bolt.png" class="h-24 inline" /></h1>
             <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl">Add hot reloading to your application with only one line of code.
-                <div class="my-8 w-52 mx-auto bg-[#1D1D1D] rounded-3xl border-4 border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert relative"><pre class="relative"><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em; text-align: left;">magic.HotReload()</code></pre>
+                <div class="my-8 w-52 mx-auto bg-[#1D1D1D] rounded-2xl border border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert relative"><pre class="relative"><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em; text-align: left;">magic.HotReload()</code></pre>
                 </div>Thanks to Go's fast compiler a hot reload happens in an instant.
             </h2>
             <div class="flex flex-row justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 178" class="w-[300px] h-[100px] md:w-[600px] md:h-[180px] ">
                     <g id="Gruppe_17" data-name="Gruppe 17" transform="translate(-612 -3931)">
-                      <g id="Rechteck_19" data-name="Rechteck 19" transform="translate(612 3932)" fill="none" stroke="#6d45f5" stroke-width="10">
+                      <g id="Rechteck_19" data-name="Rechteck 19" transform="translate(612 3932)" fill="none" stroke="#6d45f5" stroke-width="4">
                         <rect width="258" height="177" rx="57" stroke="none"/>
                         <rect x="5" y="5" width="248" height="167" rx="52" fill="none"/>
                       </g>
-                      <g id="Rechteck_20" data-name="Rechteck 20" transform="translate(1032 3931)" fill="none" stroke="#6d45f5" stroke-width="10">
+                      <g id="Rechteck_20" data-name="Rechteck 20" transform="translate(1032 3931)" fill="none" stroke="#6d45f5" stroke-width="4">
                         <rect width="192" height="177" rx="57" stroke="none"/>
                         <rect x="5" y="5" width="182" height="167" rx="52" fill="none"/>
                       </g>
