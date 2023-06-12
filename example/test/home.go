@@ -42,12 +42,12 @@ var homeView = magic.View(`
 var connectedUsers = &atomic.Int64{}
 
 var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
-	connectedUsers.Add(1)
-	fmt.Printf("Connected: %v\n", connectedUsers.Load())
 	magic.Assign(s, "navbar", navbarComponent(s, e))
 	magic.Assign(s, "liveNavbar", counterComponent(s, e))
 
 	if s.Live() {
+		connectedUsers.Add(1)
+		fmt.Printf("Connected (mount): %v\n", connectedUsers.Load())
 
 		t := time.NewTicker(time.Second * 5)
 		go func() {
@@ -62,7 +62,7 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 				println(kp.Content + kp.Key)
 			case magic.UnmountEvent:
 				connectedUsers.Add(-1)
-				fmt.Printf("Connected: %v\v", connectedUsers.Load())
+				fmt.Printf("Connected (unmount): %v\n", connectedUsers.Load())
 				t.Stop()
 			}
 		})

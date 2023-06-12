@@ -250,7 +250,7 @@ func (s *socket) dispatch(ev string, data EventData) {
 		sr := s.refs[i]
 		if sr != nil {
 			s.refsRefs[i] = 0
-			s.dispatch(ev, data)
+			sr.dispatch(ev, data)
 		}
 	}
 }
