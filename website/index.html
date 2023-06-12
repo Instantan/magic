@@ -85,15 +85,15 @@
     </section>
 
     <section class="lg:pl-16 lg:pr-16 py-20 flex w-100 justify-center mt-[8vh] md:mt-[13vh] flex-row text-white bg-black">
-        <div class="flex flex-col justify-center text-center gap-4 overflow-hidden">
-            <h1 class="text-3xl md:text-5xl font-extralight">Build full-stack applications<br/> without JavaScript</h1>
-            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl font-extralight w-full">Magic allows you to build applications out of components known out of popular libraries like React or Vue.<br /> The components are written in HTML and Go.</h2>
+        <div class="flex flex-col justify-center text-center gap-4 overflow-hidden md:overflow-visible">
+            <h1 class="text-3xl md:text-5xl font-extralight px-2">Build full-stack applications<br/> without JavaScript</h1>
+            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl w-full">Magic allows you to build applications out of components known out of popular libraries like React or Vue.<br /> The components are written in HTML and Go.</h2>
             <div class="flex justify-center mt-8">
                 <div class="w-2/3 hidden md:block md:-ml-20 h-96 p-4 bg-[#1D1D1D] rounded-3xl rounded-r-none text-left">
                     Hello World
                 </div>
-                <div class="w-full md:w-2/3 p-4 md:-mr-20 -mt-8 bg-[#1D1D1D] rounded-3xl border-4 border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert relative">
-                    <pre class="text-left prose prose-invert"><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;"><span class="hljs-keyword">package</span> main
+                <div class="w-full md:w-2/3 p-4 md:-mr-20 -mt-8 bg-[#1D1D1D] rounded-3xl border-4 border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert [&>pre>code]:text-sm [&>pre>code]:md:text-base relative">
+                    <pre class="text-left prose prose-invert"><div class="absolute top-1 right-2 bg-zinc-900 px-1 rounded">main.go</div><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;"><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"net/http"</span>
@@ -118,7 +118,7 @@
 }</code></pre>
                 </div>
             </div>
-            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl font-extralight">Magic is fully server-side renderered.<br/> Don't worry about writing API's, or syncing States.</h2>
+            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl">Magic is fully server-side renderered.<br/> Don't worry about writing API's, or syncing States.</h2>
 
         </div>
     </section>
@@ -126,7 +126,7 @@
     <section class="lg:pl-16 lg:pr-16 py-20 flex w-100 justify-center flex-row text-white">
         <div class="flex flex-col justify-center text-center gap-4">
             <h1 class="text-3xl md:text-5xl font-extralight">Realtime out of the Box</h1>
-            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl font-extralight">State changes are pushed to the client in milliseconds. Build chat-apps, realtime data visualizations and more. <br/>Stop worrying about creating WebSocket connections, reconnecting and heartbeats.<br/>Magic does all of that for you.</h2>
+            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl">State changes are pushed to the client in milliseconds. Build chat-apps, realtime data visualizations and more. <br/>Stop worrying about creating WebSocket connections, reconnecting and heartbeats.<br/>Magic does all of that for you.</h2>
             <div class="flex justify-center mt-8">
                 <div class="w-1/2 h-96 p-4 bg-[var(--blue)] rounded-3xl">
 
@@ -138,7 +138,7 @@
     <section class="lg:pl-16 lg:pr-16 py-20 flex w-100 justify-center flex-row text-white bg-black">
         <div class="flex flex-col justify-center text-center gap-4">
             <h1 class="text-3xl md:text-5xl font-extralight">Hot reloading baked in <img src="assets/images/bolt.png" class="h-24 inline" /></h1>
-            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl font-extralight">Add hot reloading to your application with only one line of code.
+            <h2 class="text-md px-8 md:px-5 py-6 md:py-14 md:text-xl">Add hot reloading to your application with only one line of code.
                 <div class="my-8 w-52 mx-auto bg-[#1D1D1D] rounded-3xl border-4 border-[var(--purple)] [&>pre]:prose [&>pre]:prose-invert relative"><pre class="relative"><code class="no-scrollbar language-go hljs" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em; text-align: left;">magic.HotReload()</code></pre>
                 </div>Thanks to Go's fast compiler a hot reload happens in an instant.
             </h2>
