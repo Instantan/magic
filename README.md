@@ -2,6 +2,9 @@
 
 > Transform your web development with a touch of Magic
 
+<img src="https://raw.githubusercontent.com/Instantan/magic/main/website/assets/images/magic-logo.svg?token=GHSAT0AAAAAAB7YBL5YY7SBTOQFTZ52KSNIZEHSFYQ" align="right"
+     title="Kosmo logo" width="120">
+
 Magic is a powerful, yet easy-to-use web development framework written in Golang that simplifies the web development process. With its small JavaScript footprint of under 12kb (4.6kb gzipped), Magic helps you build fast and efficient web applications.
 
 ## Getting started
