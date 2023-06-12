@@ -1,7 +1,5 @@
 # magic
 
-> Transform your web development with a touch of Magic
-
 <img src="https://raw.githubusercontent.com/Instantan/magic/main/website/assets/images/magic-logo.svg?token=GHSAT0AAAAAAB7YBL5YY7SBTOQFTZ52KSNIZEHSFYQ" align="right"
      title="Magic logo" width="120">
 
