@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Transform your web development with a touch of Magic">
     <link rel="icon" type="image/x-icon" href="/assets/favicon.83e69bfb.ico">
-    <title>Quickstart - Magic</title>
+    <title>Learn - Magic</title>
     <script type="module" crossorigin="" src="/assets/index.aae60ab4.js"></script>
-    <link rel="stylesheet" href="/assets/index.09be49dd.css">
+    <link rel="stylesheet" href="/assets/index.b2e80081.css">
 </head>
 
 <body class="bg-zinc-900 h-screen font-sans text-white flex flex-col">
@@ -17,7 +17,7 @@
             <h1 class="text-2xl -mt-1.5 ml-1 font-extralight">magic</h1>
         </a>
         <div class="flex-grow"></div>
-        <div class="hidden md:flex gap-5"><a href="/quickstart" class="magic-text-hover">Quickstart </a><a href="/docs" class="magic-text-hover">Docs </a>
+        <div class="hidden md:flex gap-5"><a href="/learn" class="magic-text-hover">Learn </a><a href="/docs" class="magic-text-hover">Docs </a>
             <a href="/ecosystem" class="magic-text-hover">
                 <p>Ecosystem</p>
             </a><a href="https://github.com/Instantan/magic"><svg viewBox="0 0 16 16" fill="currentColor" role="img" aria-label="GitHub Logo" width="22" height="22" q:key="xo_0"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a></div>
@@ -29,30 +29,38 @@
                 <div class="flex w-20 md:hidden" id="close-menu"><span class="close after:bg-white before:bg-white"></span></div>
             </nav>
             <div class="flex px-10 pt-10 pb-5 justify-center">
-                <div class="flex flex-col gap-4 text-center justify-center"><a href="/quickstart" class="magic-text-hover text-xl">Quickstart </a><a href="/docs" class="magic-text-hover text-xl">Docs </a><a href="/ecosystem" class="magic-text-hover text-xl">Ecosystem </a><a href="https://github.com/Instantan/magic"
-                        class="magic-text-hover text-xl">Github</a></div>
+                <div class="flex flex-col gap-4 text-center justify-center"><a href="/learn" class="magic-text-hover text-xl">Learn </a><a href="/docs" class="magic-text-hover text-xl">Docs </a><a href="/ecosystem" class="magic-text-hover text-xl">Ecosystem </a><a href="https://github.com/Instantan/magic" class="magic-text-hover text-xl">Github</a></div>
             </div>
         </div>
     </nav>
     <main class="flex flex-row flex-grow max-h-screen max-w-full">
-        <aside class="hidden md:flex flex-row justify-center w-72 h-full text-lg py-10">
-            <ul class="flex flex-col gap-3 font-extralight">
-                <li class="magic-text-hover"><a href="#installation">Installation</a></li>
-                <li class="magic-text-hover"><a href="#webserver">Web server</a></li>
-                <li class="magic-text-hover"><a href="#firstview">First view</a></li>
-                <li class="magic-text-hover"><a href="#simplecomponent">Simple component</a></li>
-                <li class="magic-text-hover"><a href="#makeitlive">Make it live</a></li>
-                <li class="magic-text-hover"><a href="#whatnow">What now</a></li>
-            </ul>
+        <aside class="hidden md:flex flex-row justify-center w-72 h-full text-lg py-10 md:ml-5">
+            <div>
+                <ul class="flex flex-col gap-3 font-extralight pb-10">
+                    <li class="magic-text-hover text-sm font-bold uppercase text-[var(--blue)]"><a href="#installation">Quick start</a></li>
+                    <li class="magic-text-hover"><a href="#installation">Installation</a></li>
+                    <li class="magic-text-hover"><a href="#webserver">Web server</a></li>
+                    <li class="magic-text-hover"><a href="#firstview">First view</a></li>
+                    <li class="magic-text-hover"><a href="#simplecomponent">Simple component</a></li>
+                    <li class="magic-text-hover"><a href="#makeitlive">Make it live</a></li>
+                </ul>
+                <ul class="flex flex-col gap-3 font-extralight mt-10">
+                    <li class="magic-text-hover text-sm font-bold uppercase text-[var(--blue)]"><a href="#events">Advanced</a></li>
+                    <li class="magic-text-hover"><a href="#events">Events</a></li>
+                    <li class="magic-text-hover"><a href="#javascript">JavaScript</a></li>
+                    <li class="magic-text-hover"><a href="#deferred-assigns">Deferred assigns</a></li>
+                    <li class="magic-text-hover"><a href="#hooks">Hooks</a></li>
+                </ul>
+            </div>
         </aside>
-        <section class="no-scrollbar px-5 md:px-20 mt-[-80px] w-full overflow-y-scroll [&amp;>article]:pt-32 [&amp;>article:not(:first-child)]:-mt-20 pb-96 [&amp;>article]:prose [&amp;>article]:prose-invert [&amp;>article]:max-w-none [&amp;>article>pre]:relative"
+        <section class="no-scrollbar px-5 md:px-20 lg:px-40 mt-[-80px] w-full overflow-y-scroll [&amp;>article:first-child]:pt-28 [&amp;>article:not(:first-child)]:pt-40 [&amp;>article:not(:first-child)]:-mt-20 pb-96 [&amp;>article]:prose [&amp;>article]:prose-invert [&amp;>article]:max-w-none [&amp;>article>pre]:relative [&amp;>article>pre]:rounded-2xl [&amp;>article>pre]:border [&amp;>article>pre]:border-zinc-700 hover:[&amp;>article>pre]:border-[var(--purple)] [&amp;>article>pre]:transition-colors"
             style="height:calc(100vh - 41px)">
-            <article id="installation">
+            <article id="installation"><span class="uppercase text-[var(--blue)] font-bold text-sm -mb-40">Quick start</span>
                 <p class="text-4xl pb-4 font-extralight">Installation</p>Start with a blank Go project and install <strong>magic</strong> with the following command.<pre><code class="no-scrollbar hljs language-bash" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em">go get github.com/Instantan/magic</code></pre></article>
             <article id="webserver">
                 <p class="text-4xl pb-4 font-extralight">Web server</p>In the <cite>main.go</cite> file, create a simple web server. The only <strong>magic</strong> specific thing here is the <cite>magic.CompressedComponentHTTPHandler(index)</cite> wich takes a component and returns a http.Handler.
                 You can use any std-library compatible router/server/mux you want.<br>
-                <blockquote>Note that the following code wont compile on it's own.</blockquote><pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">main.go</div><code style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em" class="no-scrollbar hljs language-go"><span class="hljs-keyword">package</span> main
+                <blockquote>Note that the following code wont compile on it's own.</blockquote><pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded-2xl">main.go</div><code style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em" class="no-scrollbar hljs language-go"><span class="hljs-keyword">package</span> main
     
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"log"</span>
@@ -76,7 +84,7 @@
                 <p class="text-4xl pb-4 font-extralight">First view</p>Create a new file <cite>index.go</cite>. In that file we will create the first view. Views in magic are simple http templates. The templates are like <a href="https://mustache.github.io/">mustache templates</a> logicless.
                 It's recommended that the views are created on the top level, because the view creation is somewhat expensive.<br>The <cite>indexView</cite> contains a basic HTML page. The body includes a tag with the name <cite>body</cite>. In this placeholder
                 we will render the to displaying data.
-                <blockquote>Note that the following code wont compile on it's own.</blockquote><pre><div class="absolute top-1 right-1 bg-zinc-900 px-1.5 rounded">index.go</div><code class="language-go no-scrollbar hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
+                <blockquote>Note that the following code wont compile on it's own.</blockquote><pre><div class="absolute top-1 right-1 bg-zinc-900 px-2 rounded-2xl">index.go</div><code class="language-go no-scrollbar hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"github.com/Instantan/magic"</span>
@@ -86,7 +94,7 @@
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -97,7 +105,7 @@
                 <p class="text-4xl pb-4 font-extralight">Simple component</p>To render a view we need to create a component. The first argument of the component takes always a <cite>magic.Socket</cite>. The second argument is a generic one. It can take any type you want and is used to pass down
                 data to the component. In this example we use the type <cite>magic.Empty</cite> wich is just a empty struct.<br>We will add the component just under the view we just created. In that component we use the <cite>magic.Assign</cite> function
                 to assign the value <cite>"Hello World"</cite> to the Socket.<br>The <cite>index.go</cite> will looks afterwards like the following snippet.<br>Now the project is runnable (<cite>go run .</cite>) and shows under the url
-                <a href="http://localhost:8070">http://localhost:8070</a> the expected site.<pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded">index.go</div><code class="no-scrollbar language-go hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
+                <a href="http://localhost:8070">http://localhost:8070</a> the expected site.<pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded-2xl">index.go</div><code class="no-scrollbar language-go hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"github.com/Instantan/magic"</span>
@@ -107,7 +115,7 @@
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -124,7 +132,7 @@
                 the header of each website. This script turns every site into a soft realtime updateable web app. To demonstrate this we add the following code into our index component. So that our <cite>index.go</cite> file looks like the following snippet.
                 <br><br>This snippet checks if the socket is a live socket. Then it starts a ticker. Every seconds we call <cite>magic.Assign</cite> and assign the value of the current ticker time to the tag <cite>"body"</cite>.<br>after the we call the
                 <cite>s.HandleEvent</cite> method and stop the timer when we receive the unmount event.<br><br>If you run the project (<cite>go run .</cite>) and visit the site under <a href="http://localhost:8070">http://localhost:8070</a> you will see
-                that the <cite>Hello World</cite> on the screen will turn into the current Date and Time that updates every second.<pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded">index.go</div><code class="no-scrollbar language-go hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
+                that the <cite>Hello World</cite> on the screen will turn into the current Date and Time that updates every second.<pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded-2xl">index.go</div><code class="no-scrollbar language-go hljs" style="display:block;overflow-x:scroll;padding:1em;border-radius:.5em"><span class="hljs-keyword">package</span> main
 
 <span class="hljs-keyword">import</span> (
     <span class="hljs-string">"github.com/Instantan/magic"</span>
@@ -134,7 +142,7 @@
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -160,9 +168,15 @@
     }
     <span class="hljs-keyword">return</span> indexView(s)
 })</code></pre></article>
-            <article id="whatnow" class="mb-[30vh]">
-                <p class="text-4xl pb-4 font-extralight">What now</p>Magic can do more then "just" updating webpages in soft realtime. It can navigate between sites without completly reloading the site. It can send events to server and the client. Consult the <a href="/docs">docs</a> for hooks,
-                events and more.</article>
+            <div class="h-32"></div>
+            <article id="events" class="mb-[30vh]"><span class="uppercase text-[var(--blue)] font-bold text-sm -mb-30">Advanced</span>
+                <p class="text-4xl pb-4 font-extralight">Events</p>Send events like onclick from the client to the server and handle it in your component.</article>
+            <article id="javascript" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">JavaScript</p>-</article>
+            <article id="deferred-assigns" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">Deferred assigns</p>-</article>
+            <article id="hooks" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">Hooks</p>-</article>
         </section>
     </main>
 </body>
