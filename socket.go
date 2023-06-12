@@ -38,6 +38,8 @@ type socket struct {
 	assignments *assignments
 	sending     sync.Mutex
 	tracking    sync.Mutex
+
+	deferredAssigns sync.WaitGroup
 }
 
 func NewSocket(request *http.Request) *socket {
@@ -128,6 +130,7 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 	assignments := renderable.assignments()
 	s.initialized = true
 
+	s.deferredAssigns.Wait()
 	s.send(s.patchesToJson(assignments))
 
 	for {

@@ -52,16 +52,19 @@ func (s *ref) clone() Socket {
 }
 
 func (s *ref) assign(key string, value any) {
-	switch s.Live() {
-	case true:
+	if isDeferred(value) {
+		s.assignDeferred(key, value)
+	} else if s.Live() {
 		s.assignLive(key, value)
-	case false:
+	} else {
 		s.assignStatic(key, value)
 	}
 }
 
 func (s *ref) assignStatic(key string, value any) {
+	s.assigning.Lock()
 	s.state[key] = value
+	s.assigning.Unlock()
 }
 
 func (s *ref) assignLive(key string, value any) {
@@ -96,6 +99,14 @@ func (s *ref) assignLive(key string, value any) {
 		}
 		s.root.assignments.append(p)
 	}
+}
+
+func (s *ref) assignDeferred(key string, value any) {
+	s.root.deferredAssigns.Add(1)
+	go func() {
+		s.assign(key, resolveDeferred(value))
+		s.root.deferredAssigns.Done()
+	}()
 }
 
 func (s *ref) track(sock Socket) {

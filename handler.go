@@ -37,7 +37,9 @@ func (f ComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		go s.establishConnection(ComponentFn[Empty](f), conn)
 		return
 	}
-	f(s, Empty{}).html(w, &htmlRenderConfig{
+	av := f(s, Empty{})
+	s.deferredAssigns.Wait()
+	av.html(w, &htmlRenderConfig{
 		magicScriptInline: true,
 	})
 }
@@ -84,7 +86,9 @@ func (dmss deferedMagicScriptServer) componentHTTPHandler(f ComponentFn[Empty]) 
 			go s.establishConnection(ComponentFn[Empty](f), conn)
 			return
 		}
-		f(s, Empty{}).html(w, &htmlRenderConfig{
+		av := f(s, Empty{})
+		s.deferredAssigns.Wait()
+		av.html(w, &htmlRenderConfig{
 			magicScriptInline: false,
 			magicScriptUrl:    dmss.url,
 		})

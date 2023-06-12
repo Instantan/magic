@@ -47,7 +47,9 @@ func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err er
 			}
 			return w.Write(magicMinScriptWithTags)
 		}
+		av.ref.assigning.Lock()
 		rv, ok := av.ref.state[tag]
+		av.ref.assigning.Unlock()
 		if !ok {
 			return 0, nil
 		}
