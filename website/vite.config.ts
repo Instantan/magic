@@ -34,7 +34,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(_dirname, 'index.html'),
-        quickstart: resolve(_dirname, 'quickstart/index.html'),
+        learn: resolve(_dirname, 'learn/index.html'),
         ecosystem: resolve(_dirname, 'ecosystem/index.html'),
         docs: resolve(_dirname, 'docs/index.html')
       },

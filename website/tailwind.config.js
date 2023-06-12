@@ -3,7 +3,7 @@ module.exports = {
     content: [
         './index.html',
         './docs/index.html',
-        './quickstart/index.html',
+        './learn/index.html',
         './ecosystem/index.html',
         './src/**/*.{js,ts,jsx,tsx,css,md,mdx,html,json,scss}',
     ],

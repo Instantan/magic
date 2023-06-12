@@ -8,7 +8,7 @@
     <meta name="description" content="Transform your web development with a touch of Magic">
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <title>Quickstart - Magic</title>
+    <title>Learn - Magic</title>
 </head>
 
 <body class="bg-zinc-900 h-screen font-sans text-white flex flex-col">
@@ -19,8 +19,8 @@
         </a>
         <div class="flex-grow"></div>
         <div class="hidden md:flex gap-5">
-            <a href="/quickstart" class="magic-text-hover">
-                Quickstart
+            <a href="/learn" class="magic-text-hover">
+                Learn
             </a>
             <a href="/docs" class="magic-text-hover">
                 Docs
@@ -48,8 +48,8 @@
             </nav>
             <div class="flex px-10 pt-10 pb-5 justify-center">
                 <div class="flex flex-col gap-4 text-center justify-center">
-                    <a href="/quickstart" class="magic-text-hover text-xl">
-                        Quickstart
+                    <a href="/learn" class="magic-text-hover text-xl">
+                        Learn
                     </a>
                     <a href="/docs" class="magic-text-hover text-xl">
                         Docs
@@ -67,29 +67,50 @@
     </nav>
     <main class="flex flex-row flex-grow max-h-screen max-w-full">
         <aside class="hidden md:flex flex-row justify-center w-72 h-full text-lg py-10">
-            <ul class="flex flex-col gap-3 font-extralight">
-                <li class="magic-text-hover">
-                    <a href="#installation">Installation</a>
-                </li>
-                <li class="magic-text-hover">
-                    <a href="#webserver">Web server</a>
-                </li>
-                <li class="magic-text-hover">
-                    <a href="#firstview">First view</a>
-                </li>
-                <li class="magic-text-hover">
-                    <a href="#simplecomponent">Simple component</a>
-                </li>
-                <li class="magic-text-hover">
-                    <a href="#makeitlive">Make it live</a>
-                </li>
-                <li class="magic-text-hover">
-                    <a href="#whatnow">What now</a>
-                </li>
-            </ul>
+            <div>
+
+                <ul class="flex flex-col gap-3 font-extralight">
+                    <li class="magic-text-hover text-sm font-bold uppercase text-[var(--blue)]">
+                        <a href="#installation">Quick start</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#installation">Installation</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#webserver">Web server</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#firstview">First view</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#simplecomponent">Simple component</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#makeitlive">Make it live</a>
+                    </li>
+                </ul>
+                <ul class="flex flex-col gap-3 font-extralight mt-10">
+                    <li class="magic-text-hover text-sm font-bold uppercase text-[var(--blue)]">
+                        <a href="#events">Advanced</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#events">Events</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#javascript">JavaScript</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#deferred-assigns">Deferred assigns</a>
+                    </li>
+                    <li class="magic-text-hover">
+                        <a href="#hooks">Hooks</a>
+                    </li>
+                </ul>
+            </div>
         </aside>
         <section class="no-scrollbar px-5 md:px-20 mt-[-80px] w-full overflow-y-scroll [&>article]:pt-32 [&>article:not(:first-child)]:-mt-20 pb-96 [&>article]:prose [&>article]:prose-invert [&>article]:max-w-none [&>article>pre]:relative" style="height: calc(100vh - 41px);">
             <article id="installation">
+                <span class="uppercase text-[var(--blue)] font-bold text-sm -mb-40">Quick start</span>
                 <p class="text-4xl pb-4 font-extralight">Installation</p>Start with a blank Go project and install <strong>magic</strong> with the following command.<pre><code class="no-scrollbar" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code></pre>
             </article>
             <article id="webserver">
@@ -134,7 +155,7 @@ var indexView = magic.View(`
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -160,7 +181,7 @@ var indexView = magic.View(`
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -191,7 +212,7 @@ var indexView = magic.View(`
     &lt;!DOCTYPE html&gt;
     &lt;html&gt;
     &lt;head&gt;
-        &lt;title&gt;Quickstart&lt;/title&gt;
+        &lt;title&gt;Learn&lt;/title&gt;
     &lt;/head&gt;
     &lt;body&gt;
         {{ body }}
@@ -218,10 +239,23 @@ var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedVie
     return indexView(s)
 })</code></pre>
             </article>
-            <article id="whatnow" class="mb-[30vh]">
-                <p class="text-4xl pb-4 font-extralight">What now</p>
-                Magic can do more then "just" updating webpages in soft realtime. It can navigate between sites without completly reloading the site. It can send events to server and the client. Consult the <a href="/docs">docs</a> for hooks, events and
-                more.
+            <div class="h-32"></div>
+            <article id="events" class="mb-[30vh]">
+                <span class="uppercase text-[var(--blue)] font-bold text-sm -mb-30">Advanced</span>
+                <p class="text-4xl pb-4 font-extralight">Events</p>
+                Send events like onclick from the client to the server and handle it in your component.
+            </article>
+            <article id="javascript" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">JavaScript</p>
+                -
+            </article>
+            <article id="deferred-assigns" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">Deferred assigns</p>
+                -
+            </article>
+            <article id="hooks" class="mb-[30vh]">
+                <p class="text-4xl pb-4 font-extralight">Hooks</p>
+                -
             </article>
         </section>
     </main>
