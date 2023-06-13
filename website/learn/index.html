@@ -65,7 +65,7 @@
         </div>
 
     </nav>
-    <main class="flex flex-row flex-grow max-h-screen max-w-full">
+    <main class="flex flex-row flex-grow max-w-full overflow-visible" style="max-height: calc(100vh - 77px);">
         <aside class="hidden md:flex flex-row justify-center w-72 h-full text-lg py-10 md:ml-5">
             <div>
                 <ul class="flex flex-col gap-3 font-extralight pb-10">
@@ -107,11 +107,29 @@
                 </ul>
             </div>
         </aside>
-        <section class="no-scrollbar px-5 md:px-20 lg:px-40 mt-[-80px] w-full overflow-y-scroll [&>article:first-child]:pt-28 [&>article:not(:first-child)]:pt-40 [&>article:not(:first-child)]:-mt-20 pb-96 [&>article]:prose [&>article]:prose-invert [&>article]:max-w-none [&>article>pre]:relative [&>article>pre]:rounded-2xl [&>article>pre]:border [&>article>pre]:border-zinc-700 hover:[&>article>pre]:border-[var(--purple)] [&>article>pre]:transition-colors"
-            style="height: calc(100vh - 41px);">
+        <section class="
+            no-scrollbar 
+            px-5 md:px-20 
+            lg:px-40 
+            mt-[-80px] 
+            w-full 
+            overflow-y-scroll 
+            [&>article:first-child]:pt-28 
+            [&>article:not(:first-child)]:pt-40
+            [&>article:not(:first-child)]:-mt-20 
+            pb-96 [&>article]:prose 
+            [&>article]:prose-invert 
+            [&>article]:max-w-none 
+            [&>article>pre]:relative 
+            [&>article>pre]:rounded-2xl 
+            [&>article>pre]:border 
+            [&>article>pre]:border-zinc-700 
+            hover:[&>article>pre]:border-[var(--purple)] 
+            [&>article>pre]:transition-colors
+            ">
             <article id="installation">
                 <span class="uppercase text-[var(--blue)] font-bold text-sm -mb-40">Quick start</span>
-                <p class="text-4xl pb-4 font-extralight">Installation</p>Start with a blank Go project and install <strong>magic</strong> with the following command.<pre><code class="no-scrollbar" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code></pre>
+                <p class="text-4xl pb-4 font-extralight" style="margin-top: 10px;">Installation</p>Start with a blank Go project and install <strong>magic</strong> with the following command.<pre><code class="no-scrollbar" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">go get github.com/Instantan/magic</code></pre>
             </article>
             <article id="webserver">
                 <p class="text-4xl pb-4 font-extralight">Web server</p>In the
@@ -141,9 +159,9 @@ func main() {
             </article>
             <article id="firstview">
                 <p class="text-4xl pb-4 font-extralight">First view</p>
-                Create a new file <cite>index.go</cite>. In that file we will create the first view. Views in magic are simple http templates. The templates are like <a href="https://mustache.github.io/">mustache templates</a> logicless. It's recommended
-                that the views are created on the top level, because the view creation is somewhat expensive.<br/> The <cite>indexView</cite> contains a basic HTML page. The body includes a tag with the name <cite>body</cite>. In this placeholder we will
-                render the to displaying data.
+                Create a new file <cite>index.go</cite>. In that file you will create the first view. Views in magic are simple http templates. The templates are like <a href="https://mustache.github.io/">mustache templates</a> logicless. It's recommended
+                that the views are created on the top level, because the view creation is somewhat expensive.<br/> The <cite>indexView</cite> contains a basic HTML page. The body includes a tag with the name <cite>body</cite>. In this placeholder you
+                will render the to displaying data.
                 <blockquote>Note that the following code wont compile on it's own.</blockquote>
                 <pre><div class="absolute top-1 right-1 bg-zinc-900 px-2 rounded-2xl">index.go</div><code class="language-go no-scrollbar" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;">package main
 
@@ -165,8 +183,8 @@ var indexView = magic.View(`
             </article>
             <article id="simplecomponent">
                 <p class="text-4xl pb-4 font-extralight">Simple component</p>
-                To render a view we need to create a component. The first argument of the component takes always a <cite>magic.Socket</cite>. The second argument is a generic one. It can take any type you want and is used to pass down data to the component.
-                In this example we use the type <cite>magic.Empty</cite> wich is just a empty struct. <br/> We will add the component just under the view we just created. In that component we use the <cite>magic.Assign</cite> function to assign the value
+                To render a view you first need to create a component. The first argument of the component takes always a <cite>magic.Socket</cite>. The second argument is a generic one. It can take any type you want and is used to pass down data to the
+                component. This example uses the type <cite>magic.Empty</cite> wich is just a empty struct. <br/>Add the component just under the view you just created. In that component use the <cite>magic.Assign</cite> function to assign the value
                 <cite>"Hello World"</cite> to the Socket.
 
                 <br/>The <cite>index.go</cite> will looks afterwards like the following snippet.<br/>Now the project is runnable (<cite>go run .</cite>) and shows under the url <a href="http://localhost:8070">http://localhost:8070</a> the expected site.
@@ -197,11 +215,9 @@ var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedVie
             <article id="makeitlive">
                 <p class="text-4xl pb-4 font-extralight">Make it live</p>
                 So far there is nothing much magical about this. You can statically render websites based on composeable components, but thats it.
-                <br/><br/>This is where the magic starts. Magic injects a 9.6kb small JavaScript script into the header of each website. This script turns every site into a soft realtime updateable web app. To demonstrate this we add the following code
-                into our index component. So that our <cite>index.go</cite> file looks like the following snippet.<br/><br/>This snippet checks if the socket is a live socket. Then it starts a ticker. Every seconds we call <cite>magic.Assign</cite> and
-                assign the value of the current ticker time to the tag <cite>"body"</cite>.
-                <br /> after the we call the <cite>s.HandleEvent</cite> method and stop the timer when we receive the unmount event.<br/><br/>If you run the project (<cite>go run .</cite>) and visit the site under <a href="http://localhost:8070">http://localhost:8070</a>                you will see that the <cite>Hello World</cite> on the screen will turn into the current Date and Time that updates every second.
-
+                <br/><br/>This is where the magic starts. Magic injects a 12kb (4.6kb gzipped) small JavaScript script into the header of each website. This script turns every site into a soft realtime updateable web app. To demonstrate this we add the
+                following code into our index component. So that our <cite>index.go</cite> file looks like the following snippet.<br/><br/>This snippet checks if the socket is a live socket. Then it starts a ticker. Every seconds we call <cite>magic.Assign</cite>                and assign the value of the current ticker time to the tag <cite>"body"</cite>. Then call the <cite>s.HandleEvent</cite> method and stop the timer when the unmount event is received.<br/><br/>If you run the project (<cite>go run .</cite>)
+                and visit the site under <a href="http://localhost:8070">http://localhost:8070</a> you will see that the <cite>Hello World</cite> on the screen will turn into the current Date and Time that updates every second.
                 <pre class="relative"><div class="absolute top-1 right-1 bg-zinc-800 px-1.5 rounded-2xl">index.go</div><code class="no-scrollbar language-go" style="display: block; overflow-x: scroll; padding: 1em; border-radius: 0.5em;" class="language-go">package main
 
 import (
@@ -238,11 +254,12 @@ var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedVie
     }
     return indexView(s)
 })</code></pre>
+                <br /> You can find the full example under <a href="https://github.com/Instantan/magic-quickstart-example">github.com/Instantan/magic-quickstart-example</a>.
             </article>
             <div class="h-32"></div>
             <article id="events" class="mb-[30vh]">
                 <span class="uppercase text-[var(--blue)] font-bold text-sm -mb-30">Advanced</span>
-                <p class="text-4xl pb-4 font-extralight">Events</p>
+                <p class="text-4xl pb-4 font-extralight" style="margin-top: 10px;">Events</p>
                 Send events like onclick from the client to the server and handle it in your component.
             </article>
             <article id="javascript" class="mb-[30vh]">
