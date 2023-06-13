@@ -65,6 +65,7 @@ var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView
 
 # Roadmap
 
+- Implement temporal data patches
 - Clean up socket.go, ref.go and view.go
 - Benchmarking, memory reduction and performance improvements
 - Unit tests
