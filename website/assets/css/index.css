@@ -80,7 +80,7 @@
     position: absolute;
     font-size: 8px;
     bottom: 0px;
-    right: 0px;
+    right: -8px;
     transform: translateX(100%);
     color: white;
     background-color: var(--blue);
