@@ -55,18 +55,40 @@
 
 .coming-soon {   
     position: relative;
+    cursor: none;
+    pointer-events: none;
 }
 .coming-soon::after {
     content: 'Coming soon';
     position: absolute;
-    font-size: 10px;
+    font-size: 8px;
     bottom: 0px;
-    right: -80px;
+    right: -68px;
     color: white;
     background-color: var(--blue);
     padding: 5px;
     border-radius: 20px;
     line-height: 10px;
+}
+
+.coming-soon-top {   
+    position: relative;
+    min-width: 61px;
+    cursor: none;
+    pointer-events: none;
+}
+.coming-soon-top::after {
+    content: 'Coming soon';
+    position: absolute;
+    font-size: 8px;
+    top: -18px;
+    left: 5px;
+    color: white;
+    background-color: var(--blue);
+    padding: 5px;
+    border-radius: 20px;
+    line-height: 10px;
+    min-width: 62px;
 }
 
 
