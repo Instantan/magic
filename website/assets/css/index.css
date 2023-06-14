@@ -52,6 +52,23 @@
     display: none;
 }
 
+.version {
+    position: relative;
+}
+.version::after {
+    width: 68px;
+    content: 'v0.0.1.-alpha.1';
+    position: absolute;
+    font-size: 8px;
+    top: -2px;
+    right: 0px;
+    transform: translateX(100%);
+    color: white;
+    background-color: var(--blue);
+    padding: 5px;
+    border-radius: 20px;
+    line-height: 10px;
+}
 
 .coming-soon {   
     position: relative;
@@ -63,7 +80,8 @@
     position: absolute;
     font-size: 8px;
     bottom: 0px;
-    right: -68px;
+    right: 0px;
+    transform: translateX(100%);
     color: white;
     background-color: var(--blue);
     padding: 5px;
@@ -73,7 +91,7 @@
 
 .coming-soon-top {   
     position: relative;
-    min-width: 61px;
+    /* min-width: px; */
     cursor: none;
     pointer-events: none;
 }
@@ -81,8 +99,9 @@
     content: 'Coming soon';
     position: absolute;
     font-size: 8px;
-    top: -18px;
-    left: 5px;
+    top: -20px;
+    right: 40px;
+    transform: translateX(100%);
     color: white;
     background-color: var(--blue);
     padding: 5px;
