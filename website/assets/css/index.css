@@ -53,6 +53,23 @@
 }
 
 
+.coming-soon {   
+    position: relative;
+}
+.coming-soon::after {
+    content: 'Coming soon';
+    position: absolute;
+    font-size: 10px;
+    bottom: 0px;
+    right: -80px;
+    color: white;
+    background-color: var(--blue);
+    padding: 5px;
+    border-radius: 20px;
+    line-height: 10px;
+}
+
+
 /* Hide scrollbar for IE, Edge and Firefox */
 
 .no-scrollbar {
