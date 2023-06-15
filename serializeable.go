@@ -18,6 +18,8 @@ type Value interface {
 		uintptr |
 		float32 |
 		float64 |
+		complex64 |
+		complex128 |
 		string |
 		bool |
 		time.Time |
@@ -36,6 +38,8 @@ type Value interface {
 		func() uintptr |
 		func() float32 |
 		func() float64 |
+		func() complex64 |
+		func() complex128 |
 		func() string |
 		func() bool |
 		func() time.Time |
@@ -54,6 +58,8 @@ type Value interface {
 		<-chan uintptr |
 		<-chan float32 |
 		<-chan float64 |
+		<-chan complex64 |
+		<-chan complex128 |
 		<-chan string |
 		<-chan bool |
 		<-chan time.Time |
@@ -90,6 +96,10 @@ func isDeferred(v any) bool {
 		return true
 	case func() float64:
 		return true
+	case func() complex64:
+		return true
+	case func() complex128:
+		return true
 	case func() string:
 		return true
 	case func() bool:
@@ -121,6 +131,10 @@ func isDeferred(v any) bool {
 	case <-chan float32:
 		return true
 	case <-chan float64:
+		return true
+	case <-chan complex64:
+		return true
+	case <-chan complex128:
 		return true
 	case <-chan string:
 		return true
@@ -161,6 +175,10 @@ func resolveDeferred(v any) any {
 		return d()
 	case func() float64:
 		return d()
+	case func() complex64:
+		return d()
+	case func() complex128:
+		return d()
 	case func() string:
 		return d()
 	case func() bool:
@@ -193,6 +211,10 @@ func resolveDeferred(v any) any {
 		return <-d
 	case <-chan float64:
 		return <-d
+	case <-chan complex64:
+		return <-d
+	case <-chan complex128:
+		return <-d
 	case <-chan string:
 		return <-d
 	case <-chan bool:
@@ -204,6 +226,6 @@ func resolveDeferred(v any) any {
 	case <-chan []AppliedView:
 		return <-d
 	default:
-		return false
+		return ""
 	}
 }
