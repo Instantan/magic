@@ -276,7 +276,8 @@ var index = magic.Component(func(s magic.Socket, _ magic.Empty) magic.AppliedVie
             </article>
             <article id="static-nodes" class="mb-[30vh]">
                 <p class="text-4xl pb-4 font-extralight">Static nodes</p>
-                -
+                Sometimes you dont want to live render some nodes. For example when you manipulate divs with JavaScript. 
+                If thats the case you can use the HTML Attribute <cite>magic:static="a"</cite>. Only when the value equals the live rendered value the node gets ignored.
             </article>
             <article id="javascript" class="mb-[30vh]">
                 <p class="text-4xl pb-4 font-extralight">JavaScript</p>
