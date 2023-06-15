@@ -31,14 +31,13 @@ var testView = magic.View(`
 	<p>{{child}}</p>
 `)
 
-var test = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+var test = magic.DeferredComponent(func(s magic.Socket, e magic.Empty) magic.AppliedView {
+	time.Sleep(time.Second * 5)
 	return testView(s)
 })
 
 var home = magic.Component(func(s magic.Socket, e magic.Empty) magic.AppliedView {
-	magic.Assign(s, "child", func() magic.AppliedView {
-		time.Sleep(time.Second * 5)
-		return test(s, e)
-	})
+	magic.Assign(s, "child", test(s, e))
+	print("rendered home")
 	return homeView(s)
 })
