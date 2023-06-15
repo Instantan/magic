@@ -33,13 +33,14 @@ type socket struct {
 	knownTemplates Set[int]
 
 	conn        net.Conn
-	initialized bool
-	request     *http.Request
 	assignments *assignments
-	sending     sync.Mutex
-	tracking    sync.Mutex
 
+	sending  sync.Mutex
+	tracking sync.Mutex
+
+	request         *http.Request
 	deferredAssigns sync.WaitGroup
+	initialized     bool
 }
 
 func NewSocket(request *http.Request) *socket {

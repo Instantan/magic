@@ -23,8 +23,8 @@ type AnimateOptions struct {
 }
 
 type ScrollIntoViewArgs struct {
-	AlignToTop bool                  `json:"alignToTop,omitempty"`
 	Options    ScrollIntoViewOptions `json:"options,omitempty"`
+	AlignToTop bool                  `json:"alignToTop,omitempty"`
 }
 
 type ScrollIntoViewOptions struct {

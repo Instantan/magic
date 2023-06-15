@@ -21,10 +21,9 @@ type assignment struct {
 }
 
 type assignments struct {
-	p              []*assignment
-	l              sync.Mutex
-	startedFlusher bool
-	onSend         func(ps []*assignment)
+	p      []*assignment
+	l      sync.Mutex
+	onSend func(ps []*assignment)
 }
 
 func NewPatches(onSend func(ps []*assignment)) *assignments {
@@ -54,11 +53,8 @@ func (p *assignment) free() {
 func (ps *assignments) append(p ...*assignment) {
 	ps.l.Lock()
 	ps.p = append(ps.p, p...)
-	if !ps.startedFlusher {
-		ps.startedFlusher = true
-		go ps.runSend()
-	}
 	ps.l.Unlock()
+	go ps.runSend()
 }
 
 func (ps *assignments) runSend() {
@@ -67,7 +63,6 @@ func (ps *assignments) runSend() {
 	cp := make([]*assignment, len(ps.p))
 	copy(cp, ps.p)
 	ps.p = []*assignment{}
-	ps.startedFlusher = false
 	ps.onSend(cp)
 	ps.l.Unlock()
 }

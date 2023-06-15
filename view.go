@@ -21,8 +21,8 @@ type AppliedView struct {
 type Views = []AppliedView
 
 type htmlRenderConfig struct {
-	magicScriptInline bool
 	magicScriptUrl    string
+	magicScriptInline bool
 	static            bool
 }
 

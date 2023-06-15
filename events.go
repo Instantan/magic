@@ -52,41 +52,41 @@ type FocusPayload struct {
 
 type ChangePayload struct {
 	Value   string `json:"value"`
+	Content string `json:"content"`
+	Key     string `json:"key"`
 	MetaKey bool   `json:"metaKey"`
 	CtrlKey bool   `json:"shiftKey"`
-	Key     string `json:"key"`
-	Content string `json:"content"`
 }
 
 type KeydownPayload struct {
 	Value   string `json:"value"`
-	MetaKey bool   `json:"metaKey"`
-	CtrlKey bool   `json:"shiftKey"`
 	Key     string `json:"key"`
 	Content string `json:"content"`
+	MetaKey bool   `json:"metaKey"`
+	CtrlKey bool   `json:"shiftKey"`
 }
 
 type KeypressPayload struct {
 	Value   string `json:"value"`
-	MetaKey bool   `json:"metaKey"`
-	CtrlKey bool   `json:"shiftKey"`
 	Key     string `json:"key"`
 	Content string `json:"content"`
+	MetaKey bool   `json:"metaKey"`
+	CtrlKey bool   `json:"shiftKey"`
 }
 
 type KeyupPayload struct {
 	Value   string `json:"value"`
-	MetaKey bool   `json:"metaKey"`
-	CtrlKey bool   `json:"shiftKey"`
 	Key     string `json:"key"`
 	Content string `json:"content"`
+	MetaKey bool   `json:"metaKey"`
+	CtrlKey bool   `json:"shiftKey"`
 }
 
 type SubmitPayload struct {
 	Value   string          `json:"value"`
+	Form    json.RawMessage `json:"form"`
 	MetaKey bool            `json:"metaKey"`
 	CtrlKey bool            `json:"shiftKey"`
-	Form    json.RawMessage `json:"form"`
 }
 
 type DblclickPayload struct {
