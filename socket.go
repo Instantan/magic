@@ -27,9 +27,13 @@ type Socket interface {
 	dispatch(ev string, data EventData)
 }
 
+type countableSocket struct {
+	socket Socket
+	count  int
+}
+
 type socket struct {
-	refs           map[uintptr]Socket
-	refsRefs       map[uintptr]int
+	refs           map[uintptr]countableSocket
 	knownTemplates Set[int]
 
 	conn        net.Conn
@@ -46,8 +50,7 @@ type socket struct {
 func NewSocket(request *http.Request) *socket {
 	return &socket{
 		conn:           nil,
-		refs:           map[uintptr]Socket{},
-		refsRefs:       map[uintptr]int{},
+		refs:           map[uintptr]countableSocket{},
 		request:        request,
 		knownTemplates: NewSet[int](),
 	}
@@ -70,11 +73,11 @@ func (s *socket) handleEvent(ev Event) {
 		s.dispatch(ev.Kind, EventData(ev.Payload))
 		return
 	}
-	sref := s.refs[ev.Target]
-	if sref == nil {
+	sref, ok := s.refs[ev.Target]
+	if !ok {
 		return
 	}
-	sref.dispatch(ev.Kind, EventData(ev.Payload))
+	sref.socket.dispatch(ev.Kind, EventData(ev.Payload))
 }
 
 func (s *socket) DispatchEvent(ev string, data any) error {
@@ -215,8 +218,10 @@ func (s *socket) patchesToJson(ps []*assignment) []byte {
 func (s *socket) track(sock Socket) {
 	s.tracking.Lock()
 	id := sock.id()
-	s.refs[id] = sock
-	s.refsRefs[id] = s.refsRefs[id] + 1
+	r := s.refs[id]
+	r.socket = sock
+	r.count = r.count + 1
+	s.refs[id] = r
 	s.check(id)
 	s.tracking.Unlock()
 }
@@ -224,17 +229,16 @@ func (s *socket) track(sock Socket) {
 func (s *socket) untrack(sock Socket) {
 	s.tracking.Lock()
 	id := sock.id()
-	s.refsRefs[id] = s.refsRefs[id] - 1
+	cs := s.refs[id]
+	cs.count = cs.count - 1
+	s.refs[id] = cs
 	s.check(id)
 	s.tracking.Unlock()
 }
 
 func (s *socket) check(id uintptr) {
-	if s.refsRefs[id] < 1 {
-		if sr := s.refs[id]; sr != nil {
-			sr.dispatch(UnmountEvent, nil)
-		}
-		delete(s.refsRefs, id)
+	if r, ok := s.refs[id]; ok && r.count < 1 {
+		r.socket.dispatch(UnmountEvent, nil)
 		delete(s.refs, id)
 	}
 }
@@ -247,14 +251,15 @@ func (s *socket) close() {
 }
 
 func (s *socket) dispatch(ev string, data EventData) {
-	for i, v := range s.refsRefs {
-		if v < 1 {
+	for i, v := range s.refs {
+		if v.count < 1 {
 			continue
 		}
-		sr := s.refs[i]
-		if sr != nil {
-			s.refsRefs[i] = 0
-			sr.dispatch(ev, data)
+		sr, ok := s.refs[i]
+		if ok {
+			sr.count = 0
+			s.refs[i] = sr
+			sr.socket.dispatch(ev, data)
 		}
 	}
 }
