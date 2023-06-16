@@ -52,7 +52,7 @@ func NewSocket(request *http.Request) *socket {
 		conn:           nil,
 		refs:           map[uintptr]countableSocket{},
 		request:        request,
-		knownTemplates: NewSet[int](),
+		knownTemplates: newSet[int](),
 	}
 }
 

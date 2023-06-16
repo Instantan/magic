@@ -7,7 +7,7 @@ type set[T comparable] struct {
 	l *sync.Mutex
 }
 
-func NewSet[T comparable]() set[T] {
+func newSet[T comparable]() set[T] {
 	return set[T]{
 		m: make(map[T]struct{}),
 		l: &sync.Mutex{},
