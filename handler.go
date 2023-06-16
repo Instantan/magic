@@ -7,77 +7,47 @@ import (
 	"github.com/klauspost/compress/gzhttp"
 )
 
-type ComponentHTTPHandler ComponentFn[Empty]
-type StaticComponentHTTPHandler ComponentFn[Empty]
-
-type Server interface {
-	ComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler
-	CompressedComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler
-	StaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler
-	CompressedStaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler
-	MagicScriptHandler(http.ResponseWriter, *http.Request)
+type Options struct {
+	// OnlyStatic disables the websocket (live) connection when true
+	OnlyStatic bool
+	// Compressed enables gzip compression for the handler
+	Compressed bool
+	// Injects the magic script if its empty, if not it adds a defered script src with the given url
+	MagicScriptURL string
 }
 
-type deferedMagicScriptServer struct {
-	url string
-}
+type Option func(opts *Options)
 
-func NewServer(magicScriptUrl string) Server {
-	return deferedMagicScriptServer{url: magicScriptUrl}
-}
-
-func (f ComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s := NewSocket(r)
-	if r.Header.Get("Upgrade") == "websocket" {
-		r.Header.Set(gzhttp.HeaderNoCompression, "-")
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		if err != nil {
-			return
-		}
-		submitTask(func() {
-			s.establishConnection(ComponentFn[Empty](f), conn)
-		})
-		return
+func WithOptions(options Options) Option {
+	return func(opts *Options) {
+		*opts = options
 	}
-	av := f(s, Empty{})
-	s.deferredAssigns.Wait()
-	av.html(w, &htmlRenderConfig{
-		magicScriptInline: true,
-	})
 }
 
-func (f StaticComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	f(NewSocket(r), Empty{}).html(w, &htmlRenderConfig{
-		static: true,
-	})
+func WithOnlyStatic(onlyStatic bool) Option {
+	return func(opts *Options) {
+		opts.OnlyStatic = onlyStatic
+	}
 }
 
-func CompressedComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return gzhttp.GzipHandler(ComponentHTTPHandler(fn))
+func WithCompressed(compressed bool) Option {
+	return func(opts *Options) {
+		opts.Compressed = compressed
+	}
 }
 
-func CompressedStaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return gzhttp.GzipHandler(StaticComponentHTTPHandler(fn))
+func WithMagicScriptURL(url string) Option {
+	return func(opts *Options) {
+		opts.MagicScriptURL = url
+	}
 }
 
-func (dmss deferedMagicScriptServer) ComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return dmss.componentHTTPHandler(fn)
-}
-
-func (dmss deferedMagicScriptServer) CompressedComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return gzhttp.GzipHandler(dmss.componentHTTPHandler(fn))
-}
-
-func (dmss deferedMagicScriptServer) StaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return StaticComponentHTTPHandler(fn)
-}
-
-func (dmss deferedMagicScriptServer) CompressedStaticComponentHTTPHandler(fn ComponentFn[Empty]) http.Handler {
-	return CompressedStaticComponentHTTPHandler(fn)
-}
-
-func (dmss deferedMagicScriptServer) componentHTTPHandler(f ComponentFn[Empty]) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func ComponentHTTPHandler(fn ComponentFn[Empty], options ...Option) http.Handler {
+	opts := &Options{}
+	for _, optFn := range options {
+		optFn(opts)
+	}
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := NewSocket(r)
 		if r.Header.Get("Upgrade") == "websocket" {
 			r.Header.Set(gzhttp.HeaderNoCompression, "-")
@@ -86,19 +56,21 @@ func (dmss deferedMagicScriptServer) componentHTTPHandler(f ComponentFn[Empty]) 
 				return
 			}
 			submitTask(func() {
-				s.establishConnection(ComponentFn[Empty](f), conn)
+				s.establishConnection(ComponentFn[Empty](fn), conn)
 			})
 			return
 		}
-		av := f(s, Empty{})
+		av := fn(s, Empty{})
 		s.deferredAssigns.Wait()
 		av.html(w, &htmlRenderConfig{
-			magicScriptInline: false,
-			magicScriptUrl:    dmss.url,
+			magicScriptInline: opts.MagicScriptURL == "",
+			magicScriptUrl:    opts.MagicScriptURL,
+			static:            opts.OnlyStatic,
 		})
 	})
-}
-
-func (dmss deferedMagicScriptServer) MagicScriptHandler(w http.ResponseWriter, r *http.Request) {
-	ServeMagicScript(w, r)
+	if opts.Compressed {
+		return gzhttp.GzipHandler(handler)
+	} else {
+		return handler
+	}
 }

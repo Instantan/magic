@@ -121,7 +121,7 @@
 })
 
 <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
-    http.Handle(<span class="hljs-string">"/"</span>, magic.CompressedComponentHTTPHandler(index))
+    http.Handle(<span class="hljs-string">"/"</span>, magic.ComponentHTTPHandler(index))
     <span class="hljs-keyword">if</span> err := http.ListenAndServe(<span class="hljs-string">":8070"</span>); err != <span class="hljs-literal">nil</span> {
         panic(err)
     }
