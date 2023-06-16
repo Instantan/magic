@@ -34,7 +34,9 @@ func (f ComponentHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			return
 		}
-		go s.establishConnection(ComponentFn[Empty](f), conn)
+		submitTask(func() {
+			s.establishConnection(ComponentFn[Empty](f), conn)
+		})
 		return
 	}
 	av := f(s, Empty{})
@@ -83,7 +85,9 @@ func (dmss deferedMagicScriptServer) componentHTTPHandler(f ComponentFn[Empty]) 
 			if err != nil {
 				return
 			}
-			go s.establishConnection(ComponentFn[Empty](f), conn)
+			submitTask(func() {
+				s.establishConnection(ComponentFn[Empty](f), conn)
+			})
 			return
 		}
 		av := f(s, Empty{})

@@ -12,6 +12,7 @@ require (
 require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/panjf2000/ants v1.3.0 // indirect
 	github.com/rjeczalik/notify v0.9.3 // indirect
 	github.com/tdewolff/minify v2.3.6+incompatible // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect

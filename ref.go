@@ -103,10 +103,10 @@ func (s *ref) assignLive(key string, value any) {
 
 func (s *ref) assignDeferred(key string, value any) {
 	s.root.deferredAssigns.Add(1)
-	go func() {
+	submitTask(func() {
 		s.assign(key, resolveDeferred(value))
 		s.root.deferredAssigns.Done()
-	}()
+	})
 }
 
 func (s *ref) track(sock Socket) {

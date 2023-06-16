@@ -34,7 +34,7 @@ type countableSocket struct {
 
 type socket struct {
 	refs           map[uintptr]countableSocket
-	knownTemplates Set[int]
+	knownTemplates set[int]
 
 	conn        net.Conn
 	assignments *assignments
@@ -158,11 +158,11 @@ func (s *socket) establishConnection(root ComponentFn[Empty], conn net.Conn) {
 }
 
 func (s *socket) templateIsKnown(tmpl *Template) bool {
-	return s.knownTemplates.Has(tmpl.ID())
+	return s.knownTemplates.has(tmpl.ID())
 }
 
 func (s *socket) markTemplateAsKnown(tmpl *Template) {
-	s.knownTemplates.Set(tmpl.ID())
+	s.knownTemplates.set(tmpl.ID())
 }
 
 func (s *socket) send(data []byte) {

@@ -6,15 +6,8 @@ import (
 	"time"
 )
 
-/*
-a patch has the following format when it gets sent to the client
-[
-
-	[templateID, TEMPLATE]
-	[socketID, templateID, DATA]
-
-]
-*/
+// a patch has the following format when it gets sent to the client
+// [[templateID, TEMPLATE][socketID, templateID, DATA]]
 type assignment struct {
 	socketid json.RawMessage
 	data     map[string]any
@@ -52,9 +45,13 @@ func (p *assignment) free() {
 
 func (ps *assignments) append(p ...*assignment) {
 	ps.l.Lock()
-	ps.p = append(ps.p, p...)
+	if len(ps.p) == 0 {
+		ps.p = append(ps.p, p...)
+		submitTask(ps.runSend)
+	} else {
+		ps.p = append(ps.p, p...)
+	}
 	ps.l.Unlock()
-	go ps.runSend()
 }
 
 func (ps *assignments) runSend() {

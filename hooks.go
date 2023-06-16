@@ -21,7 +21,9 @@ func UseRoutine(s Socket, fn func(quit <-chan struct{})) {
 			q <- struct{}{}
 		}
 	})
-	go fn(q)
+	submitTask(func() {
+		fn(q)
+	})
 }
 
 // UseLiveRoutine spawns a new goroutine when the connection is live
