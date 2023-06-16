@@ -23,12 +23,9 @@ func Must[T any](val T, err error) T {
 	return val
 }
 
-func Map[T any, R any](s []T, f func(e T) R) []R {
-	ns := make([]R, len(s))
-	for i := range s {
-		ns[i] = f(s[i])
-	}
-	return ns
+// Compresses the given http.Handler with gzip
+func Compressor(h http.Handler) http.HandlerFunc {
+	return gzhttp.GzipHandler(h)
 }
 
 func socketid(id uintptr) json.RawMessage {
@@ -76,10 +73,6 @@ func urlToStringWithoutSchemeAndHost(u *url.URL) string {
 		buf.WriteString(u.EscapedFragment())
 	}
 	return buf.String()
-}
-
-func Compressor(h http.Handler) http.HandlerFunc {
-	return gzhttp.GzipHandler(h)
 }
 
 //go:linkname acceptsGzip gzhttp.acceptsGzip

@@ -8,12 +8,12 @@ import (
 )
 
 type Options struct {
+	// Injects the magic script if its empty, if not it adds a defered script src with the given url
+	MagicScriptURL string
 	// OnlyStatic disables the websocket (live) connection when true
 	OnlyStatic bool
 	// Compressed enables gzip compression for the handler
 	Compressed bool
-	// Injects the magic script if its empty, if not it adds a defered script src with the given url
-	MagicScriptURL string
 }
 
 type Option func(opts *Options)
