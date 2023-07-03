@@ -15,11 +15,8 @@ var homeView = magic.View(`
 		<link href="/assets/index.min.css" rel="stylesheet">
 	</head>
 
-	<body class="bg-black">
-		<magic-script 
-			src="test"
-			mount="ok"
-		/>
+	<body class="bg-black text-whited">
+		Test!
 	</body>
 	</html>
 `)

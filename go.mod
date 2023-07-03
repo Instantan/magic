@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/Instantan/template v0.0.0-20230425082119-3dc7bea5b7b6
-	github.com/Instantan/watcher v0.0.0-20230607190015-46491d4d39fc
+	github.com/Instantan/watcher v0.0.0-20230703184439-ff392fdcc0c3
 	github.com/gobwas/ws v1.2.1
-	github.com/klauspost/compress v1.16.5
+	github.com/klauspost/compress v1.16.7
 )
 
 require (
@@ -19,5 +19,5 @@ require (
 	github.com/tdewolff/test v1.0.9 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 )

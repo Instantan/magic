@@ -2,6 +2,8 @@ github.com/Instantan/template v0.0.0-20230425082119-3dc7bea5b7b6 h1:bY56EOpJWRw1
 github.com/Instantan/template v0.0.0-20230425082119-3dc7bea5b7b6/go.mod h1:EfVMmm+rt26UXwDwOhGuL2UEjq5bylLIo1vGXJl/Z4k=
 github.com/Instantan/watcher v0.0.0-20230607190015-46491d4d39fc h1:BO7C4Qb3CDAczmxA5xd4QS53WO1K8sdPTrpliWYtoQQ=
 github.com/Instantan/watcher v0.0.0-20230607190015-46491d4d39fc/go.mod h1:R/DU6k9fVj+pYMhwI7ahmiygPg8L0aHN4MStcXzEFhI=
+github.com/Instantan/watcher v0.0.0-20230703184439-ff392fdcc0c3 h1:/tEvdtqG0yLWpiEMJdaO8zHd2vzm3zJuq6ruuIYMqgU=
+github.com/Instantan/watcher v0.0.0-20230703184439-ff392fdcc0c3/go.mod h1:R/DU6k9fVj+pYMhwI7ahmiygPg8L0aHN4MStcXzEFhI=
 github.com/gobwas/httphead v0.1.0 h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU=
 github.com/gobwas/httphead v0.1.0/go.mod h1:O/RXo79gxV8G+RqlR/otEwx4Q36zl9rqC5u12GKvMCM=
 github.com/gobwas/pool v0.2.1 h1:xfeeEhW7pwmX8nuLVlqbzVc7udMDrwetjEv+TZIz1og=
@@ -10,6 +12,8 @@ github.com/gobwas/ws v1.2.1 h1:F2aeBZrm2NDsc7vbovKrWSogd4wvfAxg0FQ89/iqOTk=
 github.com/gobwas/ws v1.2.1/go.mod h1:hRKAFb8wOxFROYNsT1bqfWnhX+b5MFeJM9r2ZSwg/KY=
 github.com/klauspost/compress v1.16.5 h1:IFV2oUNUzZaz+XyusxpLzpzS8Pt5rh0Z16For/djlyI=
 github.com/klauspost/compress v1.16.5/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
+github.com/klauspost/compress v1.16.7 h1:2mk3MPGNzKyxErAw8YaohYh69+pa4sIQSC0fPGCFR9I=
+github.com/klauspost/compress v1.16.7/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
 github.com/panjf2000/ants v1.3.0 h1:8pQ+8leaLc9lys2viEEr8md0U4RN6uOSUCE9bOYjQ9M=
 github.com/panjf2000/ants v1.3.0/go.mod h1:AaACblRPzq35m1g3enqYcxspbbiOJJYaxU2wMpm1cXY=
 github.com/rjeczalik/notify v0.9.3 h1:6rJAzHTGKXGj76sbRgDiDcYj/HniypXmSJo1SWakZeY=
@@ -30,3 +34,5 @@ golang.org/x/sys v0.0.0-20180926160741-c2ed4eda69e7/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.8.0 h1:EBmGv8NaZBZTWvrbjNoL6HVt+IVy3QDQpJs7VRIw3tU=
 golang.org/x/sys v0.8.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.9.0 h1:KS/R3tvhPqvJvwcKfnBHJwwthS11LRhmM5D59eEXa0s=
+golang.org/x/sys v0.9.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
