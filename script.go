@@ -16,7 +16,7 @@ var gzippedMagicMinScript []byte
 var regexpHeadTag = regexp.MustCompile("<head.*>")
 
 func init() {
-	magicMinScriptWithTags = append(append([]byte("<script>"), magicMinScript...), []byte("</script>")...)
+	magicMinScriptWithTags = append(append([]byte("<script magic:inject>"), magicMinScript...), []byte("</script>")...)
 	{
 		buf := &bytes.Buffer{}
 		writer, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
@@ -35,7 +35,7 @@ func init() {
 
 func injectLiveScript(templ string) string {
 	return regexpHeadTag.ReplaceAllStringFunc(templ, func(s string) string {
-		s = strings.Replace(s, ">", ">{{magic:live}}", 1)
+		s = strings.Replace(s, ">", ">{{magic:inject}}", 1)
 		return s
 	})
 }
@@ -50,4 +50,20 @@ func ServeMagicScript(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(magicMinScript)
+}
+
+func injectedScripts(urls []string) string {
+	s := ""
+	for _, url := range urls {
+		s = s + "<script magic:inject src=\"" + url + "\"/>"
+	}
+	return s
+}
+
+func injectedInlineScripts(inline []string) string {
+	s := ""
+	for _, inline := range inline {
+		s = s + "<script magic:inject>" + inline + "</script>"
+	}
+	return s
 }

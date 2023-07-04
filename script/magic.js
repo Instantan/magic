@@ -127,8 +127,8 @@ function renderRef(templateref) {
 function renderTemplate(magicid, template, data) {
     return execute(template, (v) => {
         switch (v) {
-            case "magic:live":
-                return magicLiveScript()
+            case "magic:inject":
+                return magicInjects()
             case "magic-id":
                 return v + `="${magicid}"`
         }
@@ -149,8 +149,12 @@ function renderTemplate(magicid, template, data) {
     })
 }
 
-function magicLiveScript() {
-    return "<script>" + document.head.children[0].innerHTML + "</script>"
+function magicInjects() {
+    return Array.of(...document.head.children).filter(e => e.hasAttribute("magic:inject")).map(e => {
+        const n = document.createElement("div")
+        n.appendChild(e)
+        return n.innerHTML
+    }).join('')
 }
 
 function execute(tpl, fn) {

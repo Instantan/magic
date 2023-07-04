@@ -24,6 +24,7 @@ type htmlRenderConfig struct {
 	magicScriptUrl    string
 	magicScriptInline bool
 	static            bool
+	additionalInjects []byte
 }
 
 func View(templ string) ViewFn {
@@ -38,14 +39,14 @@ func View(templ string) ViewFn {
 
 func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err error) {
 	av.template.Execute(w, func(w io.Writer, tag string) (int, error) {
-		if tag == "magic:live" {
+		if tag == "magic:inject" {
 			if config != nil && config.static {
-				return w.Write([]byte{})
+				return w.Write(config.additionalInjects)
 			}
 			if config != nil && !config.magicScriptInline && config.magicScriptUrl != "" {
-				return w.Write(unsafeStringToBytes(`<script src=\"` + config.magicScriptUrl + `\" defer/>`))
+				return w.Write(append(unsafeStringToBytes(`<script magic:inject src=\"`+config.magicScriptUrl+`\" defer/>`), config.additionalInjects...))
 			}
-			return w.Write(magicMinScriptWithTags)
+			return w.Write(append(magicMinScriptWithTags, config.additionalInjects...))
 		}
 		av.ref.assigning.Lock()
 		rv, ok := av.ref.state[tag]

@@ -14,6 +14,10 @@ type Options struct {
 	OnlyStatic bool
 	// Compressed enables gzip compression for the handler
 	Compressed bool
+	// Injected script urls
+	Scripts []string
+	// Injected inline scripts
+	InlineScripts []string
 }
 
 type Option func(opts *Options)
@@ -42,10 +46,28 @@ func WithMagicScriptURL(url string) Option {
 	}
 }
 
+func WithScript(url string) Option {
+	return func(opts *Options) {
+		opts.Scripts = append(opts.Scripts, url)
+	}
+}
+
+func WithInlineScript(script string) Option {
+	return func(opts *Options) {
+		opts.InlineScripts = append(opts.InlineScripts, script)
+	}
+}
+
 func ComponentHTTPHandler(fn ComponentFn[Empty], options ...Option) http.Handler {
 	opts := &Options{}
 	for _, optFn := range options {
 		optFn(opts)
+	}
+	config := &htmlRenderConfig{
+		magicScriptInline: opts.MagicScriptURL == "",
+		magicScriptUrl:    opts.MagicScriptURL,
+		static:            opts.OnlyStatic,
+		additionalInjects: []byte(injectedScripts(opts.Scripts) + injectedInlineScripts(opts.InlineScripts)),
 	}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := NewSocket(r)
@@ -62,11 +84,7 @@ func ComponentHTTPHandler(fn ComponentFn[Empty], options ...Option) http.Handler
 		}
 		av := fn(s, Empty{})
 		s.deferredAssigns.Wait()
-		av.html(w, &htmlRenderConfig{
-			magicScriptInline: opts.MagicScriptURL == "",
-			magicScriptUrl:    opts.MagicScriptURL,
-			static:            opts.OnlyStatic,
-		})
+		av.html(w, config)
 	})
 	if opts.Compressed {
 		return gzhttp.GzipHandler(handler)
