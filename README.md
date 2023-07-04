@@ -17,7 +17,7 @@ package main
 
 func main() {
     mux := http.NewServeMux()
-	mux.Handle("/", magic.CompressedComponentHTTPHandler(home))
+	mux.Handle("/", magic.ComponentHTTPHandler(home))
 	log.Print("Listening to http://localhost:8070")
 	if err := http.ListenAndServe(":8070", mux); err != nil {
 		log.Fatal(err)
