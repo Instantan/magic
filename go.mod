@@ -4,16 +4,14 @@ go 1.20
 
 require (
 	github.com/Instantan/template v0.0.0-20230425082119-3dc7bea5b7b6
-	github.com/Instantan/watcher v0.0.0-20230703184439-ff392fdcc0c3
 	github.com/gobwas/ws v1.2.1
 	github.com/klauspost/compress v1.16.7
+	github.com/panjf2000/ants v1.3.0
 )
 
 require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/panjf2000/ants v1.3.0 // indirect
-	github.com/rjeczalik/notify v0.9.3 // indirect
 	github.com/tdewolff/minify v2.3.6+incompatible // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.9 // indirect
