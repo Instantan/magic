@@ -1,6 +1,6 @@
 # magic
 
-<img height="120px" align="right" title="Magic logo" src="website/assets/images/magic-logo.svg" />
+<img height="120px" align="right" title="Magic logo" src="docs/assets/images/magic-logo.svg" />
 
 Magic is a Golang web framework that simplifies web development.
 With under 12kb JavaScript, it's powerful yet easy to use for building
