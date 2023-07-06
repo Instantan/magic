@@ -42,7 +42,7 @@ var homeView = magic.View(`
 		<title>Time</title>
 	</head>
 	<body>
-		<p>{{counter}}</p>
+		<p>{{time}}</p>
 	</body>
 	</html>
 `)
