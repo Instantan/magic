@@ -230,49 +230,35 @@ function hydrateElement(element, attribute) {
     const value = attribute.value
     const baseProps = m.baseProps
     const keyboardProps = m.keyboardProps
+    const actualEvent = "on" + kind
     switch (kind) {
         case "click":
-            element.onclick = createMagicEventListener(
-                kind, [...baseProps], value
-            )
-            return
         case "focus":
-            element.onfocus = createMagicEventListener(
+            element[actualEvent] = createMagicEventListener(
                 kind, [...baseProps], value
             )
             return
         case "change":
-            element.onchange = createMagicEventListener(
-                kind, [...baseProps, ...keyboardProps], value
-            )
-            return
         case "keydown":
-            element.onkeydown = createMagicEventListener(
-                kind, [...baseProps, ...keyboardProps], value
-            )
-            return
         case "keypress":
-            element.onkeypress = createMagicEventListener(
-                kind, [...baseProps, ...keyboardProps], value
-            )
-            return
         case "keyup":
-            element.onkeyup = createMagicEventListener(
+            element[actualEvent] = createMagicEventListener(
                 kind, [...baseProps, ...keyboardProps], value
             )
             return
         case "submit":
-            element.onsubmit = createMagicEventListener(
+            element[actualEvent] = createMagicEventListener(
                 kind, [...baseProps, "form"], value, stopPropagation
             )
             return
         case "dblclick":
-            element.ondblclick = createMagicEventListener(
+            element[actualEvent] = createMagicEventListener(
                 kind, [...baseProps], value
             )
             return
         case "patch":
-            element.onclick = liveNavigationEvent
+            element[actualEvent] = liveNavigationEvent
+            return
         case "static":
             element.isSameNode = (o) => {
                 const s = o.attributes.getNamedItem("magic:static")
