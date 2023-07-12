@@ -65,6 +65,16 @@ func (av AppliedView) html(w io.Writer, config *htmlRenderConfig) (n int, err er
 				n += m
 			}
 			return n, nil
+		case *[]AppliedView:
+			n := 0
+			for i := range *v {
+				m, err := (*v)[i].html(w, config)
+				if err != nil {
+					log.Println(err)
+				}
+				n += m
+			}
+			return n, nil
 		default:
 			return 0, nil
 		}
@@ -108,6 +118,10 @@ func (av AppliedView) assignment(assignmentsByref *map[uintptr]*assignment) {
 		case []AppliedView:
 			for i := range v {
 				v[i].assignment(assignmentsByref)
+			}
+		case *[]AppliedView:
+			for i := range *v {
+				(*v)[i].assignment(assignmentsByref)
 			}
 		}
 	}

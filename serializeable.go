@@ -25,6 +25,7 @@ type Value interface {
 		time.Time |
 		AppliedView |
 		[]AppliedView |
+		*[]AppliedView |
 		func() int |
 		func() int8 |
 		func() int16 |
@@ -45,6 +46,7 @@ type Value interface {
 		func() time.Time |
 		func() AppliedView |
 		func() []AppliedView |
+		func() *[]AppliedView |
 		<-chan int |
 		<-chan int8 |
 		<-chan int16 |
@@ -64,7 +66,8 @@ type Value interface {
 		<-chan bool |
 		<-chan time.Time |
 		<-chan AppliedView |
-		<-chan []AppliedView
+		<-chan []AppliedView |
+		<-chan *[]AppliedView
 }
 
 // Assign assigns a new value to the given socket
@@ -110,6 +113,8 @@ func isDeferred(v any) bool {
 		return true
 	case func() []AppliedView:
 		return true
+	case func() *[]AppliedView:
+		return true
 	case <-chan int:
 		return true
 	case <-chan int8:
@@ -145,6 +150,8 @@ func isDeferred(v any) bool {
 	case <-chan AppliedView:
 		return true
 	case <-chan []AppliedView:
+		return true
+	case <-chan *[]AppliedView:
 		return true
 	default:
 		return false
@@ -189,6 +196,8 @@ func resolveDeferred(v any) any {
 		return d()
 	case func() []AppliedView:
 		return d()
+	case func() *[]AppliedView:
+		return d()
 	case <-chan int:
 		return <-d
 	case <-chan int8:
@@ -222,6 +231,8 @@ func resolveDeferred(v any) any {
 	case <-chan time.Time:
 		return <-d
 	case <-chan AppliedView:
+		return <-d
+	case <-chan *[]AppliedView:
 		return <-d
 	case <-chan []AppliedView:
 		return <-d

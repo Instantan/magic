@@ -198,6 +198,15 @@ func (s *socket) patchesToJson(ps []*assignment) []byte {
 						s.markTemplateAsKnown(e.template)
 					}
 				}
+			case *[]AppliedView:
+				for v := range *av {
+					e := (*av)[v]
+					if !s.templateIsKnown(e.template) {
+						t, _ := e.marshalAssignmentJSON()
+						templatesToSend = append(templatesToSend, t)
+						s.markTemplateAsKnown(e.template)
+					}
+				}
 			}
 		}
 		d := make([]json.RawMessage, 2)

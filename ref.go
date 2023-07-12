@@ -124,6 +124,10 @@ func (s *ref) untrack(sock Socket) {
 				for i := range v {
 					v[i].ref.untrack(nil)
 				}
+			case *[]AppliedView:
+				for i := range *v {
+					(*v)[i].ref.untrack(nil)
+				}
 			}
 		}
 		s.assigning.Unlock()
